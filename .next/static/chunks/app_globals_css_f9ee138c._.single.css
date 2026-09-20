@@ -1268,6 +1268,10 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   cursor: pointer;
 }
 
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
 .resize-none {
   resize: none;
 }
@@ -1659,6 +1663,16 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.bg-\[\#B5B5C3\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(181 181 195 / var(--tw-bg-opacity));
+}
+
+.bg-\[\#F1416C\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(241 65 108 / var(--tw-bg-opacity));
 }
 
 .bg-opacity-100 {
@@ -2222,6 +2236,10 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .disabled\:text-white:disabled {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.disabled\:opacity-50:disabled {
+  opacity: .5;
 }
 
 .group\/sidebaritem:hover .group-hover\/sidebaritem\:translate-x-3 {

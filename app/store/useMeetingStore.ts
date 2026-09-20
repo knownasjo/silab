@@ -3,7 +3,13 @@ import {
   IAddClassMeetingRequestBody,
   IGetAllClassMeetingResponseBody,
 } from "../interfaces/meeting/meeting.interface";
-import { getMeetings, postMeeting } from "../services/meeting/api";
+import {
+  deleteStudentAttendance,
+  getMeetings,
+  postMeeting,
+  putMeetingStatus,
+  putStudentAttendance,
+} from "../services/meeting/api";
 
 type MeetingState = GlobalState & {
   meetingsData: IGetAllClassMeetingResponseBody[];
@@ -13,6 +19,22 @@ type MeetingState = GlobalState & {
 type MeetingActions = {
   getMeetings: (classId: string) => Promise<void>;
   addMeeting: (body: IAddClassMeetingRequestBody) => Promise<void>;
+  updateMeetingStatus: (
+    meetingId: string,
+    status: boolean,
+    classId: string,
+  ) => Promise<void>;
+  updateStudentAttendance: (
+    meetingId: string,
+    userId: string,
+    status: boolean,
+    classId: string,
+  ) => Promise<void>;
+  resetStudentAttendance: (
+    meetingId: string,
+    userId: string,
+    classId: string,
+  ) => Promise<void>;
 };
 
 const initialState = {
@@ -55,6 +77,63 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
         set({ error: res.message });
       }
     } catch {
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  updateMeetingStatus: async (meetingId, status, classId) => {
+    set({ isLoading: true, error: null, message: null });
+
+    try {
+      const res = await putMeetingStatus(meetingId, { status });
+
+      if (res.status) {
+        set({ message: res.message });
+        await get().getMeetings(classId);
+      } else {
+        set({ error: res.message });
+      }
+    } catch (error: any) {
+      set({ error: error?.response?.data?.message ?? "Terjadi kesalahan" });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  updateStudentAttendance: async (meetingId, userId, status, classId) => {
+    set({ isLoading: true, error: null, message: null });
+
+    try {
+      const res = await putStudentAttendance(meetingId, userId, { status });
+
+      if (res.status) {
+        set({ message: res.message });
+        await get().getMeetings(classId);
+      } else {
+        set({ error: res.message });
+      }
+    } catch (error: any) {
+      set({ error: error?.response?.data?.message ?? "Terjadi kesalahan" });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  resetStudentAttendance: async (meetingId, userId, classId) => {
+    set({ isLoading: true, error: null, message: null });
+
+    try {
+      const res = await deleteStudentAttendance(meetingId, userId);
+
+      if (res.status) {
+        set({ message: res.message });
+        await get().getMeetings(classId);
+      } else {
+        set({ error: res.message });
+      }
+    } catch (error: any) {
+      set({ error: error?.response?.data?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }

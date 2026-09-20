@@ -6,17 +6,33 @@ import MeetingsDropDown from "../meetings-dropdown";
 import OpenAttendancesButton from "../open-attendance-button";
 import ShowQrCodeButton from "./show-qr-code-button";
 import StudentAttendanceEditButton from "../student-attendance-edit-button";
-import { Meeting } from "../../types/meeting";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import Link from "next/link";
 import Image from "next/image";
-import { IGetAllClassMeetingResponseBody } from "@/app/interfaces/meeting/meeting.interface";
+import {
+  IGetAllClassMeetingResponseBody,
+  IMeetingParticipants,
+} from "@/app/interfaces/meeting/meeting.interface";
 
 interface ClassMeetingsContentProps {
   classId?: string;
   meetingData: IGetAllClassMeetingResponseBody[];
 }
+
+type AttendanceStatus = "Hadir" | "Tidak Hadir" | "Belum Presensi";
+
+const getAttendanceStatus = (
+  student: IMeetingParticipants,
+): AttendanceStatus => {
+  if (student.submitted_at === null) return "Belum Presensi";
+
+  return student.is_attended ? "Hadir" : "Tidak Hadir";
+};
+
+const statusStyle: Record<AttendanceStatus, string> = {
+  Hadir: "bg-[#E8FFF3] text-[#50CD89]",
+  "Tidak Hadir": "bg-[#FFF5F8] text-[#F1416C]",
+  "Belum Presensi": "bg-[#F1F1F2] text-[#181C32]",
+};
 
 export default function ClassMeetingsContent({
   classId,
@@ -24,30 +40,15 @@ export default function ClassMeetingsContent({
 }: ClassMeetingsContentProps) {
   const [selectedMeeting, setSelectedMeeting] = useState<string>("");
 
-  const downloadPDF = async () => {
-    try {
-      const element = document.getElementById("recap-attendances");
-      if (!element) {
-        throw new Error("No content to generate the PDF!");
-      }
+  const currentMeeting = meetingData?.find(
+    (meeting) => meeting.id === selectedMeeting,
+  );
 
-      const canvas = await html2canvas(element, { scale: 2 });
-      const imageData = canvas.toDataURL("image/png");
+  const students = currentMeeting?.students ?? [];
 
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "px",
-        format: "a4",
-      });
-
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imageData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save("attendance-recap.pdf");
-    } catch (error) {
-      console.error("Failed to generate PDF:", error);
-    }
-  };
+  const attendedCount = students.filter(
+    (student) => getAttendanceStatus(student) === "Hadir",
+  ).length;
 
   return (
     <>
@@ -111,25 +112,24 @@ export default function ClassMeetingsContent({
                 />
               </Link>
               <p className="text-base font-bold">
-                {
-                  meetingData?.find((meeting) => meeting.id === selectedMeeting)
-                    ?.meeting_name
-                }
+                {currentMeeting?.meeting_name}
+              </p>
+              <p
+                className={`rounded-md p-2 text-xs font-semibold ${
+                  currentMeeting?.is_open
+                    ? "bg-[#E8FFF3] text-[#50CD89]"
+                    : "bg-[#F1F1F2] text-[#181C32]"
+                }`}
+              >
+                {currentMeeting?.is_open
+                  ? "Presensi Dibuka"
+                  : "Presensi Ditutup"}
               </p>
             </div>
             <div className="flex flex-col items-end">
               <p>Tanggal Meeting</p>
               <p>
-                Jumlah hadir{" "}
-                {
-                  meetingData
-                    ?.find((meeting) => meeting.id === selectedMeeting)
-                    ?.students?.filter((student) => student.is_attended)?.length
-                }
-                /
-                {meetingData !== undefined &&
-                  meetingData?.find((meeting) => meeting.id === selectedMeeting)
-                    ?.students?.length}
+                Jumlah hadir {attendedCount}/{students.length}
               </p>
             </div>
           </div>
@@ -142,9 +142,10 @@ export default function ClassMeetingsContent({
               </p>
               <div className="flex w-2/12 items-center justify-center" />
             </div>
-            {meetingData
-              ?.find((meeting) => meeting.id === selectedMeeting)
-              ?.students?.map((student) => (
+            {students.map((student) => {
+              const status = getAttendanceStatus(student);
+
+              return (
                 <div
                   key={student.student_id}
                   className="flex w-full flex-row text-base font-semibold text-[#5E6278]"
@@ -155,30 +156,23 @@ export default function ClassMeetingsContent({
                   <p className="flex w-5/12 items-center justify-center">
                     {student.student_name}
                   </p>
-                  <div className={`flex w-3/12 items-center justify-center`}>
+                  <div className="flex w-3/12 items-center justify-center">
                     <p
-                      className={`rounded-md p-2 text-sm font-semibold ${
-                        student.is_attended !== null &&
-                        student.submitted_at === null
-                          ? "bg-[#FFF5F8] text-[#F1416C]"
-                          : student.is_attended !== null &&
-                              student.submitted_at !== null
-                            ? "bg-[#E8FFF3] text-[#50CD89]"
-                            : "bg-[#F1F1F2] text-[#181C32]"
-                      }`}
+                      className={`rounded-md p-2 text-sm font-semibold ${statusStyle[status]}`}
                     >
-                      {student.is_attended !== null &&
-                      student.submitted_at === null
-                        ? "Tidak Hadir"
-                        : student.is_attended !== null &&
-                            student.submitted_at !== null
-                          ? "Hadir"
-                          : "Belum Presensi"}
+                      {status}
                     </p>
                   </div>
-                  <StudentAttendanceEditButton />
+                  {classId && (
+                    <StudentAttendanceEditButton
+                      student={student}
+                      meetingId={selectedMeeting}
+                      classId={classId}
+                    />
+                  )}
                 </div>
-              ))}
+              );
+            })}
           </div>
         </div>
       )}

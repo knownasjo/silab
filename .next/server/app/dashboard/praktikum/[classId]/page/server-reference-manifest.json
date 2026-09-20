@@ -3,7 +3,7 @@
     "00b403e80c7670780409b6ba296d51cbfdcc23c9b9": {
       "workers": {
         "app/dashboard/praktikum/[classId]/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/dashboard/praktikum/[classId]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         }
       },
@@ -14,7 +14,7 @@
     "00c716041119548c04d049d6dfef4615126f61b684": {
       "workers": {
         "app/dashboard/praktikum/[classId]/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/dashboard/praktikum/[classId]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         }
       },
@@ -25,7 +25,7 @@
     "00cb91416e49994049c15005d61718a3498624f979": {
       "workers": {
         "app/dashboard/praktikum/[classId]/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/dashboard/praktikum/[classId]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         }
       },
@@ -36,7 +36,7 @@
     "400766dd8b9e4dbb6ff82ea71693332a2e871cba65": {
       "workers": {
         "app/dashboard/praktikum/[classId]/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/dashboard/praktikum/[classId]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         }
       },
@@ -47,7 +47,7 @@
     "40d35a5aec6274b36fd9f7304338946a32f424eb00": {
       "workers": {
         "app/dashboard/praktikum/[classId]/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/dashboard/praktikum/[classId]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         }
       },
@@ -58,18 +58,7 @@
     "40edbeaf989a13a4d0da396a0295b9a8a34e7956dd": {
       "workers": {
         "app/dashboard/praktikum/[classId]/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/dashboard/praktikum/[classId]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/dashboard/praktikum/[classId]/page": "action-browser"
-      }
-    },
-    "70abde2b14d53a1ab5251d06697fe913e0dfe442aa": {
-      "workers": {
-        "app/dashboard/praktikum/[classId]/page": {
-          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/dashboard/praktikum/[classId]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "moduleId": "[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         }
       },

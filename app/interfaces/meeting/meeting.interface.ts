@@ -6,6 +6,7 @@ export interface IAddClassMeetingRequestBody {
 export interface IGetAllClassMeetingResponseBody {
   id: string;
   meeting_name: string;
+  is_open?: boolean;
   token?: string;
   students?: IMeetingParticipants[];
 }
@@ -16,4 +17,12 @@ export interface IMeetingParticipants {
   nim: string;
   submitted_at: string | null;
   is_attended: boolean;
+}
+
+export interface IUpdateMeetingStatusRequestBody {
+  status: boolean;
+}
+
+export interface IUpdateAttendanceRequestBody {
+  status: boolean;
 }
