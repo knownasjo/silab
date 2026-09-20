@@ -175,8 +175,10 @@ const useMeetingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                         error: res.message
                     });
                 }
-            } catch  {
-                console.log(get().error);
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
             } finally{
                 set({
                     isLoading: false
@@ -186,7 +188,8 @@ const useMeetingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
         addMeeting: async (body)=>{
             set({
                 isLoading: true,
-                error: null
+                error: null,
+                message: null
             });
             try {
                 const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$meeting$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["postMeeting"])(body);
@@ -194,12 +197,17 @@ const useMeetingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                     set({
                         message: res.message
                     });
+                    await get().getMeetings(body.classId);
                 } else {
                     set({
                         error: res.message
                     });
                 }
-            } catch  {} finally{
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
+            } finally{
                 set({
                     isLoading: false
                 });
@@ -227,7 +235,7 @@ const useMeetingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                 }
             } catch (error) {
                 set({
-                    error: error?.response?.data?.message ?? "Terjadi kesalahan"
+                    error: error?.message ?? "Terjadi kesalahan"
                 });
             } finally{
                 set({
@@ -257,7 +265,7 @@ const useMeetingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                 }
             } catch (error) {
                 set({
-                    error: error?.response?.data?.message ?? "Terjadi kesalahan"
+                    error: error?.message ?? "Terjadi kesalahan"
                 });
             } finally{
                 set({
@@ -285,7 +293,7 @@ const useMeetingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                 }
             } catch (error) {
                 set({
-                    error: error?.response?.data?.message ?? "Terjadi kesalahan"
+                    error: error?.message ?? "Terjadi kesalahan"
                 });
             } finally{
                 set({
@@ -319,19 +327,46 @@ function AddMeetingButton({ classId }) {
     const [isAddMeetingOpen, setIsAddMeetingOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [meetingName, setMeetingName] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const [isSuccessDialogOpen, setIsSuccessDialogOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
-    const { addMeeting, message, isLoading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useMeetingStore$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"])();
-    const handleMeetingNameChange = (value)=>{
-        setMeetingName(value);
+    const [successMessage, setSuccessMessage] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
+    const [dialogError, setDialogError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
+    const { addMeeting, isLoading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useMeetingStore$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"])();
+    const openDialog = ()=>{
+        setMeetingName("");
+        setDialogError("");
+        setIsAddMeetingOpen(true);
+    };
+    const handleSave = async ()=>{
+        if (!classId) {
+            setDialogError("Kelas tidak ditemukan!");
+            return;
+        }
+        if (meetingName.trim() === "") {
+            setDialogError("Judul pertemuan wajib diisi!");
+            return;
+        }
+        await addMeeting({
+            classId,
+            meetingName: meetingName.trim()
+        });
+        const { error, message } = __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useMeetingStore$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].getState();
+        if (error) {
+            setDialogError(error);
+            return;
+        }
+        setIsAddMeetingOpen(false);
+        setMeetingName("");
+        setSuccessMessage(message ?? "Pertemuan berhasil ditambahkan");
+        setIsSuccessDialogOpen(true);
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                onClick: ()=>setIsAddMeetingOpen(true),
+                onClick: openDialog,
                 className: "h-fit content-center rounded-full bg-[#D2E3F1] p-3 text-sm font-semibold text-[#3272CA]",
                 children: "Tambah Pertemuan"
             }, void 0, false, {
                 fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                lineNumber: 31,
+                lineNumber: 61,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$headlessui$2f$react$2f$dist$2f$components$2f$dialog$2f$dialog$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -343,7 +378,7 @@ function AddMeetingButton({ classId }) {
                         className: "fixed inset-0 bg-black/30"
                     }, void 0, false, {
                         fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                        lineNumber: 42,
+                        lineNumber: 72,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -356,7 +391,7 @@ function AddMeetingButton({ classId }) {
                                     children: "Tambah Pertemuan Praktikum"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                                    lineNumber: 45,
+                                    lineNumber: 75,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -375,87 +410,96 @@ function AddMeetingButton({ classId }) {
                                                             children: "e.g Pertemuan 1"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                                                            lineNumber: 52,
+                                                            lineNumber: 82,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                                                    lineNumber: 50,
+                                                    lineNumber: 80,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                     required: true,
                                                     className: "h-[46px] w-full rounded-2xl bg-[#F5F5F5] px-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]",
                                                     placeholder: "Judul pertemuan",
-                                                    onChange: (e)=>handleMeetingNameChange(e.target.value),
+                                                    onChange: (e)=>{
+                                                        setMeetingName(e.target.value);
+                                                        setDialogError("");
+                                                    },
                                                     value: meetingName
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                                                    lineNumber: 56,
+                                                    lineNumber: 86,
                                                     columnNumber: 17
+                                                }, this),
+                                                dialogError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                    className: "text-sm font-semibold text-[#F1416C]",
+                                                    children: dialogError
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
+                                                    lineNumber: 97,
+                                                    columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                                            lineNumber: 49,
+                                            lineNumber: 79,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                             className: "flex h-full flex-col justify-end",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                                onClick: ()=>addMeeting({
-                                                        classId: classId,
-                                                        meetingName: meetingName
-                                                    }),
+                                                onClick: handleSave,
+                                                disabled: isLoading,
                                                 className: "h-fit w-1/3 self-end rounded-full bg-[#D2E3F1] py-3 font-bold text-[#3272CA] disabled:bg-gray-300 disabled:text-white",
                                                 children: isLoading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                     className: "loading loading-dots loading-sm"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                                                    lineNumber: 72,
+                                                    lineNumber: 109,
                                                     columnNumber: 21
                                                 }, this) : "Simpan"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                                                lineNumber: 65,
+                                                lineNumber: 103,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                                            lineNumber: 64,
+                                            lineNumber: 102,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                                    lineNumber: 48,
+                                    lineNumber: 78,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                            lineNumber: 44,
+                            lineNumber: 74,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                        lineNumber: 43,
+                        lineNumber: 73,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                lineNumber: 37,
+                lineNumber: 67,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$success$2d$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
                 dialogOpen: isSuccessDialogOpen,
                 onClose: ()=>setIsSuccessDialogOpen(false),
-                title: message
+                title: successMessage
             }, void 0, false, {
                 fileName: "[project]/app/components/praktikum/add-meeting-button.tsx",
-                lineNumber: 82,
+                lineNumber: 119,
                 columnNumber: 7
             }, this)
         ]

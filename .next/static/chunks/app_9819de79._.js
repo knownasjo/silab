@@ -412,9 +412,11 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
 {
 __turbopack_context__.s({
+    "deleteAnnouncement": (()=>deleteAnnouncement),
     "getAllAnnouncements": (()=>getAllAnnouncements),
     "getAnnouncementById": (()=>getAnnouncementById),
-    "postAnnouncement": (()=>postAnnouncement)
+    "postAnnouncement": (()=>postAnnouncement),
+    "putAnnouncement": (()=>putAnnouncement)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/services/satellite/index.ts [app-client] (ecmascript)");
 ;
@@ -428,6 +430,14 @@ const getAllAnnouncements = async ()=>{
 };
 const getAnnouncementById = async (id)=>{
     const res = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get(`/announcement/${id}`);
+    return res.data;
+};
+const putAnnouncement = async (id, body)=>{
+    const res = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].put(`/announcement/${id}`, body);
+    return res.data;
+};
+const deleteAnnouncement = async (id)=>{
+    const res = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].delete(`/announcement/${id}`);
     return res.data;
 };
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
@@ -450,24 +460,94 @@ const initialState = {
     isLoading: false,
     error: null,
     announcementsData: [],
-    announcementData: null
+    announcementData: null,
+    message: null
 };
 const useAnnouncementStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$react$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["create"])((set, get)=>({
         ...initialState,
         addAnnouncement: async (body)=>{
             set({
                 isLoading: true,
-                error: null
+                error: null,
+                message: null
             });
             try {
                 const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$announcement$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["postAnnouncement"])(body);
-                if (!res.status) {
+                if (res.status) {
                     set({
-                        error: res.message
+                        message: res.message
                     });
+                    return true;
                 }
-            } catch  {
-                console.log(get().error);
+                set({
+                    error: res.message
+                });
+                return false;
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
+                return false;
+            } finally{
+                set({
+                    isLoading: false
+                });
+            }
+        },
+        updateAnnouncement: async (id, body)=>{
+            set({
+                isLoading: true,
+                error: null,
+                message: null
+            });
+            try {
+                const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$announcement$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["putAnnouncement"])(id, body);
+                if (res.status) {
+                    set({
+                        message: res.message
+                    });
+                    await get().getAllAnnouncements();
+                    return true;
+                }
+                set({
+                    error: res.message
+                });
+                return false;
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
+                return false;
+            } finally{
+                set({
+                    isLoading: false
+                });
+            }
+        },
+        removeAnnouncement: async (id)=>{
+            set({
+                isLoading: true,
+                error: null,
+                message: null
+            });
+            try {
+                const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$announcement$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["deleteAnnouncement"])(id);
+                if (res.status) {
+                    set({
+                        message: res.message
+                    });
+                    await get().getAllAnnouncements();
+                    return true;
+                }
+                set({
+                    error: res.message
+                });
+                return false;
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
+                return false;
             } finally{
                 set({
                     isLoading: false
@@ -490,8 +570,10 @@ const useAnnouncementStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f
                         error: res.message
                     });
                 }
-            } catch  {
-                console.log(get().error);
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
             } finally{
                 set({
                     isLoading: false
@@ -514,8 +596,10 @@ const useAnnouncementStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f
                         error: res.message
                     });
                 }
-            } catch  {
-                console.log(get().error);
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
             } finally{
                 set({
                     isLoading: false
@@ -554,41 +638,68 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
+const MAX_BODY_LENGTH = 200;
+const MAX_TITLE_LENGTH = 150;
+const emptyAnnouncement = {
+    type: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$interfaces$2f$announcement$2f$announcement$2e$interface$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnnouncementTypeEnum"].BASIC,
+    title: "",
+    body: ""
+};
 function Pengumuman() {
     _s();
-    const [dialogOpen, setDialogOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    const [announcement, setAnnouncement] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({
-        type: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$interfaces$2f$announcement$2f$announcement$2e$interface$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AnnouncementTypeEnum"].BASIC,
-        title: "",
-        body: ""
-    });
-    const { isLoading, error, addAnnouncement } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useAnnouncementStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
-    const open = ()=>{
-        setDialogOpen(true);
-    };
-    const close = ()=>{
-        setDialogOpen(false);
-    };
+    const [successDialogOpen, setSuccessDialogOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [errorDialogOpen, setErrorDialogOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [formError, setFormError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
+    const [dialogMessage, setDialogMessage] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
+    const [announcement, setAnnouncement] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(emptyAnnouncement);
+    const { isLoading, addAnnouncement } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useAnnouncementStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
     const handleValueChange = (field, value)=>{
         setAnnouncement((prev)=>({
                 ...prev,
                 [field]: value
             }));
-    };
-    const handleAddNewAnnnouncement = async ()=>{
-        await addAnnouncement(announcement);
+        setFormError("");
     };
     const resetAnnouncement = ()=>{
-        handleValueChange("title", "");
-        handleValueChange("type", "");
-        handleValueChange("body", "");
+        setAnnouncement(emptyAnnouncement);
+        setFormError("");
+    };
+    const handleAddNewAnnouncement = async ()=>{
+        const title = announcement.title.trim();
+        const body = announcement.body.trim();
+        if (title === "") {
+            setFormError("Judul pengumuman wajib diisi!");
+            return;
+        }
+        if (body === "") {
+            setFormError("Deskripsi pengumuman wajib diisi!");
+            return;
+        }
+        if (!announcement.type) {
+            setFormError("Jenis pengumuman wajib dipilih!");
+            return;
+        }
+        const isSuccess = await addAnnouncement({
+            type: announcement.type,
+            title,
+            body
+        });
+        const { error, message } = __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useAnnouncementStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].getState();
+        if (!isSuccess) {
+            setDialogMessage(error ?? "Gagal menerbitkan pengumuman");
+            setErrorDialogOpen(true);
+            return;
+        }
+        resetAnnouncement();
+        setDialogMessage(message ?? "Pengumuman berhasil diterbitkan");
+        setSuccessDialogOpen(true);
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "flex h-full w-full flex-col space-y-10",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$pengumuman$2f$add$2d$pengumuman$2f$add$2d$pengumuman$2d$title$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                lineNumber: 57,
+                lineNumber: 89,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -599,7 +710,7 @@ function Pengumuman() {
                         children: "Buat Pengumuman"
                     }, void 0, false, {
                         fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                        lineNumber: 59,
+                        lineNumber: 91,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -607,27 +718,43 @@ function Pengumuman() {
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                 className: "text-base font-semibold text-[#5E6278]",
-                                children: "Judul Pengumuman"
-                            }, void 0, false, {
+                                children: [
+                                    "Judul Pengumuman",
+                                    " ",
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "text-xs font-normal text-[#5E6278]/75",
+                                        children: [
+                                            "(maks: ",
+                                            MAX_TITLE_LENGTH,
+                                            " karakter)"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
+                                        lineNumber: 95,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
                                 fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                                lineNumber: 61,
+                                lineNumber: 93,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                 required: true,
                                 className: "h-[46px] w-full rounded-2xl bg-[#F5F5F5] px-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]",
                                 placeholder: "Judul pengumuman",
+                                maxLength: MAX_TITLE_LENGTH,
                                 onChange: (e)=>handleValueChange("title", e.target.value),
                                 value: announcement.title ?? ""
                             }, void 0, false, {
                                 fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                                lineNumber: 64,
+                                lineNumber: 99,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                        lineNumber: 60,
+                        lineNumber: 92,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -637,12 +764,12 @@ function Pengumuman() {
                             value: announcement.type
                         }, void 0, false, {
                             fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                            lineNumber: 73,
+                            lineNumber: 109,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                        lineNumber: 72,
+                        lineNumber: 108,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -655,109 +782,135 @@ function Pengumuman() {
                                     " ",
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         className: "text-xs font-normal text-[#5E6278]/75",
-                                        children: "(maks: 200 karakter)"
-                                    }, void 0, false, {
+                                        children: [
+                                            "(maks: ",
+                                            MAX_BODY_LENGTH,
+                                            " karakter)"
+                                        ]
+                                    }, void 0, true, {
                                         fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                                        lineNumber: 83,
+                                        lineNumber: 119,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                                lineNumber: 81,
+                                lineNumber: 117,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
                                 required: true,
                                 className: "h-[140px] w-full resize-none rounded-2xl bg-[#F5F5F5] pl-5 pt-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]",
                                 placeholder: "Deskripsi pengumuman",
-                                maxLength: 200,
+                                maxLength: MAX_BODY_LENGTH,
                                 inputMode: "text",
                                 onChange: (e)=>handleValueChange("body", e.target.value),
                                 value: announcement.body ?? ""
                             }, void 0, false, {
                                 fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                                lineNumber: 87,
+                                lineNumber: 123,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-right text-xs font-semibold text-[#5E6278]/75",
+                                children: [
+                                    announcement.body.length,
+                                    "/",
+                                    MAX_BODY_LENGTH
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
+                                lineNumber: 132,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                        lineNumber: 80,
+                        lineNumber: 116,
                         columnNumber: 9
+                    }, this),
+                    formError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-sm font-semibold text-[#F1416C]",
+                        children: formError
+                    }, void 0, false, {
+                        fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
+                        lineNumber: 137,
+                        columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "my-10 h-[1px] w-full bg-[#1D1D1D]/30"
                     }, void 0, false, {
                         fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                        lineNumber: 97,
+                        lineNumber: 139,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "flex w-full flex-row justify-end space-x-6",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                onClick: ()=>resetAnnouncement(),
-                                className: "rounded-full bg-[#FFD9D9] px-[16px] py-[8px] text-[16px] font-semibold text-[#FE2F60]",
+                                onClick: resetAnnouncement,
+                                disabled: isLoading,
+                                className: "rounded-full bg-[#FFD9D9] px-[16px] py-[8px] text-[16px] font-semibold text-[#FE2F60] disabled:opacity-50",
                                 children: "Hapus"
                             }, void 0, false, {
                                 fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                                lineNumber: 99,
+                                lineNumber: 141,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                onClick: ()=>handleAddNewAnnnouncement(),
-                                className: "rounded-full bg-[#D2E3F1] px-[16px] py-[8px] text-[16px] font-semibold text-[#3272CA]",
+                                onClick: handleAddNewAnnouncement,
+                                disabled: isLoading,
+                                className: "rounded-full bg-[#D2E3F1] px-[16px] py-[8px] text-[16px] font-semibold text-[#3272CA] disabled:opacity-50",
                                 children: !isLoading ? "Simpan" : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     className: "loading loading-dots loading-sm"
                                 }, void 0, false, {
                                     fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                                    lineNumber: 112,
+                                    lineNumber: 156,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                                lineNumber: 105,
+                                lineNumber: 148,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                        lineNumber: 98,
+                        lineNumber: 140,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                lineNumber: 58,
+                lineNumber: 90,
                 columnNumber: 7
             }, this),
-            !error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$success$2d$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                dialogOpen: dialogOpen,
-                onClose: close,
-                title: "Announcement Added!"
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$success$2d$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                dialogOpen: successDialogOpen,
+                onClose: ()=>setSuccessDialogOpen(false),
+                title: dialogMessage
             }, void 0, false, {
                 fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                lineNumber: 118,
-                columnNumber: 9
+                lineNumber: 161,
+                columnNumber: 7
             }, this),
-            error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$error$2d$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                dialogOpen: dialogOpen,
-                onClose: close,
-                title: error
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$error$2d$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                dialogOpen: errorDialogOpen,
+                onClose: ()=>setErrorDialogOpen(false),
+                title: dialogMessage
             }, void 0, false, {
                 fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-                lineNumber: 125,
-                columnNumber: 9
+                lineNumber: 166,
+                columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/dashboard/pengumuman/add-pengumuman/page.tsx",
-        lineNumber: 56,
+        lineNumber: 88,
         columnNumber: 5
     }, this);
 }
-_s(Pengumuman, "dvp+RWYQ0uiylYu0goAACe1tH8I=", false, function() {
+_s(Pengumuman, "fItPiXcS7v/7tcPiU/fMGUR6iU8=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useAnnouncementStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
     ];

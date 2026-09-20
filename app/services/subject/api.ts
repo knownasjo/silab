@@ -13,20 +13,17 @@ export const getAllSubjects = async () => {
   return res.data;
 };
 
-export const getAllRegisteredStudent = async () => {
-  const res =
-    await satellite.get<IBaseResponse<IGetActivationResponseBody[]>>(
-      "/activation",
-    );
-
-  return res.data;
-};
-
-export const getUnpaidStudents = async () => {
-  const res =
-    await satellite.get<IBaseResponse<IGetActivationResponseBody[]>>(
-      "/activation",
-    );
+/**
+ * Mengambil daftar aktivasi.
+ *
+ * status dikosongkan  -> seluruh aktivasi
+ * status "true"       -> yang sudah membayar
+ * status "false"      -> yang belum membayar
+ */
+export const getActivations = async (status?: "true" | "false") => {
+  const res = await satellite.get<IBaseResponse<IGetActivationResponseBody[]>>(
+    `/activation/?status=${status ?? ""}`,
+  );
 
   return res.data;
 };

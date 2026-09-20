@@ -33,8 +33,15 @@ export default function Authentication() {
   const onSubmit = async () => {
     const body = watch();
 
-    await login(body);
+    const isSuccess = await login(body);
+
+    if (!isSuccess) {
+      setDialogOpen(true);
+      return;
+    }
+
     router.replace("/dashboard");
+    router.refresh();
   };
 
   return (
@@ -98,7 +105,8 @@ export default function Authentication() {
             </div>
             <button
               type="submit"
-              className="h-[48px] w-[400px] rounded-[30px] bg-[#3272CA] text-[18px] font-semibold text-white"
+              disabled={isLoading}
+              className="h-[48px] w-[400px] rounded-[30px] bg-[#3272CA] text-[18px] font-semibold text-white disabled:opacity-60"
             >
               {isLoading ? (
                 <span className="loading loading-dots loading-md" />
@@ -109,13 +117,11 @@ export default function Authentication() {
           </form>
         </div>
       </div>
-      {error && (
-        <ErrorDialog
-          title={error}
-          dialogOpen={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-        />
-      )}
+      <ErrorDialog
+        title={error ?? "Gagal masuk. Periksa NIM dan password Anda."}
+        dialogOpen={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+      />
     </>
   );
 }

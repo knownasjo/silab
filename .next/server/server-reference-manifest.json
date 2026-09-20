@@ -22,6 +22,10 @@
           "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         },
+        "app/dashboard/pengumuman/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        },
         "app/dashboard/pengumuman/add-pengumuman/page": {
           "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/add-pengumuman/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
@@ -57,6 +61,7 @@
         "app/dashboard/master-data/add-subject/page": "rsc",
         "app/dashboard/master-data/pembayaran/page": "rsc",
         "app/dashboard/page": "rsc",
+        "app/dashboard/pengumuman/[id]/page": "rsc",
         "app/dashboard/pengumuman/add-pengumuman/page": "rsc",
         "app/dashboard/pengumuman/list-pengumuman/page": "rsc",
         "app/dashboard/praktikum/[classId]/page": "rsc",
@@ -88,6 +93,10 @@
           "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         },
+        "app/dashboard/pengumuman/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        },
         "app/dashboard/pengumuman/add-pengumuman/page": {
           "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/add-pengumuman/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
@@ -123,6 +132,7 @@
         "app/dashboard/master-data/add-subject/page": "action-browser",
         "app/dashboard/master-data/pembayaran/page": "action-browser",
         "app/dashboard/page": "action-browser",
+        "app/dashboard/pengumuman/[id]/page": "action-browser",
         "app/dashboard/pengumuman/add-pengumuman/page": "action-browser",
         "app/dashboard/pengumuman/list-pengumuman/page": "action-browser",
         "app/dashboard/praktikum/[classId]/page": "action-browser",
@@ -154,6 +164,10 @@
           "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         },
+        "app/dashboard/pengumuman/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        },
         "app/dashboard/pengumuman/add-pengumuman/page": {
           "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/add-pengumuman/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
@@ -189,6 +203,7 @@
         "app/dashboard/master-data/add-subject/page": "action-browser",
         "app/dashboard/master-data/pembayaran/page": "action-browser",
         "app/dashboard/page": "action-browser",
+        "app/dashboard/pengumuman/[id]/page": "action-browser",
         "app/dashboard/pengumuman/add-pengumuman/page": "action-browser",
         "app/dashboard/pengumuman/list-pengumuman/page": "action-browser",
         "app/dashboard/praktikum/[classId]/page": "action-browser",
@@ -220,6 +235,10 @@
           "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         },
+        "app/dashboard/pengumuman/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        },
         "app/dashboard/pengumuman/add-pengumuman/page": {
           "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/add-pengumuman/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
@@ -255,6 +274,7 @@
         "app/dashboard/master-data/add-subject/page": "rsc",
         "app/dashboard/master-data/pembayaran/page": "rsc",
         "app/dashboard/page": "rsc",
+        "app/dashboard/pengumuman/[id]/page": "rsc",
         "app/dashboard/pengumuman/add-pengumuman/page": "rsc",
         "app/dashboard/pengumuman/list-pengumuman/page": "rsc",
         "app/dashboard/praktikum/[classId]/page": "rsc",
@@ -286,6 +306,10 @@
           "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         },
+        "app/dashboard/pengumuman/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        },
         "app/dashboard/pengumuman/add-pengumuman/page": {
           "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/add-pengumuman/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
@@ -321,6 +345,7 @@
         "app/dashboard/master-data/add-subject/page": "rsc",
         "app/dashboard/master-data/pembayaran/page": "rsc",
         "app/dashboard/page": "rsc",
+        "app/dashboard/pengumuman/[id]/page": "rsc",
         "app/dashboard/pengumuman/add-pengumuman/page": "rsc",
         "app/dashboard/pengumuman/list-pengumuman/page": "rsc",
         "app/dashboard/praktikum/[classId]/page": "rsc",
@@ -350,6 +375,10 @@
         },
         "app/dashboard/page": {
           "moduleId": "[project]/.next-internal/server/app/dashboard/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        },
+        "app/dashboard/pengumuman/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/dashboard/pengumuman/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false
         },
         "app/dashboard/pengumuman/add-pengumuman/page": {
@@ -387,6 +416,7 @@
         "app/dashboard/master-data/add-subject/page": "action-browser",
         "app/dashboard/master-data/pembayaran/page": "action-browser",
         "app/dashboard/page": "action-browser",
+        "app/dashboard/pengumuman/[id]/page": "action-browser",
         "app/dashboard/pengumuman/add-pengumuman/page": "action-browser",
         "app/dashboard/pengumuman/list-pengumuman/page": "action-browser",
         "app/dashboard/praktikum/[classId]/page": "action-browser",

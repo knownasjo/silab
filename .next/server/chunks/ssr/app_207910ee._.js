@@ -527,9 +527,8 @@ var { g: global, __dirname } = __turbopack_context__;
 {
 __turbopack_context__.s({
     "addSubject": (()=>addSubject),
-    "getAllRegisteredStudent": (()=>getAllRegisteredStudent),
-    "getAllSubjects": (()=>getAllSubjects),
-    "getUnpaidStudents": (()=>getUnpaidStudents)
+    "getActivations": (()=>getActivations),
+    "getAllSubjects": (()=>getAllSubjects)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/services/satellite/index.ts [app-ssr] (ecmascript)");
 ;
@@ -537,12 +536,8 @@ const getAllSubjects = async ()=>{
     const res = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get("/subject");
     return res.data;
 };
-const getAllRegisteredStudent = async ()=>{
-    const res = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get("/activation");
-    return res.data;
-};
-const getUnpaidStudents = async ()=>{
-    const res = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get("/activation");
+const getActivations = async (status)=>{
+    const res = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get(`/activation/?status=${status ?? ""}`);
     return res.data;
 };
 const addSubject = async (body)=>{

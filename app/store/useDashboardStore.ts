@@ -1,88 +1,58 @@
 import { create } from "zustand";
-import {
-  getAllRegisteredStudent,
-  getAllSubjects,
-  getUnpaidStudents,
-} from "../services/subject/api";
+import { getActivations, getAllSubjects } from "../services/subject/api";
+import { getAllClass } from "../services/class/api";
 
 type DashboardState = GlobalState & {
   totalSubject: number | null;
-  totalRegisteredStudent: number | null;
+  totalClass: number | null;
+  totalActivation: number | null;
+  totalPaidStudent: number | null;
   totalUnpaidStudent: number | null;
 };
 
 type DashboardActions = {
-  getTotalSubject: () => Promise<void>;
-  getTotalRegisteredStudent: () => Promise<void>;
-  getTotalUnpaidStudent: () => Promise<void>;
+  getDashboardData: () => Promise<void>;
 };
 
 const initialState = {
   isLoading: false,
   error: null,
   totalSubject: null,
-  totalRegisteredStudent: null,
+  totalClass: null,
+  totalActivation: null,
+  totalPaidStudent: null,
   totalUnpaidStudent: null,
 };
 
-const useDashboardStore = create<DashboardState & DashboardActions>(
-  (set, get) => ({
-    ...initialState,
+const useDashboardStore = create<DashboardState & DashboardActions>((set) => ({
+  ...initialState,
 
-    getTotalRegisteredStudent: async () => {
-      set({ isLoading: false, error: null });
+  getDashboardData: async () => {
+    set({ isLoading: true, error: null });
 
-      try {
-        const res = await getAllSubjects();
+    try {
+      const [subjects, classes, allActivations, paid, unpaid] =
+        await Promise.all([
+          getAllSubjects(),
+          getAllClass(),
+          getActivations(),
+          getActivations("true"),
+          getActivations("false"),
+        ]);
 
-        if (res.status && res.data) {
-          set({ totalSubject: res.data.length });
-        } else {
-          set({ error: res.message });
-        }
-      } catch {
-        console.log(get().error);
-      } finally {
-        set({ isLoading: false });
-      }
-    },
-
-    getTotalSubject: async () => {
-      set({ isLoading: false, error: null });
-
-      try {
-        const res = await getAllRegisteredStudent();
-
-        if (res.status && res.data) {
-          set({ totalRegisteredStudent: res.data.length });
-        } else {
-          set({ error: res.message });
-        }
-      } catch {
-        console.log(get().error);
-      } finally {
-        set({ isLoading: false });
-      }
-    },
-
-    getTotalUnpaidStudent: async () => {
-      set({ isLoading: false, error: null });
-
-      try {
-        const res = await getUnpaidStudents();
-
-        if (res.status && res.data) {
-          set({ totalUnpaidStudent: res.data.length });
-        } else {
-          set({ error: res.message });
-        }
-      } catch {
-        console.log(get().error);
-      } finally {
-        set({ isLoading: false });
-      }
-    },
-  }),
-);
+      set({
+        totalSubject: subjects.data?.length ?? 0,
+        totalClass: classes.data?.length ?? 0,
+        totalActivation: allActivations.data?.length ?? 0,
+        totalPaidStudent: paid.data?.length ?? 0,
+        totalUnpaidStudent: unpaid.data?.length ?? 0,
+      });
+    } catch (error: any) {
+      set({ error: error?.message ?? "Terjadi kesalahan" });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+}));
 
 export default useDashboardStore;

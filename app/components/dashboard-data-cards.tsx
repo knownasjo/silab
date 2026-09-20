@@ -3,13 +3,21 @@
 import useAuthStore from "../store/useAuthStore";
 import DashboardDataContainer from "./dashboard-data-container";
 
+interface DashboardDataCardsProps {
+  totalSubject: number | null;
+  totalClass: number | null;
+  totalActivation: number | null;
+  totalPaidStudent: number | null;
+  totalUnpaidStudent: number | null;
+}
+
 export default function DashboardDataCards({
-  subjectData,
-  studentsData,
-  studentsPaymentStatusPaidData,
-  studentsPaymentStatusPendingData,
-  studentPracticumData,
-}: any) {
+  totalSubject,
+  totalClass,
+  totalActivation,
+  totalPaidStudent,
+  totalUnpaidStudent,
+}: DashboardDataCardsProps) {
   const { userData } = useAuthStore();
 
   return (
@@ -17,21 +25,20 @@ export default function DashboardDataCards({
       <div className="mt-6 flex w-full flex-row space-x-5">
         {userData?.role === "LABORAN" && (
           <>
-            {" "}
             <DashboardDataContainer
-              data={subjectData}
+              data={totalSubject}
               title="Jumlah Praktikum"
-              subTitle="Semester 1 - 8"
+              subTitle="Mata kuliah praktikum terdaftar"
             />
             <DashboardDataContainer
-              data={studentsPaymentStatusPaidData}
-              data2={studentsData}
+              data={totalPaidStudent}
+              data2={totalActivation}
               title="Jumlah Mahasiswa"
-              subTitle="Yang sudah mendaftar praktikum"
+              subTitle="Yang sudah membayar praktikum"
             />
             <DashboardDataContainer
-              data={studentsPaymentStatusPendingData}
-              data2={studentsData}
+              data={totalUnpaidStudent}
+              data2={totalActivation}
               title="Jumlah Mahasiswa"
               subTitle="Yang belum membayar praktikum"
             />
@@ -40,14 +47,14 @@ export default function DashboardDataCards({
         {userData?.role === "MAHASISWA" && (
           <>
             <DashboardDataContainer
-              data={subjectData}
+              data={totalSubject}
               title="Jumlah Praktikum"
-              subTitle="Semester 1 - 8"
+              subTitle="Mata kuliah praktikum terdaftar"
             />
             <DashboardDataContainer
-              data={studentPracticumData}
-              title="Jumlah Kelas Asisten Praktikum"
-              subTitle="Semester 1 - 8"
+              data={totalClass}
+              title="Jumlah Kelas Praktikum"
+              subTitle="Seluruh kelas yang berjalan"
             />
           </>
         )}

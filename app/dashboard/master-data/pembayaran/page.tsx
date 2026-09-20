@@ -2,7 +2,10 @@
 
 import ErrorDialog from "@/app/components/error-dialog";
 import SuccessDialog from "@/app/components/success-dialog";
-import { IGetActivationResponseBody } from "@/app/interfaces/activation/activation.interface";
+import {
+  IAvailableClass,
+  IGetActivationResponseBody,
+} from "@/app/interfaces/activation/activation.interface";
 import useActivationStore from "@/app/store/useActivationStore";
 import {
   Dialog,
@@ -11,6 +14,10 @@ import {
   DialogTitle,
   Field,
   Input,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
   Switch,
 } from "@headlessui/react";
 import Image from "next/image";
@@ -21,8 +28,11 @@ export default function Pembayaran() {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [selectedStudent, setSelectedStudent] =
     useState<IGetActivationResponseBody>();
-  const [selectedStudentPaymentStatus, setSelectedStudentPaymentStatus] =
-    useState<boolean>();
+  const [paymentStatus, setPaymentStatus] = useState<boolean>(false);
+  const [selectedClass, setSelectedClass] = useState<IAvailableClass | null>(
+    null,
+  );
+  const [dialogError, setDialogError] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [successDialogOpen, setSuccessDialogOpen] = useState<boolean>(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState<boolean>(false);
@@ -31,21 +41,16 @@ export default function Pembayaran() {
     activationData,
     getAllActivations,
     updatePaymentStatus,
+    updateStudentClass,
     isLoading,
-    error,
     status,
     setStatusQuery,
     setNameQuery,
-    reset,
   } = useActivationStore();
 
   useEffect(() => {
     getAllActivations();
   }, [getAllActivations]);
-
-  useEffect(() => {
-    reset();
-  }, []);
 
   const debouncedSetQuery = useMemo(() => {
     return debounce((val: string) => {
@@ -59,15 +64,93 @@ export default function Pembayaran() {
     };
   }, [debouncedSetQuery]);
 
+  const openDialog = (student: IGetActivationResponseBody) => {
+    setSelectedStudent(student);
+    setPaymentStatus(student.status);
+
+    const currentClass = student.registered_class
+      ? (student.available_classes.find(
+          (c) => c.id === student.registered_class!.id,
+        ) ?? null)
+      : null;
+
+    setSelectedClass(currentClass);
+    setDialogError("");
+    setIsDialogOpen(true);
+  };
+
+  const finish = (successMessage: string) => {
+    setIsDialogOpen(false);
+    setMessage(successMessage);
+    setSuccessDialogOpen(true);
+  };
+
+  const fail = (errorMessage: string) => {
+    setDialogError(errorMessage);
+  };
+
+  const handleSave = async () => {
+    if (!selectedStudent) return;
+
+    const currentClass = selectedStudent.registered_class;
+    const statusChanged = paymentStatus !== selectedStudent.status;
+
+    if (!currentClass) {
+      if (paymentStatus && !selectedClass) {
+        fail(
+          "Geser tombol ke Sudah Bayar dan pilih kelas praktikum terlebih dahulu!",
+        );
+        return;
+      }
+
+      await updatePaymentStatus(
+        selectedStudent.id,
+        paymentStatus,
+        selectedClass?.id,
+      );
+
+      const { error, message: storeMessage } = useActivationStore.getState();
+
+      if (error) return fail(error);
+
+      return finish(storeMessage ?? "Berhasil");
+    }
+
+    const classChanged =
+      selectedClass !== null && selectedClass.id !== currentClass.id;
+
+    if (!classChanged && !statusChanged) {
+      fail("Tidak ada perubahan yang perlu disimpan.");
+      return;
+    }
+
+    if (classChanged) {
+      await updateStudentClass(selectedStudent.id, selectedClass!.id);
+
+      const { error } = useActivationStore.getState();
+
+      if (error) return fail(error);
+    }
+
+    if (statusChanged) {
+      await updatePaymentStatus(selectedStudent.id, paymentStatus);
+
+      const { error } = useActivationStore.getState();
+
+      if (error) return fail(error);
+    }
+
+    const { message: storeMessage } = useActivationStore.getState();
+
+    return finish(storeMessage ?? "Berhasil");
+  };
+
   return (
     <div className="flex h-full w-full flex-col space-y-[38px] overflow-auto overscroll-contain">
       <div className="flex h-fit w-full flex-row space-x-9">
         <div className="flex h-[200px] w-[300px] flex-col justify-between rounded-3xl bg-[#3272CA] p-5">
           <h1 className="text-6xl font-bold text-[#FFBF01]">
-            {
-              activationData.filter((student) => student.status === false)
-                .length
-            }
+            {activationData.filter((student) => student.status === false).length}
           </h1>
           <p className="text-base font-semibold text-white">
             Jumlah aktivasi mahasiswa yang{" "}
@@ -99,7 +182,7 @@ export default function Pembayaran() {
               "h-full w-full rounded-2xl pl-10 data-[focus]:outline-[#3272CA]"
             }
             placeholder="Cari Mahasiswa"
-            onChange={(e) => setNameQuery(e.target.value)}
+            onChange={(e) => debouncedSetQuery(e.target.value)}
           />
         </Field>
       </div>
@@ -127,80 +210,51 @@ export default function Pembayaran() {
         <div className="flex w-full flex-col space-y-9">
           <div className="flex flex-row text-sm font-bold text-[#5E6278]">
             <p className="flex w-2/12 justify-center">NIM</p>
-            <p className="flex w-4/12 justify-center">Nama</p>
+            <p className="flex w-3/12 justify-center">Nama</p>
             <p className="flex w-3/12 justify-center">Mata Kuliah</p>
+            <p className="flex w-2/12 justify-center">Kelas</p>
             <p className="flex w-2/12 justify-center">Status Pembayaran</p>
             <p className="flex w-1/12 justify-center"></p>
           </div>
-          {activationData &&
-            !status &&
-            activationData.map((student) => (
-              <div
-                key={student.id}
-                className="flex flex-row text-sm font-semibold text-[#5E6278]"
-              >
-                <p className="flex w-2/12 justify-center">{student.nim}</p>
-                <p className="flex w-4/12 justify-center">{student.student}</p>
-                <div className="flex w-3/12 flex-col justify-center space-y-2">
-                  {student.subjects.map((subject) => (
-                    <li key={subject.subject_name}>{subject.subject_name}</li>
-                  ))}
-                </div>
-                <p
-                  className={`flex h-fit w-2/12 justify-center rounded-md p-2 font-semibold ${student.status === false ? "bg-[#F1F1F2]" : "bg-[#E8FFF3] text-[#50CD89]"}`}
-                >
-                  {student.status === true ? "Sudah Bayar" : "Belum Bayar"}
-                </p>
-                <button
-                  onClick={() => {
-                    setIsDialogOpen(true);
-                    setSelectedStudent(student);
-                    setSelectedStudentPaymentStatus(student.status);
-                  }}
-                  className="relative flex h-6 w-1/12 justify-center"
-                >
-                  {!student.status && (
-                    <Image
-                      src={"/edit-blue.png"}
-                      alt="action"
-                      fill
-                      style={{ objectFit: "contain" }}
-                    />
-                  )}
-                </button>
+          {isLoading && activationData.length === 0 && (
+            <p className="text-sm text-[#5E6278]">Memuat data...</p>
+          )}
+          {!isLoading && activationData.length === 0 && (
+            <p className="text-sm text-[#5E6278]">Tidak ada data.</p>
+          )}
+          {activationData.map((student) => (
+            <div
+              key={student.id}
+              className="flex flex-row text-sm font-semibold text-[#5E6278]"
+            >
+              <p className="flex w-2/12 justify-center">{student.nim}</p>
+              <p className="flex w-3/12 justify-center">{student.student}</p>
+              <div className="flex w-3/12 flex-col justify-center space-y-2">
+                {student.subjects.map((subject) => (
+                  <li key={subject.subject_name}>{subject.subject_name}</li>
+                ))}
               </div>
-            ))}
-          {activationData &&
-            status &&
-            activationData.map((student) => (
-              <div
-                key={student.id}
-                className="flex flex-row text-sm font-semibold text-[#5E6278]"
+              <p className="flex w-2/12 justify-center">
+                {student.registered_class ? student.registered_class.name : "-"}
+              </p>
+              <p
+                className={`flex h-fit w-2/12 justify-center rounded-md p-2 font-semibold ${student.status === false ? "bg-[#F1F1F2]" : "bg-[#E8FFF3] text-[#50CD89]"}`}
               >
-                <p className="flex w-2/12 justify-center">{student.nim}</p>
-                <p className="flex w-4/12 justify-center">{student.student}</p>
-                <div className="flex w-3/12 flex-col justify-center space-y-2">
-                  {student.subjects.map((subject) => (
-                    <li key={subject.subject_name}>{subject.subject_name}</li>
-                  ))}
-                </div>
-                <p
-                  className={`flex h-fit w-2/12 justify-center rounded-md p-2 font-semibold ${student.status === false ? "bg-[#F1F1F2]" : "bg-[#E8FFF3] text-[#50CD89]"}`}
-                >
-                  {student.status === true ? "Sudah Bayar" : "Belum Bayar"}
-                </p>
-                <button className="relative flex h-6 w-1/12 justify-center">
-                  {!student.status && (
-                    <Image
-                      src={"/edit-blue.png"}
-                      alt="action"
-                      fill
-                      style={{ objectFit: "contain" }}
-                    />
-                  )}
-                </button>
-              </div>
-            ))}
+                {student.status === true ? "Sudah Bayar" : "Belum Bayar"}
+              </p>
+              <button
+                onClick={() => openDialog(student)}
+                className="relative flex h-6 w-1/12 justify-center"
+              >
+                <Image
+                  src={"/edit-blue.png"}
+                  alt="action"
+                  fill
+                  style={{ objectFit: "contain" }}
+                />
+              </button>
+            </div>
+          ))}
         </div>
       </div>
       <Dialog
@@ -210,12 +264,12 @@ export default function Pembayaran() {
       >
         <DialogBackdrop className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 flex h-full w-screen items-center justify-center p-4">
-          <DialogPanel className="flex h-3/5 w-[500px] flex-col space-y-4 rounded-2xl bg-white p-10">
+          <DialogPanel className="flex max-h-[85vh] w-[500px] flex-col space-y-4 overflow-y-auto rounded-2xl bg-white p-10">
             <DialogTitle className="font-bold text-[#1d1d1d]">
-              Ubah Status Pembayaran Mahasiswa
+              Ubah Data Aktivasi Mahasiswa
             </DialogTitle>
-            <div className="flex h-full w-full flex-col justify-between">
-              <div className="flex h-full w-full flex-col space-y-8">
+            <div className="flex h-full w-full flex-col justify-between space-y-8">
+              <div className="flex h-full w-full flex-col space-y-6">
                 <div className="flex flex-col">
                   <p className="text-xs font-semibold text-[#5E6278]">NIM</p>
                   <p className="text-sm font-bold text-[#1D1D1D]">
@@ -239,10 +293,8 @@ export default function Pembayaran() {
                       Belum Bayar
                     </p>
                     <Switch
-                      checked={selectedStudentPaymentStatus}
-                      onChange={(checked) =>
-                        setSelectedStudentPaymentStatus(checked ? true : false)
-                      }
+                      checked={paymentStatus}
+                      onChange={setPaymentStatus}
                       className="group relative flex h-7 w-14 cursor-pointer rounded-full bg-[#D9D9D9] p-1 transition-colors duration-200 ease-in-out focus:outline-none data-[checked]:bg-[#3272CA] data-[focus]:outline-1 data-[focus]:outline-white"
                     >
                       <span
@@ -255,31 +307,93 @@ export default function Pembayaran() {
                     </p>
                   </div>
                 </div>
+                <div className="flex flex-col">
+                  <p className="text-xs font-semibold text-[#5E6278]">
+                    Kelas Praktikum
+                  </p>
+                  {selectedStudent?.registered_class && (
+                    <p className="mt-1 text-xs text-[#5E6278]">
+                      Kelas sekarang:{" "}
+                      <span className="font-bold text-[#1D1D1D]">
+                        {selectedStudent.registered_class.name}
+                      </span>
+                    </p>
+                  )}
+                  <Listbox value={selectedClass} onChange={setSelectedClass}>
+                    <ListboxButton className="mt-2 flex w-full flex-row items-center justify-between rounded-2xl border-2 border-[#BFD9EF] p-3 text-left text-sm font-semibold text-[#3272CA]">
+                      <span>
+                        {selectedClass
+                          ? `Kelas ${selectedClass.name} — ${selectedClass.day}, ${selectedClass.session_time}`
+                          : "Pilih Kelas"}
+                      </span>
+                      <Image
+                        src={"/down-blue.png"}
+                        alt="chevron down"
+                        width={20}
+                        height={20}
+                      />
+                    </ListboxButton>
+                    <ListboxOptions className="mt-1 w-full rounded-2xl border-2 border-[#BFD9EF] bg-white p-2">
+                      {selectedStudent?.available_classes.length === 0 && (
+                        <p className="p-2 text-sm text-[#5E6278]">
+                          Belum ada kelas untuk mata kuliah ini.
+                        </p>
+                      )}
+                      {selectedStudent?.available_classes.map(
+                        (availableClass) => {
+                          const isCurrent =
+                            selectedStudent.registered_class?.id ===
+                            availableClass.id;
+
+                          return (
+                            <ListboxOption
+                              key={availableClass.id}
+                              value={availableClass}
+                              disabled={availableClass.is_full && !isCurrent}
+                              className="cursor-pointer rounded-xl p-2 text-sm font-semibold text-[#1D1D1D] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40 data-[focus]:bg-[#D2E3F1]"
+                            >
+                              Kelas {availableClass.name} — {availableClass.day}
+                              , {availableClass.session_time} (
+                              {availableClass.registered_students}/
+                              {availableClass.quota})
+                              {isCurrent && " — kelas sekarang"}
+                              {availableClass.is_full &&
+                                !isCurrent &&
+                                " — Penuh"}
+                            </ListboxOption>
+                          );
+                        },
+                      )}
+                    </ListboxOptions>
+                  </Listbox>
+                </div>
+                {dialogError && (
+                  <p className="text-sm font-semibold text-[#F1416C]">
+                    {dialogError}
+                  </p>
+                )}
               </div>
               <button
-                onClick={() => updatePaymentStatus(selectedStudent?.id!)}
-                className="w-full rounded-full bg-[#D2E3F1] p-4 font-semibold text-[#3272CA]"
+                onClick={handleSave}
+                disabled={isLoading}
+                className="w-full rounded-full bg-[#D2E3F1] p-4 font-semibold text-[#3272CA] disabled:opacity-50"
               >
-                Simpan Perubahan
+                {isLoading ? "Menyimpan..." : "Simpan Perubahan"}
               </button>
             </div>
           </DialogPanel>
         </div>
       </Dialog>
-      {!error && (
-        <SuccessDialog
-          dialogOpen={successDialogOpen}
-          onClose={() => setSuccessDialogOpen(false)}
-          title={message}
-        />
-      )}
-      {error && (
-        <ErrorDialog
-          dialogOpen={errorDialogOpen}
-          onClose={() => setErrorDialogOpen(false)}
-          title={message}
-        />
-      )}
+      <SuccessDialog
+        dialogOpen={successDialogOpen}
+        onClose={() => setSuccessDialogOpen(false)}
+        title={message}
+      />
+      <ErrorDialog
+        dialogOpen={errorDialogOpen}
+        onClose={() => setErrorDialogOpen(false)}
+        title={message}
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import MasterDataSidebarDisclosure from "./master-data-sidebar-disclosure";
 import useAuthStore from "../store/useAuthStore";
 import { useEffect } from "react";
 import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const sideBarItems: SideBarProps[] = [
   { imageSrc: "/dashboard.png", route: "/dashboard", title: "Dashboard" },
@@ -24,31 +25,31 @@ export default function SideBar() {
     me();
   }, [me]);
 
+  const isRoleUnknown = !userData && isLoading;
+
   return (
     <div className="mt-8 flex h-full w-1/4 flex-col justify-between px-8 py-4">
       <div className="flex h-full w-full flex-col space-y-5">
-        {isLoading ? (
-          [...Array(4)].map((_, index) => (
-            <div key={index} className="h-4 w-full">
-              <Skeleton height={40} className="bg-red-600" />
+        {sideBarItems.map((item) => (
+          <SideBarItem
+            imageSrc={item.imageSrc}
+            route={item.route}
+            title={item.title}
+            key={item.title}
+          />
+        ))}
+
+        {isRoleUnknown &&
+          [...Array(2)].map((_, index) => (
+            <div key={index} className="h-10 w-full">
+              <Skeleton height={40} borderRadius={9999} />
             </div>
-          ))
-        ) : (
+          ))}
+
+        {userData?.role === "LABORAN" && (
           <>
-            {sideBarItems.map((item) => (
-              <SideBarItem
-                imageSrc={item.imageSrc}
-                route={item.route}
-                title={item.title}
-                key={item.title}
-              />
-            ))}
-            {userData?.role === "LABORAN" && (
-              <>
-                <MasterDataSidebarDisclosure />
-                <PengumumanSidebarDisclosure />
-              </>
-            )}
+            <MasterDataSidebarDisclosure />
+            <PengumumanSidebarDisclosure />
           </>
         )}
       </div>

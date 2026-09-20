@@ -104,8 +104,23 @@ const satellite = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2
     baseURL: ("TURBOPACK compile-time value", "http://localhost:3000"),
     timeout: 20_000
 });
+/**
+ * Membaca cookie accessToken langsung dari browser.
+ *
+ * Sebelumnya setiap permintaan memanggil getToken(), sebuah server action,
+ * sehingga harus bolak-balik ke server hanya untuk membaca cookie. Tepat
+ * setelah login, panggilan itu mengantre di belakang navigasi yang sedang
+ * berjalan dan membuat halaman tampak kosong sampai di-refresh.
+ *
+ * Cookie ini memang terbaca JavaScript karena diset tanpa httpOnly, jadi
+ * membacanya di sini tidak menambah risiko apa pun yang belum ada.
+ */ const readTokenFromBrowser = ()=>{
+    if (typeof document === "undefined") return undefined;
+    const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/);
+    return match ? decodeURIComponent(match[1]) : undefined;
+};
 satellite.interceptors.request.use(async (request)=>{
-    const token = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$utils$2f$data$3a$d91613__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__["getToken"])();
+    const token = readTokenFromBrowser() ?? await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$utils$2f$data$3a$d91613__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__["getToken"])();
     if (token) request.headers["Authorization"] = `Bearer ${token}`;
     return request;
 }, async (error)=>Promise.reject(error));
@@ -213,13 +228,17 @@ const useAuthStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_mo
                 const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$auth$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["postLogin"])(body);
                 if (res.status && res.data) {
                     await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$utils$2f$data$3a$8b2206__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__["setToken"])(res.data.accessToken);
-                } else {
-                    set({
-                        error: res.message
-                    });
+                    return true;
                 }
-            } catch  {
-                console.log(get().error);
+                set({
+                    error: res.message
+                });
+                return false;
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
+                return false;
             } finally{
                 set({
                     isLoading: false
@@ -228,6 +247,9 @@ const useAuthStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_mo
         },
         logout: async ()=>{
             await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$utils$2f$data$3a$cbe69b__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__["deleteToken"])();
+            set({
+                ...initialAuthState
+            });
         },
         me: async ()=>{
             set({
@@ -245,8 +267,10 @@ const useAuthStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_mo
                         error: res.message
                     });
                 }
-            } catch  {
-                console.log(get().error);
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
             } finally{
                 set({
                     isLoading: false
@@ -838,6 +862,7 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
+;
 const sideBarItems = [
     {
         imageSrc: "/dashboard.png",
@@ -860,68 +885,68 @@ function SideBar() {
     }["SideBar.useEffect"], [
         me
     ]);
+    const isRoleUnknown = !userData && isLoading;
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "mt-8 flex h-full w-1/4 flex-col justify-between px-8 py-4",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "flex h-full w-full flex-col space-y-5",
-                children: isLoading ? [
-                    ...Array(4)
-                ].map((_, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "h-4 w-full",
-                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$loading$2d$skeleton$2f$dist$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                            height: 40,
-                            className: "bg-red-600"
-                        }, void 0, false, {
+                children: [
+                    sideBarItems.map((item)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$sidebar$2d$item$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                            imageSrc: item.imageSrc,
+                            route: item.route,
+                            title: item.title
+                        }, item.title, false, {
                             fileName: "[project]/app/components/sidebar.tsx",
-                            lineNumber: 33,
-                            columnNumber: 15
-                        }, this)
-                    }, index, false, {
-                        fileName: "[project]/app/components/sidebar.tsx",
-                        lineNumber: 32,
-                        columnNumber: 13
-                    }, this)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
-                    children: [
-                        sideBarItems.map((item)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$sidebar$2d$item$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                imageSrc: item.imageSrc,
-                                route: item.route,
-                                title: item.title
-                            }, item.title, false, {
+                            lineNumber: 34,
+                            columnNumber: 11
+                        }, this)),
+                    isRoleUnknown && [
+                        ...Array(2)
+                    ].map((_, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "h-10 w-full",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$loading$2d$skeleton$2f$dist$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                height: 40,
+                                borderRadius: 9999
+                            }, void 0, false, {
                                 fileName: "[project]/app/components/sidebar.tsx",
-                                lineNumber: 39,
+                                lineNumber: 45,
                                 columnNumber: 15
-                            }, this)),
-                        userData?.role === "LABORAN" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$master$2d$data$2d$sidebar$2d$disclosure$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
-                                    fileName: "[project]/app/components/sidebar.tsx",
-                                    lineNumber: 48,
-                                    columnNumber: 17
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$pengumuman$2d$sidebar$2d$disclosure$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
-                                    fileName: "[project]/app/components/sidebar.tsx",
-                                    lineNumber: 49,
-                                    columnNumber: 17
-                                }, this)
-                            ]
-                        }, void 0, true)
-                    ]
-                }, void 0, true)
-            }, void 0, false, {
+                            }, this)
+                        }, index, false, {
+                            fileName: "[project]/app/components/sidebar.tsx",
+                            lineNumber: 44,
+                            columnNumber: 13
+                        }, this)),
+                    userData?.role === "LABORAN" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$master$2d$data$2d$sidebar$2d$disclosure$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
+                                fileName: "[project]/app/components/sidebar.tsx",
+                                lineNumber: 51,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$pengumuman$2d$sidebar$2d$disclosure$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
+                                fileName: "[project]/app/components/sidebar.tsx",
+                                lineNumber: 52,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true)
+                ]
+            }, void 0, true, {
                 fileName: "[project]/app/components/sidebar.tsx",
-                lineNumber: 29,
+                lineNumber: 32,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$signout$2d$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/app/components/sidebar.tsx",
-                lineNumber: 56,
+                lineNumber: 57,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/components/sidebar.tsx",
-        lineNumber: 28,
+        lineNumber: 31,
         columnNumber: 5
     }, this);
 }

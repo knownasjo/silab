@@ -58,25 +58,27 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
       } else {
         set({ error: res.message });
       }
-    } catch {
-      console.log(get().error);
+    } catch (error: any) {
+      set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }
   },
 
   addMeeting: async (body) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, message: null });
 
     try {
       const res = await postMeeting(body);
 
       if (res.status) {
         set({ message: res.message });
+        await get().getMeetings(body.classId);
       } else {
         set({ error: res.message });
       }
-    } catch {
+    } catch (error: any) {
+      set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }
@@ -95,7 +97,7 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
         set({ error: res.message });
       }
     } catch (error: any) {
-      set({ error: error?.response?.data?.message ?? "Terjadi kesalahan" });
+      set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }
@@ -114,7 +116,7 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
         set({ error: res.message });
       }
     } catch (error: any) {
-      set({ error: error?.response?.data?.message ?? "Terjadi kesalahan" });
+      set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }
@@ -133,7 +135,7 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
         set({ error: res.message });
       }
     } catch (error: any) {
-      set({ error: error?.response?.data?.message ?? "Terjadi kesalahan" });
+      set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }

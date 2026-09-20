@@ -1,6 +1,6 @@
 interface DashboardDataContainerProps {
-  data: number;
-  data2?: number | undefined;
+  data: number | null;
+  data2?: number | null;
   title: string;
   subTitle: string;
 }
@@ -11,11 +11,14 @@ export default function DashboardDataContainer({
   title,
   subTitle,
 }: DashboardDataContainerProps) {
+  const isReady = data !== null && data !== undefined;
+
   return (
     <div className="flex h-[280px] w-1/3 flex-col justify-between rounded-3xl bg-[#3272CA] p-5">
       <p className="text-7xl font-bold text-[#FFBF01]">
-        {data2 && `${data} / ${data2}`}
-        {!data2 && data}
+        {!isReady && "-"}
+        {isReady &&
+          (data2 !== null && data2 !== undefined ? `${data} / ${data2}` : data)}
       </p>
       <div className="flex flex-col text-white">
         <p className="text-[24px] font-bold">{title}</p>

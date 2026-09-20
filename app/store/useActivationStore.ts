@@ -3,17 +3,24 @@ import { IGetActivationResponseBody } from "../interfaces/activation/activation.
 import {
   getAllActivation,
   putUpdatePaymentStatus,
+  putUpdateStudentClass,
 } from "../services/activation/api";
 
 type ActivationState = GlobalState & {
   activationData: IGetActivationResponseBody[];
   status: string;
   name: string;
+  message: string | null;
 };
 
 type ActivationActions = {
   getAllActivations: () => Promise<void>;
-  updatePaymentStatus: (id: string) => Promise<void>;
+  updatePaymentStatus: (
+    id: string,
+    paymentStatus: boolean,
+    classId?: string,
+  ) => Promise<void>;
+  updateStudentClass: (id: string, classId: string) => Promise<void>;
   setStatusQuery: (query: string | undefined) => void;
   setNameQuery: (query: string) => void;
   reset: () => void;
@@ -25,6 +32,7 @@ const initialState = {
   activationData: [],
   status: "",
   name: "",
+  message: null,
 };
 
 const useActivationStore = create<ActivationState & ActivationActions>(
@@ -32,12 +40,12 @@ const useActivationStore = create<ActivationState & ActivationActions>(
     ...initialState,
 
     setStatusQuery: (query) => {
-      set({ status: query, activationData: [] });
+      set({ status: query ?? "" });
       get().getAllActivations();
     },
 
     setNameQuery: (query) => {
-      set({ name: query, activationData: [] });
+      set({ name: query });
       get().getAllActivations();
     },
 
@@ -54,24 +62,46 @@ const useActivationStore = create<ActivationState & ActivationActions>(
         } else {
           set({ error: res.message });
         }
-      } catch {
-        console.log(get().error);
+      } catch (error: any) {
+        set({ error: error?.message ?? "Terjadi kesalahan" });
       } finally {
         set({ isLoading: false });
       }
     },
 
-    updatePaymentStatus: async (id) => {
-      set({ isLoading: true, error: null });
+    updatePaymentStatus: async (id, paymentStatus, classId) => {
+      set({ isLoading: true, error: null, message: null });
 
       try {
-        const res = await putUpdatePaymentStatus(id);
+        const res = await putUpdatePaymentStatus(id, paymentStatus, classId);
 
-        if (!res.status) {
+        if (res.status) {
+          set({ message: res.message });
+          await get().getAllActivations();
+        } else {
           set({ error: res.message });
         }
-      } catch {
-        console.log(get().error);
+      } catch (error: any) {
+        set({ error: error?.message ?? "Terjadi kesalahan" });
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
+    updateStudentClass: async (id, classId) => {
+      set({ isLoading: true, error: null, message: null });
+
+      try {
+        const res = await putUpdateStudentClass(id, classId);
+
+        if (res.status) {
+          set({ message: res.message });
+          await get().getAllActivations();
+        } else {
+          set({ error: res.message });
+        }
+      } catch (error: any) {
+        set({ error: error?.message ?? "Terjadi kesalahan" });
       } finally {
         set({ isLoading: false });
       }

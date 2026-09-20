@@ -7,27 +7,27 @@ import useDashboardStore from "../store/useDashboardStore";
 
 export default function Dashboard() {
   const {
-    getTotalRegisteredStudent,
-    getTotalSubject,
-    getTotalUnpaidStudent,
-    totalRegisteredStudent,
+    getDashboardData,
     totalSubject,
+    totalClass,
+    totalActivation,
+    totalPaidStudent,
     totalUnpaidStudent,
   } = useDashboardStore();
 
   useEffect(() => {
-    getTotalRegisteredStudent(), getTotalSubject(), getTotalUnpaidStudent();
-  }, [getTotalRegisteredStudent, getTotalSubject, getTotalUnpaidStudent]);
+    getDashboardData();
+  }, [getDashboardData]);
 
   return (
     <div className="flex h-full w-full flex-col justify-between space-y-6 overflow-auto overscroll-contain">
       <BannerDashboard />
       <DashboardDataCards
-        subjectData={totalSubject}
-        studentsData={totalRegisteredStudent}
-        studentsPaymentStatusPaidData={totalRegisteredStudent}
-        studentsPaymentStatusPendingData={totalUnpaidStudent}
-        studentPracticumData={totalSubject}
+        totalSubject={totalSubject}
+        totalClass={totalClass}
+        totalActivation={totalActivation}
+        totalPaidStudent={totalPaidStudent}
+        totalUnpaidStudent={totalUnpaidStudent}
       />
     </div>
   );

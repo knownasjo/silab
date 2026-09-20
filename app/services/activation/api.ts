@@ -6,15 +6,31 @@ export const getAllActivation = async (
   status?: string,
   name?: string,
 ): Promise<IBaseResponse<IGetActivationResponseBody[]>> => {
-  const res = await satellite.get(`/activation/?status=${status}&name=${name}`);
+  const res = await satellite.get(
+    `/activation/?status=${status ?? ""}&name=${name ?? ""}`,
+  );
 
   return res.data;
 };
 
 export const putUpdatePaymentStatus = async (
   id: string,
+  paymentStatus: boolean,
+  classId?: string,
 ): Promise<IBaseResponse> => {
-  const res = await satellite.put(`/activation/${id}`);
+  const res = await satellite.put(`/activation/${id}`, {
+    status: paymentStatus,
+    ...(classId ? { classId } : {}),
+  });
+
+  return res.data;
+};
+
+export const putUpdateStudentClass = async (
+  id: string,
+  classId: string,
+): Promise<IBaseResponse> => {
+  const res = await satellite.put(`/activation/${id}/class`, { classId });
 
   return res.data;
 };

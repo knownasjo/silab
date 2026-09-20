@@ -4,18 +4,26 @@ import {
   IGetAllAnnouncementsResponseBody,
 } from "../interfaces/announcement/announcement.interface";
 import {
+  deleteAnnouncement,
   getAllAnnouncements,
   getAnnouncementById,
   postAnnouncement,
+  putAnnouncement,
 } from "../services/announcement/api";
 
 type AnnouncementState = GlobalState & {
   announcementsData: IGetAllAnnouncementsResponseBody[];
   announcementData: IGetAllAnnouncementsResponseBody | null;
+  message: string | null;
 };
 
 type AnnouncementActions = {
-  addAnnouncement: (body: IAddAnnouncementRequestBody) => Promise<void>;
+  addAnnouncement: (body: IAddAnnouncementRequestBody) => Promise<boolean>;
+  updateAnnouncement: (
+    id: string,
+    body: IAddAnnouncementRequestBody,
+  ) => Promise<boolean>;
+  removeAnnouncement: (id: string) => Promise<boolean>;
   getAllAnnouncements: () => Promise<void>;
   getAnnouncementById: (id: string) => Promise<void>;
 };
@@ -25,6 +33,7 @@ const initialState = {
   error: null,
   announcementsData: [],
   announcementData: null,
+  message: null,
 };
 
 const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
@@ -32,16 +41,65 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
     ...initialState,
 
     addAnnouncement: async (body) => {
-      set({ isLoading: true, error: null });
+      set({ isLoading: true, error: null, message: null });
 
       try {
         const res = await postAnnouncement(body);
 
-        if (!res.status) {
-          set({ error: res.message });
+        if (res.status) {
+          set({ message: res.message });
+          return true;
         }
-      } catch {
-        console.log(get().error);
+
+        set({ error: res.message });
+        return false;
+      } catch (error: any) {
+        set({ error: error?.message ?? "Terjadi kesalahan" });
+        return false;
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
+    updateAnnouncement: async (id, body) => {
+      set({ isLoading: true, error: null, message: null });
+
+      try {
+        const res = await putAnnouncement(id, body);
+
+        if (res.status) {
+          set({ message: res.message });
+          await get().getAllAnnouncements();
+          return true;
+        }
+
+        set({ error: res.message });
+        return false;
+      } catch (error: any) {
+        set({ error: error?.message ?? "Terjadi kesalahan" });
+        return false;
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
+    removeAnnouncement: async (id) => {
+      set({ isLoading: true, error: null, message: null });
+
+      try {
+        const res = await deleteAnnouncement(id);
+
+        if (res.status) {
+          set({ message: res.message });
+          await get().getAllAnnouncements();
+          return true;
+        }
+
+        set({ error: res.message });
+        return false;
+      } catch (error: any) {
+        set({ error: error?.message ?? "Terjadi kesalahan" });
+        return false;
       } finally {
         set({ isLoading: false });
       }
@@ -58,8 +116,8 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
         } else {
           set({ error: res.message });
         }
-      } catch {
-        console.log(get().error);
+      } catch (error: any) {
+        set({ error: error?.message ?? "Terjadi kesalahan" });
       } finally {
         set({ isLoading: false });
       }
@@ -76,8 +134,8 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
         } else {
           set({ error: res.message });
         }
-      } catch {
-        console.log(get().error);
+      } catch (error: any) {
+        set({ error: error?.message ?? "Terjadi kesalahan" });
       } finally {
         set({ isLoading: false });
       }

@@ -11,7 +11,7 @@ type AuthState = GlobalState & {
 };
 
 type AuthActions = {
-  login: (body: ILoginRequestBody) => Promise<void>;
+  login: (body: ILoginRequestBody) => Promise<boolean>;
   me: () => Promise<void>;
   logout: () => Promise<void>;
   reset: () => void;
@@ -34,11 +34,14 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
 
       if (res.status && res.data) {
         await setToken(res.data.accessToken);
-      } else {
-        set({ error: res.message });
+        return true;
       }
-    } catch {
-      console.log(get().error);
+
+      set({ error: res.message });
+      return false;
+    } catch (error: any) {
+      set({ error: error?.message ?? "Terjadi kesalahan" });
+      return false;
     } finally {
       set({ isLoading: false });
     }
@@ -46,6 +49,7 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
 
   logout: async () => {
     await deleteToken();
+    set({ ...initialAuthState });
   },
 
   me: async () => {
@@ -59,8 +63,8 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
       } else {
         set({ error: res.message });
       }
-    } catch {
-      console.log(get().error);
+    } catch (error: any) {
+      set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }

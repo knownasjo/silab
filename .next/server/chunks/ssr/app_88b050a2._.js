@@ -292,24 +292,34 @@ const initialState = {
     isLoading: false,
     error: null,
     announcementsData: [],
-    announcementData: null
+    announcementData: null,
+    message: null
 };
-const useAnnouncementStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$react$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["create"])((set, get)=>({
+const useAnnouncementStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$react$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["create"])((set)=>({
         ...initialState,
         addAnnouncement: async (body)=>{
             set({
                 isLoading: true,
-                error: null
+                error: null,
+                message: null
             });
             try {
                 const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$announcement$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["postAnnouncement"])(body);
-                if (!res.status) {
+                if (res.status) {
                     set({
-                        error: res.message
+                        message: res.message
                     });
+                    return true;
                 }
-            } catch  {
-                console.log(get().error);
+                set({
+                    error: res.message
+                });
+                return false;
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
+                return false;
             } finally{
                 set({
                     isLoading: false
@@ -332,8 +342,10 @@ const useAnnouncementStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f
                         error: res.message
                     });
                 }
-            } catch  {
-                console.log(get().error);
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
             } finally{
                 set({
                     isLoading: false
@@ -356,8 +368,10 @@ const useAnnouncementStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f
                         error: res.message
                     });
                 }
-            } catch  {
-                console.log(get().error);
+            } catch (error) {
+                set({
+                    error: error?.message ?? "Terjadi kesalahan"
+                });
             } finally{
                 set({
                     isLoading: false

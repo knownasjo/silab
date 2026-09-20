@@ -28,3 +28,20 @@ export const getAnnouncementById = async (
 
   return res.data;
 };
+
+export const putAnnouncement = async (
+  id: string,
+  body: IAddAnnouncementRequestBody,
+): Promise<IBaseResponse> => {
+  const res = await satellite.put(`/announcement/${id}`, body);
+
+  return res.data;
+};
+
+export const deleteAnnouncement = async (
+  id: string,
+): Promise<IBaseResponse> => {
+  const res = await satellite.delete(`/announcement/${id}`);
+
+  return res.data;
+};

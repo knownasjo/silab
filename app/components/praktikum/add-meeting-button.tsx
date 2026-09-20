@@ -19,17 +19,47 @@ export default function AddMeetingButton({ classId }: AddMeetingButtonProps) {
   const [meetingName, setMeetingName] = useState<string>("");
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] =
     useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [dialogError, setDialogError] = useState<string>("");
 
-  const { addMeeting, message, isLoading } = useMeetingStore();
+  const { addMeeting, isLoading } = useMeetingStore();
 
-  const handleMeetingNameChange = (value: string) => {
-    setMeetingName(value);
+  const openDialog = () => {
+    setMeetingName("");
+    setDialogError("");
+    setIsAddMeetingOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!classId) {
+      setDialogError("Kelas tidak ditemukan!");
+      return;
+    }
+
+    if (meetingName.trim() === "") {
+      setDialogError("Judul pertemuan wajib diisi!");
+      return;
+    }
+
+    await addMeeting({ classId, meetingName: meetingName.trim() });
+
+    const { error, message } = useMeetingStore.getState();
+
+    if (error) {
+      setDialogError(error);
+      return;
+    }
+
+    setIsAddMeetingOpen(false);
+    setMeetingName("");
+    setSuccessMessage(message ?? "Pertemuan berhasil ditambahkan");
+    setIsSuccessDialogOpen(true);
   };
 
   return (
     <>
       <button
-        onClick={() => setIsAddMeetingOpen(true)}
+        onClick={openDialog}
         className="h-fit content-center rounded-full bg-[#D2E3F1] p-3 text-sm font-semibold text-[#3272CA]"
       >
         Tambah Pertemuan
@@ -57,15 +87,22 @@ export default function AddMeetingButton({ classId }: AddMeetingButtonProps) {
                   required
                   className="h-[46px] w-full rounded-2xl bg-[#F5F5F5] px-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]"
                   placeholder="Judul pertemuan"
-                  onChange={(e) => handleMeetingNameChange(e.target.value)}
+                  onChange={(e) => {
+                    setMeetingName(e.target.value);
+                    setDialogError("");
+                  }}
                   value={meetingName}
                 />
+                {dialogError && (
+                  <p className="text-sm font-semibold text-[#F1416C]">
+                    {dialogError}
+                  </p>
+                )}
               </fieldset>
               <div className="flex h-full flex-col justify-end">
                 <button
-                  onClick={() =>
-                    addMeeting({ classId: classId!, meetingName: meetingName })
-                  }
+                  onClick={handleSave}
+                  disabled={isLoading}
                   className="h-fit w-1/3 self-end rounded-full bg-[#D2E3F1] py-3 font-bold text-[#3272CA] disabled:bg-gray-300 disabled:text-white"
                 >
                   {isLoading ? (
@@ -82,7 +119,7 @@ export default function AddMeetingButton({ classId }: AddMeetingButtonProps) {
       <SuccessDialog
         dialogOpen={isSuccessDialogOpen}
         onClose={() => setIsSuccessDialogOpen(false)}
-        title={message!}
+        title={successMessage}
       />
     </>
   );
