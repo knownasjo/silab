@@ -1,6 +1,6 @@
 "use server";
 
-import { getToken, getToken } from "@/app/utils/cookie";
+import { getToken } from "@/app/utils/cookie";
 
 export async function getTotalMatkul() {
   try {

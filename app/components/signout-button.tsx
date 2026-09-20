@@ -1,6 +1,5 @@
 "use client";
 
-import { signOut } from "@/app/utils/cookie";
 import {
   Description,
   Dialog,

@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///Users/jordanbramada/Documents/GitHub/silab/app/dashboard/praktikum/%5BclassId%5D/loading.tsx"],"sourcesContent":["export default function Loading() {\n    return <p>Loading...</p>;\n}"],"names":[],"mappings":";;;;;AAAe,SAAS;IACpB,qBAAO,8OAAC;kBAAE;;;;;;AACd","debugId":null}}]
+}
