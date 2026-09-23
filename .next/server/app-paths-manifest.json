@@ -4,6 +4,7 @@
   "/dashboard/master-data/add-subject/page": "app/dashboard/master-data/add-subject/page.js",
   "/dashboard/master-data/pembayaran/page": "app/dashboard/master-data/pembayaran/page.js",
   "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/pengumuman/[id]/page": "app/dashboard/pengumuman/[id]/page.js",
   "/dashboard/pengumuman/add-pengumuman/page": "app/dashboard/pengumuman/add-pengumuman/page.js",
   "/dashboard/pengumuman/list-pengumuman/page": "app/dashboard/pengumuman/list-pengumuman/page.js",
   "/dashboard/praktikum/[classId]/page": "app/dashboard/praktikum/[classId]/page.js",

@@ -11,6 +11,7 @@ import {
   putMeetingStatus,
   putStudentAttendance,
 } from "../services/meeting/api";
+import { coalesce } from "../utils/coalesce";
 
 type MeetingQrToken = {
   meetingId: string;
@@ -61,8 +62,6 @@ const initialState = {
   qrError: null,
 };
 
-let pendingRefresh: { classId: string; queued: boolean } | null = null;
-
 const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
   ...initialState,
 
@@ -84,34 +83,13 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
     }
   },
 
-  refreshMeetings: async (classId) => {
-    if (pendingRefresh?.classId === classId) {
-      pendingRefresh.queued = true;
-      return;
+  refreshMeetings: coalesce(async (classId: string) => {
+    const res = await getMeetings(classId);
+
+    if (get().meetingsClassId === classId && res.status && res.data) {
+      set({ meetingsData: res.data });
     }
-
-    const refresh = { classId, queued: false };
-    pendingRefresh = refresh;
-
-    try {
-      do {
-        refresh.queued = false;
-
-        const res = await getMeetings(classId).catch(() => null);
-
-        if (
-          pendingRefresh === refresh &&
-          get().meetingsClassId === classId &&
-          res?.status &&
-          res.data
-        ) {
-          set({ meetingsData: res.data });
-        }
-      } while (refresh.queued && pendingRefresh === refresh);
-    } finally {
-      if (pendingRefresh === refresh) pendingRefresh = null;
-    }
-  },
+  }),
 
   getQrToken: async (meetingId) => {
     try {

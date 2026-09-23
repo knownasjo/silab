@@ -10,6 +10,7 @@ import {
   postAnnouncement,
   putAnnouncement,
 } from "../services/announcement/api";
+import { coalesce } from "../utils/coalesce";
 
 type AnnouncementState = GlobalState & {
   announcementsData: IGetAllAnnouncementsResponseBody[];
@@ -26,6 +27,8 @@ type AnnouncementActions = {
   removeAnnouncement: (id: string) => Promise<boolean>;
   getAllAnnouncements: () => Promise<void>;
   getAnnouncementById: (id: string) => Promise<void>;
+  refreshAllAnnouncements: () => Promise<void>;
+  refreshAnnouncementById: (id: string) => Promise<void>;
 };
 
 const initialState = {
@@ -122,6 +125,20 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
         set({ isLoading: false });
       }
     },
+
+    refreshAllAnnouncements: coalesce(async () => {
+      const res = await getAllAnnouncements();
+
+      if (res.status && res.data) set({ announcementsData: res.data });
+    }),
+
+    refreshAnnouncementById: coalesce(async (id: string) => {
+      const res = await getAnnouncementById(id);
+
+      if (get().announcementData?.id === id && res.status && res.data) {
+        set({ announcementData: res.data });
+      }
+    }),
 
     getAnnouncementById: async (id) => {
       set({ isLoading: true, error: null });

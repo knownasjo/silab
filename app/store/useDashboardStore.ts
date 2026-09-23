@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { getActivations, getAllSubjects } from "../services/subject/api";
 import { getAllClass } from "../services/class/api";
+import { coalesce } from "../utils/coalesce";
 
 type DashboardState = GlobalState & {
   totalSubject: number | null;
@@ -12,6 +13,7 @@ type DashboardState = GlobalState & {
 
 type DashboardActions = {
   getDashboardData: () => Promise<void>;
+  refreshDashboardData: () => Promise<void>;
 };
 
 const initialState = {
@@ -24,6 +26,24 @@ const initialState = {
   totalUnpaidStudent: null,
 };
 
+const loadDashboardData = async () => {
+  const [subjects, classes, allActivations, paid, unpaid] = await Promise.all([
+    getAllSubjects(),
+    getAllClass(),
+    getActivations(),
+    getActivations("true"),
+    getActivations("false"),
+  ]);
+
+  return {
+    totalSubject: subjects.data?.length ?? 0,
+    totalClass: classes.data?.length ?? 0,
+    totalActivation: allActivations.data?.length ?? 0,
+    totalPaidStudent: paid.data?.length ?? 0,
+    totalUnpaidStudent: unpaid.data?.length ?? 0,
+  };
+};
+
 const useDashboardStore = create<DashboardState & DashboardActions>((set) => ({
   ...initialState,
 
@@ -31,28 +51,15 @@ const useDashboardStore = create<DashboardState & DashboardActions>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const [subjects, classes, allActivations, paid, unpaid] =
-        await Promise.all([
-          getAllSubjects(),
-          getAllClass(),
-          getActivations(),
-          getActivations("true"),
-          getActivations("false"),
-        ]);
-
-      set({
-        totalSubject: subjects.data?.length ?? 0,
-        totalClass: classes.data?.length ?? 0,
-        totalActivation: allActivations.data?.length ?? 0,
-        totalPaidStudent: paid.data?.length ?? 0,
-        totalUnpaidStudent: unpaid.data?.length ?? 0,
-      });
+      set(await loadDashboardData());
     } catch (error: any) {
       set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }
   },
+
+  refreshDashboardData: coalesce(async () => set(await loadDashboardData())),
 }));
 
 export default useDashboardStore;

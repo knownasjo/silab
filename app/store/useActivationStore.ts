@@ -5,6 +5,7 @@ import {
   putUpdatePaymentStatus,
   putUpdateStudentClass,
 } from "../services/activation/api";
+import { coalesce } from "../utils/coalesce";
 
 type ActivationState = GlobalState & {
   activationData: IGetActivationResponseBody[];
@@ -15,6 +16,7 @@ type ActivationState = GlobalState & {
 
 type ActivationActions = {
   getAllActivations: () => Promise<void>;
+  refreshActivations: () => Promise<void>;
   updatePaymentStatus: (
     id: string,
     paymentStatus: boolean,
@@ -68,6 +70,21 @@ const useActivationStore = create<ActivationState & ActivationActions>(
         set({ isLoading: false });
       }
     },
+
+    refreshActivations: coalesce(async () => {
+      const { status, name } = get();
+      const res = await getAllActivation(status, name);
+      const current = get();
+
+      if (
+        current.status === status &&
+        current.name === name &&
+        res.status &&
+        res.data
+      ) {
+        set({ activationData: res.data });
+      }
+    }),
 
     updatePaymentStatus: async (id, paymentStatus, classId) => {
       set({ isLoading: true, error: null, message: null });

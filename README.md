@@ -161,14 +161,25 @@ catch (error: any) {
 - Login tidak lagi habis setelah 15 menit (lihat Autentikasi). Sebelumnya QR
   di dialog presensi hilang dan diganti pesan error begitu token asisten
   kedaluwarsa
-- Detail kelas dan rekap presensi diperbarui real-time lewat
-  `GET /class/:id/events` (`app/services/class/events.ts`): presensi yang masuk
-  dari HP, perubahan dari laboran/asisten lain, dan buka/tutup sesi langsung
-  tampil tanpa refresh. Data dimuat ulang diam-diam lewat
-  `refreshMeetings()` di `useMeetingStore`, tanpa `isLoading`, sehingga
-  tombol tidak berkedip; event yang datang beruntun digabung menjadi satu
-  permintaan. Stream memakai `fetch` (bukan `EventSource`) agar token tetap
-  dikirim di header, lalu tersambung ulang sendiri bila putus
+- Tampilan diperbarui real-time lewat `GET /events`
+  (`app/services/realtime/events.ts`, dipakai halaman lewat hook
+  `useRealtimeEvents`). Yang ikut berubah tanpa refresh:
+
+  | Halaman | Berubah saat |
+  |---|---|
+  | Dashboard | mahasiswa mendaftar, status bayar/kelas berubah, kelas atau mata kuliah baru |
+  | Praktikum | kelas atau mata kuliah baru, peserta kelas berubah |
+  | Detail kelas & rekap presensi | presensi masuk dari HP, buka/tutup sesi, kuota terisi, asisten |
+  | Pembayaran | mahasiswa mendaftar dari HP, status bayar/kelas diubah laboran lain |
+  | Pengumuman (daftar & detail) | pengumuman dibuat, diubah, dihapus |
+
+  Semua halaman berbagi satu koneksi; koneksi ditutup 5 detik setelah halaman
+  terakhir yang memakainya ditinggalkan. Data dimuat ulang diam-diam lewat aksi
+  `refresh…` di store (tanpa `isLoading`, jadi tombol dan tabel tidak
+  berkedip). Aksi itu dibungkus `coalesce` (`app/utils/coalesce.ts`): event
+  yang datang beruntun digabung dan permintaan berjalan berurutan, sehingga
+  respons lama tidak menimpa yang baru. Stream memakai `fetch` (bukan
+  `EventSource`) agar token tetap dikirim di header
 - Tombol Modul "Click to Open" di detail kelas membuka halaman Segera Hadir;
   sebelumnya tombol itu tidak melakukan apa-apa karena backend belum
   menyimpan modul

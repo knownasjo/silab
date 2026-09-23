@@ -24,6 +24,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash";
 import { formatDay } from "@/app/utils/day";
+import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 
 export default function Pembayaran() {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -41,6 +42,7 @@ export default function Pembayaran() {
   const {
     activationData,
     getAllActivations,
+    refreshActivations,
     updatePaymentStatus,
     updateStudentClass,
     isLoading,
@@ -52,6 +54,10 @@ export default function Pembayaran() {
   useEffect(() => {
     getAllActivations();
   }, [getAllActivations]);
+
+  useRealtimeEvents(({ type }) => {
+    if (["ready", "activation", "class"].includes(type)) refreshActivations();
+  });
 
   const debouncedSetQuery = useMemo(() => {
     return debounce((val: string) => {

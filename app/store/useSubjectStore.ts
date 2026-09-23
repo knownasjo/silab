@@ -5,6 +5,7 @@ import {
 } from "../interfaces/subject/subject.interface";
 import { create } from "zustand";
 import { addSubject, getAllSubjects } from "../services/subject/api";
+import { coalesce } from "../utils/coalesce";
 
 type SubjectState = GlobalState & {
   subjectsData: IGetSubjectResponseBody[];
@@ -12,6 +13,7 @@ type SubjectState = GlobalState & {
 
 type SubjectActions = {
   getAllSubjects: () => Promise<void>;
+  refreshAllSubjects: () => Promise<void>;
   addSubject: (body: IAddSubjectRequestBody) => Promise<void>;
 };
 
@@ -41,6 +43,12 @@ const useSubjectStore = create<SubjectState & SubjectActions>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
+  refreshAllSubjects: coalesce(async () => {
+    const res = await getAllSubjects();
+
+    if (res.data && res.status) set({ subjectsData: res.data });
+  }),
 
   addSubject: async (body) => {
     set({ isLoading: true, error: null });

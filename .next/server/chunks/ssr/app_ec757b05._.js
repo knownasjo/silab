@@ -171,6 +171,20 @@ const useAnnouncementStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f
                 });
             }
         },
+        refreshAllAnnouncements: coalesce(async ()=>{
+            const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$announcement$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getAllAnnouncements"])();
+            if (res.status && res.data) set({
+                announcementsData: res.data
+            });
+        }),
+        refreshAnnouncementById: coalesce(async (id)=>{
+            const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$announcement$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getAnnouncementById"])(id);
+            if (get().announcementData?.id === id && res.status && res.data) {
+                set({
+                    announcementData: res.data
+                });
+            }
+        }),
         getAnnouncementById: async (id)=>{
             set({
                 isLoading: true,

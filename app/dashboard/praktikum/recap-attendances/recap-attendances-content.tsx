@@ -7,7 +7,7 @@ import useMeetingStore from "@/app/store/useMeetingStore";
 import { statusStyle } from "@/app/utils/attendance";
 import { buildRecap, statusCode, statusLegend } from "./recap";
 import { downloadRecapPdf } from "./recap-pdf";
-import { watchClassEvents } from "@/app/services/class/events";
+import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 
 interface RecapAttendancesContentProps {
   classId: string;
@@ -18,7 +18,7 @@ export default function RecapAttendancesContent({
   classId,
   meetingId,
 }: RecapAttendancesContentProps) {
-  const { getClassById, classData } = useClassStore();
+  const { getClassById, refreshClassById, classData } = useClassStore();
   const { getMeetings, refreshMeetings, meetingsData, error } =
     useMeetingStore();
 
@@ -32,10 +32,16 @@ export default function RecapAttendancesContent({
     );
   }, [classId, getClassById, getMeetings]);
 
-  useEffect(
-    () => watchClassEvents(classId, () => refreshMeetings(classId)),
-    [classId, refreshMeetings],
-  );
+  useRealtimeEvents(({ type, data }) => {
+    const isReady = type === "ready";
+    if (!isReady && data.class_id !== classId) return;
+
+    if (isReady || ["meeting", "attendance", "class"].includes(type)) {
+      refreshMeetings(classId);
+    }
+
+    if (isReady || type === "class") refreshClassById(classId);
+  });
 
   const meetings = useMemo(
     () =>

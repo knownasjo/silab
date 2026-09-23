@@ -7,6 +7,7 @@ import {
   getClassCollaborators,
   postCollaborators,
 } from "../services/collaborator/api";
+import { coalesce } from "../utils/coalesce";
 
 type CollaboratorState = GlobalState & {
   collaboratorsData: IGetCollaboratorsResponseBody[];
@@ -14,6 +15,7 @@ type CollaboratorState = GlobalState & {
 
 type CollaboratorActions = {
   getClassCollaborators: (id: string) => Promise<void>;
+  refreshClassCollaborators: (id: string) => Promise<void>;
   addClassCollaborators: (body: IAddCollaboratorRequestBody) => Promise<void>;
 };
 
@@ -42,6 +44,12 @@ const useCollaboratorStore = create<CollaboratorState & CollaboratorActions>(
         set({ isLoading: false });
       }
     },
+
+    refreshClassCollaborators: coalesce(async (id: string) => {
+      const res = await getClassCollaborators(id);
+
+      if (res.status && res.data) set({ collaboratorsData: res.data });
+    }),
 
     getClassCollaborators: async (id) => {
       set({ isLoading: true, error: null });

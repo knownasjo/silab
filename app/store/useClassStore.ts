@@ -5,6 +5,7 @@ import {
   IGetClassResponseBody,
 } from "../interfaces/class/class.interface";
 import { getAllClass, getClassById, postClass } from "../services/class/api";
+import { coalesce } from "../utils/coalesce";
 
 type ClassState = GlobalState & {
   classesData: IGetClassResponseBody[];
@@ -14,6 +15,8 @@ type ClassState = GlobalState & {
 type ClassActions = {
   getAllClass: () => Promise<void>;
   getClassById: (id: string) => Promise<void>;
+  refreshAllClass: () => Promise<void>;
+  refreshClassById: (id: string) => Promise<void>;
   addClass: (body: IAddClassRequestBody) => Promise<void>;
 };
 
@@ -62,6 +65,20 @@ const useClassStore = create<ClassState & ClassActions>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
+  refreshAllClass: coalesce(async () => {
+    const res = await getAllClass();
+
+    if (res.status && res.data) set({ classesData: res.data });
+  }),
+
+  refreshClassById: coalesce(async (id: string) => {
+    const res = await getClassById(id);
+
+    if (get().classData?.id === id && res.status && res.data) {
+      set({ classData: res.data });
+    }
+  }),
 
   addClass: async (body) => {
     set({ isLoading: true, error: null });

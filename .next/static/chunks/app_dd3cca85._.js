@@ -636,6 +636,12 @@ const useSubjectStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                 });
             }
         },
+        refreshAllSubjects: coalesce(async ()=>{
+            const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$subject$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getAllSubjects"])();
+            if (res.data && res.status) set({
+                subjectsData: res.data
+            });
+        }),
         addSubject: async (body)=>{
             set({
                 isLoading: true,

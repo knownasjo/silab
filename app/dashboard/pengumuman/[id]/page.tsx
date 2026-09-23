@@ -1,17 +1,31 @@
 "use client";
 
 import useAnnouncementStore from "@/app/store/useAnnouncementStore";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 
 export default function AnnouncementDetails() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
 
-  const { getAnnouncementById, announcementData } = useAnnouncementStore();
+  const { getAnnouncementById, refreshAnnouncementById, announcementData } =
+    useAnnouncementStore();
 
   useEffect(() => {
     getAnnouncementById(params.id);
   }, [getAnnouncementById, params.id]);
+
+  useRealtimeEvents(({ type, data }) => {
+    if (type === "ready") refreshAnnouncementById(params.id);
+    if (type !== "announcement" || data.announcement_id !== params.id) return;
+
+    if (data.action === "deleted") {
+      router.replace("/dashboard/pengumuman/list-pengumuman");
+    } else {
+      refreshAnnouncementById(params.id);
+    }
+  });
 
   return (
     <div className="w-full overflow-auto overscroll-contain">

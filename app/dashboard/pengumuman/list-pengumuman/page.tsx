@@ -4,14 +4,23 @@ import AnnouncementCard from "@/app/components/pengumuman/announcement-card";
 import { IGetAllAnnouncementsResponseBody } from "@/app/interfaces/announcement/announcement.interface";
 import useAnnouncementStore from "@/app/store/useAnnouncementStore";
 import { useEffect } from "react";
+import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 
 const ListPengumuman = () => {
-  const { announcementsData, getAllAnnouncements, isLoading } =
-    useAnnouncementStore();
+  const {
+    announcementsData,
+    getAllAnnouncements,
+    refreshAllAnnouncements,
+    isLoading,
+  } = useAnnouncementStore();
 
   useEffect(() => {
     getAllAnnouncements();
   }, [getAllAnnouncements]);
+
+  useRealtimeEvents(({ type }) => {
+    if (type === "ready" || type === "announcement") refreshAllAnnouncements();
+  });
 
   return (
     <div className="flex h-full w-full flex-col overflow-auto overscroll-contain">
