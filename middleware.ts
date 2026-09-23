@@ -3,18 +3,23 @@ import { NextRequest, NextResponse } from "next/server";
 export default async function middleware(req: NextRequest) {
   try {
     const { pathname } = req.nextUrl;
-    const token = req.cookies.get("accessToken")?.value;
+    // Cookie accessToken hilang setiap 15 menit, tetapi sesi masih berlaku
+    // selama refresh token ada; token baru diminta pada permintaan berikutnya.
+    const hasSession = Boolean(
+      req.cookies.get("accessToken")?.value ||
+        req.cookies.get("refreshToken")?.value,
+    );
 
     const isProtectedRoute = pathname.startsWith("/dashboard");
     const isAuthPage = pathname === "/auth";
 
-    if (isProtectedRoute && !token) {
+    if (isProtectedRoute && !hasSession) {
       if (!isAuthPage) {
         return NextResponse.redirect(new URL("/auth", req.url));
       }
     }
 
-    if (isAuthPage && token) {
+    if (isAuthPage && hasSession) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
   } catch (error) {

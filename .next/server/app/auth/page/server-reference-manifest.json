@@ -33,6 +33,17 @@
         "app/auth/page": "action-browser"
       }
     },
+    "00e6fdd9efd39a070309a1e2c81e074e08e73b2e25": {
+      "workers": {
+        "app/auth/page": {
+          "moduleId": "[project]/.next-internal/server/app/auth/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/auth/page": "action-browser"
+      }
+    },
     "400766dd8b9e4dbb6ff82ea71693332a2e871cba65": {
       "workers": {
         "app/auth/page": {
@@ -41,7 +52,7 @@
         }
       },
       "layer": {
-        "app/auth/page": "rsc"
+        "app/auth/page": "action-browser"
       }
     },
     "40d35a5aec6274b36fd9f7304338946a32f424eb00": {

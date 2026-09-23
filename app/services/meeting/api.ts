@@ -1,6 +1,7 @@
 import {
   IAddClassMeetingRequestBody,
   IGetAllClassMeetingResponseBody,
+  IGetMeetingQrTokenResponseBody,
   IUpdateAttendanceRequestBody,
   IUpdateMeetingStatusRequestBody,
 } from "@/app/interfaces/meeting/meeting.interface";
@@ -19,6 +20,14 @@ export const getMeetings = async (
   classId: string,
 ): Promise<IBaseResponse<IGetAllClassMeetingResponseBody[]>> => {
   const res = await satellite.get(`/meeting/${classId}`);
+
+  return res.data;
+};
+
+export const getMeetingQrToken = async (
+  meetingId: string,
+): Promise<IBaseResponse<IGetMeetingQrTokenResponseBody>> => {
+  const res = await satellite.get(`/meeting/${meetingId}/qr`);
 
   return res.data;
 };

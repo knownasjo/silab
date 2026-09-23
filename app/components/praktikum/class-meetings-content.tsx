@@ -8,31 +8,13 @@ import ShowQrCodeButton from "./show-qr-code-button";
 import StudentAttendanceEditButton from "../student-attendance-edit-button";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  IGetAllClassMeetingResponseBody,
-  IMeetingParticipants,
-} from "@/app/interfaces/meeting/meeting.interface";
+import { IGetAllClassMeetingResponseBody } from "@/app/interfaces/meeting/meeting.interface";
+import { getAttendanceStatus, statusStyle } from "@/app/utils/attendance";
 
 interface ClassMeetingsContentProps {
   classId?: string;
   meetingData: IGetAllClassMeetingResponseBody[];
 }
-
-type AttendanceStatus = "Hadir" | "Tidak Hadir" | "Belum Presensi";
-
-const getAttendanceStatus = (
-  student: IMeetingParticipants,
-): AttendanceStatus => {
-  if (student.submitted_at === null) return "Belum Presensi";
-
-  return student.is_attended ? "Hadir" : "Tidak Hadir";
-};
-
-const statusStyle: Record<AttendanceStatus, string> = {
-  Hadir: "bg-[#E8FFF3] text-[#50CD89]",
-  "Tidak Hadir": "bg-[#FFF5F8] text-[#F1416C]",
-  "Belum Presensi": "bg-[#F1F1F2] text-[#181C32]",
-};
 
 export default function ClassMeetingsContent({
   classId,
@@ -86,8 +68,8 @@ export default function ClassMeetingsContent({
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center space-x-4">
               <ShowQrCodeButton
-                meetings={meetingData}
-                selectedMeeting={selectedMeeting}
+                meetingId={selectedMeeting}
+                meetingName={currentMeeting?.meeting_name}
               />
               <Link
                 href={{

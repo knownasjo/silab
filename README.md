@@ -57,9 +57,10 @@ Membereskan sisa ini adalah utang teknis terbesar yang tersisa.
 ## Autentikasi
 
 1. `/auth` → `useAuthStore.login()` → `POST /auth/login`
-2. `setToken()` (server action) menyimpan cookie `accessToken`, masa berlaku
-   di-decode dari payload JWT
-3. `middleware.ts` memblokir `/dashboard*` bila cookie tidak ada
+2. `setToken()` dan `setRefreshToken()` (server action) menyimpan cookie
+   `accessToken` dan `refreshToken`; masa berlakunya di-decode dari payload
+   JWT. Cookie `refreshToken` bersifat `httpOnly` karena hanya dibaca server
+3. `middleware.ts` memblokir `/dashboard*` bila kedua cookie tidak ada
 4. Interceptor axios membaca cookie **langsung dari `document.cookie`**, dengan
    `getToken()` sebagai cadangan
 
@@ -70,7 +71,17 @@ tampak kosong sampai di-refresh.
 Setelah login, `router.replace("/dashboard")` **harus diikuti**
 `router.refresh()` untuk membuang Router Cache Next.js.
 
-Token hanya berlaku 15 menit.
+Access token berlaku 15 menit dan diperbarui sendiri (`app/utils/cookie.ts`):
+
+- Cookie `accessToken` hilang saat tokennya kedaluwarsa. `getToken()` lalu
+  memanggil `refreshAccessToken()`, yang menukar refresh token di
+  `POST /auth/refresh` dan menyimpan cookie baru. Ini juga berlaku untuk
+  server action lama di `app/actions/`, karena semuanya memakai `getToken()`.
+- Bila jam browser tertinggal dari jam server, backend bisa membalas
+  `jwt expired` walau cookie masih ada. Interceptor lalu memperbarui token
+  dan mengulang permintaan itu sekali.
+- Setelah 1 hari backend menolak refresh token; semua cookie sesi dihapus
+  dan `SignOutButton` mengalihkan ke `/auth`.
 
 ## Halaman
 
@@ -81,8 +92,9 @@ Token hanya berlaku 15 menit.
 | `/dashboard/praktikum` | LABORAN: accordion mata kuliah. MAHASISWA: kartu kelas |
 | `/dashboard/praktikum/[classId]` | Detail kelas + panel pertemuan & presensi |
 | `.../tambah-praktikum` | Buat kelas baru |
-| `.../recap-attendances` | Rekap PDF (**bermasalah**, lihat di bawah) |
+| `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah |
+| `/dashboard/segera-hadir` | Pengganti fitur yang belum ada (`?fitur=Modul`), dituju tombol Modul "Click to Open" di detail kelas |
 | `/dashboard/master-data/pembayaran` | Konfirmasi bayar + pilih/pindah kelas |
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman |
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman |
@@ -129,12 +141,38 @@ catch (error: any) {
 - Scrollbar disembunyikan di seluruh aplikasi lewat `globals.css`
 - Daftar pertemuan langsung muncul setelah ditambah (store memanggil
   `getMeetings` ulang)
+- Halaman Rekap Presensi ditulis ulang: data dari `GET /meeting/:classId`
+  lewat store (jalur lama `/subject/classes/:classId/meetings` tidak ada di
+  backend), tidak crash bila kelas belum punya pertemuan, `meetingId`
+  dihormati, PDF baru dibuat saat tombol **Unduh PDF** diklik. PDF digambar
+  langsung dengan jsPDF (bukan screenshot html2canvas), A4 landscape, header
+  tabel diulang di tiap halaman. Logika status presensi dipindah ke
+  `app/utils/attendance.ts` dan dipakai bersama halaman detail kelas
+- Refresh atau membuka langsung halaman dashboard tidak lagi terlempar ke
+  `/dashboard`. `SignOutButton` kini hanya mengalihkan ke `/auth` setelah
+  `me()` benar-benar gagal, bukan saat `userData` masih `null` karena
+  `me()` belum selesai. Tombol **Keluar** mengalihkan ke `/auth` sendiri
+- Dialog QR presensi memakai `GET /meeting/:id/qr`: QR berganti sendiri
+  setiap 10 detik dengan hitung mundur, token tidak ditampilkan sebagai teks,
+  dan permintaan berhenti saat dialog ditutup. State QR (`qrToken`,
+  `qrError`) terpisah dari `isLoading`/`error` bersama di `useMeetingStore`,
+  supaya tombol Buka/Tutup Presensi tidak ikut berkedip. Bila sesi belum
+  dibuka, dialog menampilkan pesan dari backend
+- Login tidak lagi habis setelah 15 menit (lihat Autentikasi). Sebelumnya QR
+  di dialog presensi hilang dan diganti pesan error begitu token asisten
+  kedaluwarsa
+- Tombol Modul "Click to Open" di detail kelas membuka halaman Segera Hadir;
+  sebelumnya tombol itu tidak melakukan apa-apa karena backend belum
+  menyimpan modul
 
 ## Pekerjaan yang masih tersisa
 
-- [ ] **Halaman Rekap PDF** (`.../recap-attendances`): crash bila kelas belum
-      punya pertemuan (`data[0]["students"]` diakses langsung), dan PDF
-      terunduh otomatis saat halaman dibuka tanpa bisa dibatalkan
+- [ ] Folder `.next/` ikut ter-commit (tidak ada di `.gitignore`), jadi
+      menjalankan `npm run dev` mengubah ratusan file yang terlacak git
+- [ ] `app/components/subjects-disclosure.tsx` baris 41 gagal `tsc`
+      (`subjects` tidak ada di tipe `SubjectBySemester`), sehingga
+      `next build` akan gagal
+- [ ] Dependensi `html2canvas` tidak dipakai lagi dan bisa dihapus
 - [ ] Pindahkan enam file terakhir dari `app/actions/` ke `app/services/`,
       lalu hapus folder `actions/` dan `app/types/`
 - [ ] Halaman Praktikum: asisten melihat **semua** kelas, bukan hanya kelas
@@ -144,7 +182,9 @@ catch (error: any) {
 - [ ] `app/validations/validation.schema.ts`: `addClassSchema.name.max(1)`
       (nama kelas maksimal 1 karakter) dan pesan error field NIM berbunyi
       "Email can't be empty!"
-- [ ] Cookie diset tanpa `httpOnly`, `secure`, `sameSite`
+- [ ] Cookie `accessToken` diset tanpa `httpOnly`, `secure`, `sameSite`
+      (sengaja terbaca JavaScript, lihat Autentikasi). `refreshToken` sudah
+      `httpOnly` tetapi belum `secure` karena lab masih memakai HTTP
 - [ ] `next.config.js` masih menunjuk hostname Supabase lama bila project ref
       berubah
 

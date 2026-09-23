@@ -5,19 +5,32 @@ import {
 } from "../interfaces/meeting/meeting.interface";
 import {
   deleteStudentAttendance,
+  getMeetingQrToken,
   getMeetings,
   postMeeting,
   putMeetingStatus,
   putStudentAttendance,
 } from "../services/meeting/api";
 
+type MeetingQrToken = {
+  meetingId: string;
+  token: string;
+  periodSeconds: number;
+  /** Waktu lokal (ms) saat token ini berganti. */
+  expiresAt: number;
+};
+
 type MeetingState = GlobalState & {
   meetingsData: IGetAllClassMeetingResponseBody[];
   message: string | null;
+  qrToken: MeetingQrToken | null;
+  qrError: string | null;
 };
 
 type MeetingActions = {
   getMeetings: (classId: string) => Promise<void>;
+  getQrToken: (meetingId: string) => Promise<void>;
+  clearQrToken: () => void;
   addMeeting: (body: IAddClassMeetingRequestBody) => Promise<void>;
   updateMeetingStatus: (
     meetingId: string,
@@ -42,13 +55,15 @@ const initialState = {
   error: null,
   meetingsData: [],
   message: null,
+  qrToken: null,
+  qrError: null,
 };
 
 const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
   ...initialState,
 
   getMeetings: async (classId) => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
 
     try {
       const res = await getMeetings(classId);
@@ -63,6 +78,34 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
     } finally {
       set({ isLoading: false });
     }
+  },
+
+  // Dipanggil berulang selama dialog QR terbuka, jadi sengaja tidak memakai
+  // isLoading/error bersama agar tombol lain di halaman tidak ikut berkedip.
+  getQrToken: async (meetingId) => {
+    try {
+      const res = await getMeetingQrToken(meetingId);
+
+      if (res.status && res.data) {
+        set({
+          qrToken: {
+            meetingId,
+            token: res.data.token,
+            periodSeconds: res.data.period_seconds,
+            expiresAt: Date.now() + res.data.expires_in_ms,
+          },
+          qrError: null,
+        });
+      } else {
+        set({ qrToken: null, qrError: res.message });
+      }
+    } catch (error: any) {
+      set({ qrToken: null, qrError: error?.message ?? "Terjadi kesalahan" });
+    }
+  },
+
+  clearQrToken: () => {
+    set({ qrToken: null, qrError: null });
   },
 
   addMeeting: async (body) => {

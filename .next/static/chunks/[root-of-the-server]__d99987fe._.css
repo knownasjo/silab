@@ -515,6 +515,39 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   color: var(--fallback-bc, oklch(var(--bc) / .3));
 }
 
+.table {
+  border-radius: var(--rounded-box, 1rem);
+  text-align: left;
+  width: 100%;
+  font-size: .875rem;
+  line-height: 1.25rem;
+  position: relative;
+}
+
+.table :where(.table-pin-rows thead tr) {
+  z-index: 1;
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-b1, oklch(var(--b1) / var(--tw-bg-opacity)));
+  position: sticky;
+  top: 0;
+}
+
+.table :where(.table-pin-rows tfoot tr) {
+  z-index: 1;
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-b1, oklch(var(--b1) / var(--tw-bg-opacity)));
+  position: sticky;
+  bottom: 0;
+}
+
+.table :where(.table-pin-cols tr th) {
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-b1, oklch(var(--b1) / var(--tw-bg-opacity)));
+  position: sticky;
+  left: 0;
+  right: 0;
+}
+
 .textarea {
   border-radius: var(--rounded-btn, .5rem);
   --tw-bg-opacity: 1;
@@ -755,6 +788,40 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   }
 }
 
+.table:where([dir="rtl"], [dir="rtl"] *) {
+  text-align: right;
+}
+
+.table :where(th, td) {
+  vertical-align: middle;
+  padding: .75rem 1rem;
+}
+
+.table tr.active, .table tr.active:nth-child(2n), .table-zebra tbody tr:nth-child(2n) {
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-b2, oklch(var(--b2) / var(--tw-bg-opacity)));
+}
+
+.table :where(thead tr, tbody tr:not(:last-child), tbody tr:first-child:last-child) {
+  --tw-border-opacity: 1;
+  border-bottom-width: 1px;
+  border-bottom-color: var(--fallback-b2, oklch(var(--b2) / var(--tw-border-opacity)));
+}
+
+.table :where(thead, tfoot) {
+  white-space: nowrap;
+  color: var(--fallback-bc, oklch(var(--bc) / .6));
+  font-size: .75rem;
+  font-weight: 700;
+  line-height: 1rem;
+}
+
+.table :where(tfoot) {
+  --tw-border-opacity: 1;
+  border-top-width: 1px;
+  border-top-color: var(--fallback-b2, oklch(var(--b2) / var(--tw-border-opacity)));
+}
+
 .textarea:focus {
   box-shadow: none;
   border-color: var(--fallback-bc, oklch(var(--bc) / .2));
@@ -969,6 +1036,10 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   display: inline-flex;
 }
 
+.table {
+  display: table;
+}
+
 .hidden {
   display: none;
 }
@@ -1145,6 +1216,14 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   height: 100vh;
 }
 
+.h-1\.5 {
+  height: .375rem;
+}
+
+.h-16 {
+  height: 4rem;
+}
+
 .max-h-\[85vh\] {
   max-height: 85vh;
 }
@@ -1199,6 +1278,10 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 
 .w-5\/12 {
   width: 41.6667%;
+}
+
+.w-7 {
+  width: 1.75rem;
 }
 
 .w-\[0\.3px\] {
@@ -1323,6 +1406,18 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 
 .w-screen {
   width: 100vw;
+}
+
+.w-64 {
+  width: 16rem;
+}
+
+.w-16 {
+  width: 4rem;
+}
+
+.w-\[420px\] {
+  width: 420px;
 }
 
 .max-w-md {
@@ -1571,6 +1666,10 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   overflow: auto;
 }
 
+.overflow-hidden {
+  overflow: hidden;
+}
+
 .overflow-x-auto {
   overflow-x: auto;
 }
@@ -1627,8 +1726,8 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   border-width: 2px;
 }
 
-.border-b {
-  border-bottom-width: 1px;
+.border-t {
+  border-top-width: 1px;
 }
 
 .border-dashed {
@@ -1647,6 +1746,11 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .border-\[\#E1E3EA\] {
   --tw-border-opacity: 1;
   border-color: rgb(225 227 234 / var(--tw-border-opacity));
+}
+
+.border-\[\#F1F1F2\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(241 241 242 / var(--tw-border-opacity));
 }
 
 .border-gray-300 {
@@ -1765,6 +1869,11 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
+.bg-\[\#F4F4F9\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(244 244 249 / var(--tw-bg-opacity));
+}
+
 .bg-opacity-100 {
   --tw-bg-opacity: 1;
 }
@@ -1865,6 +1974,11 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   padding-right: 60px;
 }
 
+.py-1 {
+  padding-top: .25rem;
+  padding-bottom: .25rem;
+}
+
 .py-1\.5 {
   padding-top: .375rem;
   padding-bottom: .375rem;
@@ -1895,8 +2009,9 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   padding-bottom: 8px;
 }
 
-.pb-2 {
-  padding-bottom: .5rem;
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .pb-4 {
@@ -2041,6 +2156,10 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   line-height: 1rem;
 }
 
+.text-\[20px\] {
+  font-size: 20px;
+}
+
 .font-bold {
   font-weight: 700;
 }
@@ -2145,26 +2264,6 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   color: rgb(107 114 128 / var(--tw-text-opacity));
 }
 
-.text-gray-600 {
-  --tw-text-opacity: 1;
-  color: rgb(75 85 99 / var(--tw-text-opacity));
-}
-
-.text-gray-700 {
-  --tw-text-opacity: 1;
-  color: rgb(55 65 81 / var(--tw-text-opacity));
-}
-
-.text-green-600 {
-  --tw-text-opacity: 1;
-  color: rgb(22 163 74 / var(--tw-text-opacity));
-}
-
-.text-red-600 {
-  --tw-text-opacity: 1;
-  color: rgb(220 38 38 / var(--tw-text-opacity));
-}
-
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
@@ -2234,6 +2333,12 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   transition-timing-function: cubic-bezier(.4, 0, .2, 1);
 }
 
+.transition-\[width\] {
+  transition-property: width;
+  transition-duration: .15s;
+  transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+}
+
 .duration-200 {
   transition-duration: .2s;
 }
@@ -2248,6 +2353,10 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 
 .ease-out {
   transition-timing-function: cubic-bezier(0, 0, .2, 1);
+}
+
+.ease-linear {
+  transition-timing-function: linear;
 }
 
 :root {
@@ -2324,6 +2433,10 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 
 .focus\:outline-\[\#3272CA\]:focus {
   outline-color: #3272ca;
+}
+
+.disabled\:cursor-not-allowed:disabled {
+  cursor: not-allowed;
 }
 
 .disabled\:bg-gray-300:disabled {

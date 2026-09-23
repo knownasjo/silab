@@ -7,8 +7,13 @@ export interface IGetAllClassMeetingResponseBody {
   id: string;
   meeting_name: string;
   is_open?: boolean;
-  token?: string;
   students?: IMeetingParticipants[];
+}
+
+export interface IGetMeetingQrTokenResponseBody {
+  token: string;
+  period_seconds: number;
+  expires_in_ms: number;
 }
 
 export interface IMeetingParticipants {

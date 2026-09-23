@@ -1,5 +1,5 @@
-import { getToken } from "@/app/utils/cookie";
-import axios from "axios";
+import { getToken, refreshAccessToken } from "@/app/utils/cookie";
+import axios, { InternalAxiosRequestConfig } from "axios";
 
 const satellite = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
@@ -27,6 +27,8 @@ const readTokenFromBrowser = (): string | undefined => {
 
 satellite.interceptors.request.use(
   async (request) => {
+    // Cookie accessToken hilang sendiri saat tokennya kedaluwarsa; getToken()
+    // lalu meminta token baru dengan refresh token.
     const token = readTokenFromBrowser() ?? (await getToken());
 
     if (token) request.headers["Authorization"] = `Bearer ${token}`;
@@ -36,9 +38,38 @@ satellite.interceptors.request.use(
   async (error) => Promise.reject(error),
 );
 
+// Beberapa permintaan yang gagal bersamaan cukup memicu satu refresh.
+let pendingRefresh: Promise<string | undefined> | null = null;
+
+const refreshOnce = () =>
+  (pendingRefresh ??= refreshAccessToken().finally(() => {
+    pendingRefresh = null;
+  }));
+
 satellite.interceptors.response.use(
   async (response) => response,
   async (error) => {
+    const request = error.config as
+      | (InternalAxiosRequestConfig & { _retried?: boolean })
+      | undefined;
+
+    // Jam browser bisa tertinggal dari jam server, sehingga cookie masih
+    // terkirim padahal backend sudah menganggap tokennya kedaluwarsa.
+    // Permintaan itu diulang sekali dengan token baru.
+    if (
+      error.response?.data?.message === "jwt expired" &&
+      request &&
+      !request._retried
+    ) {
+      const token = await refreshOnce();
+
+      if (token) {
+        request._retried = true;
+        request.headers["Authorization"] = `Bearer ${token}`;
+        return satellite(request);
+      }
+    }
+
     if (error.response) {
       const errorMessage =
         error.response.data.message || "An unknown error occurred";

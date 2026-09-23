@@ -35,10 +35,11 @@ const __TURBOPACK__default__export__ = fontData;
 
 var { g: global, __dirname } = __turbopack_context__;
 {
-/* __next_internal_action_entry_do_not_use__ [{"00b403e80c7670780409b6ba296d51cbfdcc23c9b9":"getUserData","00c716041119548c04d049d6dfef4615126f61b684":"getToken","00cb91416e49994049c15005d61718a3498624f979":"deleteToken","400766dd8b9e4dbb6ff82ea71693332a2e871cba65":"setRefreshToken","40d35a5aec6274b36fd9f7304338946a32f424eb00":"setUserRole","40edbeaf989a13a4d0da396a0295b9a8a34e7956dd":"setToken"},"",""] */ __turbopack_context__.s({
+/* __next_internal_action_entry_do_not_use__ [{"00b403e80c7670780409b6ba296d51cbfdcc23c9b9":"getUserData","00c716041119548c04d049d6dfef4615126f61b684":"getToken","00cb91416e49994049c15005d61718a3498624f979":"deleteToken","00e6fdd9efd39a070309a1e2c81e074e08e73b2e25":"refreshAccessToken","400766dd8b9e4dbb6ff82ea71693332a2e871cba65":"setRefreshToken","40d35a5aec6274b36fd9f7304338946a32f424eb00":"setUserRole","40edbeaf989a13a4d0da396a0295b9a8a34e7956dd":"setToken"},"",""] */ __turbopack_context__.s({
     "deleteToken": (()=>deleteToken),
     "getToken": (()=>getToken),
     "getUserData": (()=>getUserData),
+    "refreshAccessToken": (()=>refreshAccessToken),
     "setRefreshToken": (()=>setRefreshToken),
     "setToken": (()=>setToken),
     "setUserRole": (()=>setUserRole)
@@ -50,12 +51,54 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 ;
+// Access token diperbarui sedikit sebelum kedaluwarsa, supaya permintaan yang
+// sedang berjalan tidak ditolak backend di tengah jalan.
+const REFRESH_MARGIN_MS = 30_000;
+/** Waktu kedaluwarsa JWT dalam milidetik, atau 0 bila token tidak terbaca. */ function readExpiry(token) {
+    try {
+        const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString());
+        return typeof payload.exp === "number" ? payload.exp * 1000 : 0;
+    } catch  {
+        return 0;
+    }
+}
 async function getToken() {
     const cookie = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$headers$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["cookies"])();
-    const token = cookie.get("accessToken");
-    if (token) {
-        return token.value;
+    const token = cookie.get("accessToken")?.value;
+    if (token && readExpiry(token) - Date.now() > REFRESH_MARGIN_MS) {
+        return token;
     }
+    return await refreshAccessToken() ?? token;
+}
+async function refreshAccessToken() {
+    const cookie = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$headers$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["cookies"])();
+    const refreshToken = cookie.get("refreshToken")?.value;
+    if (!refreshToken) return undefined;
+    let response;
+    try {
+        response = await fetch(`${("TURBOPACK compile-time value", "http://localhost:3000")}/auth/refresh`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                refreshToken
+            }),
+            cache: "no-store"
+        });
+    } catch  {
+        // Backend tidak terjangkau: sesi dibiarkan, dicoba lagi pada permintaan
+        // berikutnya.
+        return undefined;
+    }
+    if (response.status >= 400 && response.status < 500) {
+        await deleteToken();
+        return undefined;
+    }
+    const accessToken = (await response.json().catch(()=>null))?.data?.accessToken;
+    if (typeof accessToken !== "string") return undefined;
+    await setToken(accessToken);
+    return accessToken;
 }
 async function getUserData() {
     const cookie = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$headers$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["cookies"])();
@@ -76,24 +119,18 @@ async function getUserData() {
 async function setToken(token) {
     const cookie = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$headers$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["cookies"])();
     if (token) {
-        const base64Payload = token.split(".")[1];
-        const payload = JSON.parse(Buffer.from(base64Payload, "base64").toString());
-        const exp = payload.exp;
-        const expiresDate = new Date(exp * 1000);
         cookie.set("accessToken", token, {
-            expires: expiresDate
+            expires: new Date(readExpiry(token))
         });
     }
 }
 async function setRefreshToken(token) {
     const cookie = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$headers$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["cookies"])();
     if (token) {
-        const base64Payload = token.split(".")[1];
-        const payload = JSON.parse(Buffer.from(base64Payload, "base64").toString());
-        const exp = payload.exp;
-        const expiresDate = new Date(exp * 1000);
         cookie.set("refreshToken", token, {
-            expires: expiresDate
+            expires: new Date(readExpiry(token)),
+            httpOnly: true,
+            sameSite: "lax"
         });
     }
 }
@@ -112,6 +149,7 @@ async function deleteToken() {
 ;
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$validate$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["ensureServerEntryExports"])([
     getToken,
+    refreshAccessToken,
     getUserData,
     setToken,
     setRefreshToken,
@@ -119,6 +157,7 @@ async function deleteToken() {
     deleteToken
 ]);
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(getToken, "00c716041119548c04d049d6dfef4615126f61b684", null);
+(0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(refreshAccessToken, "00e6fdd9efd39a070309a1e2c81e074e08e73b2e25", null);
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(getUserData, "00b403e80c7670780409b6ba296d51cbfdcc23c9b9", null);
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(setToken, "40edbeaf989a13a4d0da396a0295b9a8a34e7956dd", null);
 (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$server$2d$reference$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerServerReference"])(setRefreshToken, "400766dd8b9e4dbb6ff82ea71693332a2e871cba65", null);

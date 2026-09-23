@@ -4,7 +4,7 @@ import {
   IMeResponseBody,
 } from "../interfaces/auth/auth.interface";
 import { getMe, postLogin } from "../services/auth/api";
-import { deleteToken, setToken } from "../utils/cookie";
+import { deleteToken, setRefreshToken, setToken } from "../utils/cookie";
 
 type AuthState = GlobalState & {
   userData: IMeResponseBody | null;
@@ -34,6 +34,7 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
 
       if (res.status && res.data) {
         await setToken(res.data.accessToken);
+        await setRefreshToken(res.data.refreshToken);
         return true;
       }
 

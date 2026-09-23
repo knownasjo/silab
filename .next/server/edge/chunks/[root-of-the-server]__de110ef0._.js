@@ -31,15 +31,17 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 async function middleware(req) {
     try {
         const { pathname } = req.nextUrl;
-        const token = req.cookies.get("accessToken")?.value;
+        // Cookie accessToken hilang setiap 15 menit, tetapi sesi masih berlaku
+        // selama refresh token ada; token baru diminta pada permintaan berikutnya.
+        const hasSession = Boolean(req.cookies.get("accessToken")?.value || req.cookies.get("refreshToken")?.value);
         const isProtectedRoute = pathname.startsWith("/dashboard");
         const isAuthPage = pathname === "/auth";
-        if (isProtectedRoute && !token) {
+        if (isProtectedRoute && !hasSession) {
             if (!isAuthPage) {
                 return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$spec$2d$extension$2f$response$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].redirect(new URL("/auth", req.url));
             }
         }
-        if (isAuthPage && token) {
+        if (isAuthPage && hasSession) {
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$spec$2d$extension$2f$response$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].redirect(new URL("/dashboard", req.url));
         }
     } catch (error) {

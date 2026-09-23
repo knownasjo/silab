@@ -15,9 +15,6 @@
     "[project]/app/dashboard/page": [
       "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
     ],
-    "[project]/app/dashboard/pengumuman/[id]/page": [
-      "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
-    ],
     "[project]/app/dashboard/pengumuman/add-pengumuman/page": [
       "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
     ],
@@ -36,7 +33,7 @@
     "[project]/app/dashboard/praktikum/tambah-praktikum/page": [
       "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
     ],
-    "[project]/app/page": [
+    "[project]/app/dashboard/segera-hadir/page": [
       "static/media/xn7gYHE41ni1AdIRggexSvfedN4-s.p.2b9b556b.woff2"
     ]
   },

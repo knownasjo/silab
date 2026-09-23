@@ -384,14 +384,20 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navi
 function SignOutButton() {
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRouter"])();
     let [isOpen, setIsOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
-    const { logout, userData } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useAuthStore$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"])();
+    const { logout, userData, isLoading, error } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useAuthStore$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"])();
+    // Tunggu sampai me() benar-benar gagal. Saat halaman baru dimuat, userData
+    // masih null karena me() belum selesai; mengalihkan pada saat itu membuat
+    // middleware memantulkan /auth ke /dashboard, sehingga halaman apa pun yang
+    // di-refresh selalu terlempar ke /dashboard.
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        if (!userData) {
+        if (!userData && !isLoading && error) {
             router.replace("/auth");
         }
     }, [
         router,
-        userData
+        userData,
+        isLoading,
+        error
     ]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "group/sidebaritem",
@@ -408,7 +414,7 @@ function SignOutButton() {
                         alt: "logout"
                     }, void 0, false, {
                         fileName: "[project]/app/components/signout-button.tsx",
-                        lineNumber: 34,
+                        lineNumber: 38,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -416,13 +422,13 @@ function SignOutButton() {
                         children: "Sign Out"
                     }, void 0, false, {
                         fileName: "[project]/app/components/signout-button.tsx",
-                        lineNumber: 41,
+                        lineNumber: 45,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/signout-button.tsx",
-                lineNumber: 30,
+                lineNumber: 34,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$headlessui$2f$react$2f$dist$2f$components$2f$dialog$2f$dialog$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -434,7 +440,7 @@ function SignOutButton() {
                         className: "fixed inset-0 bg-black/30"
                     }, void 0, false, {
                         fileName: "[project]/app/components/signout-button.tsx",
-                        lineNumber: 50,
+                        lineNumber: 54,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -447,14 +453,14 @@ function SignOutButton() {
                                     children: "Sign Out"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/signout-button.tsx",
-                                    lineNumber: 53,
+                                    lineNumber: 57,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                     children: "Apakah anda ingin keluar?"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/signout-button.tsx",
-                                    lineNumber: 56,
+                                    lineNumber: 60,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -466,7 +472,7 @@ function SignOutButton() {
                                             children: "Batal"
                                         }, void 0, false, {
                                             fileName: "[project]/app/components/signout-button.tsx",
-                                            lineNumber: 58,
+                                            lineNumber: 62,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -474,40 +480,41 @@ function SignOutButton() {
                                             onClick: async ()=>{
                                                 await logout();
                                                 setIsOpen(false);
+                                                router.replace("/auth");
                                             },
                                             children: "Keluar"
                                         }, void 0, false, {
                                             fileName: "[project]/app/components/signout-button.tsx",
-                                            lineNumber: 64,
+                                            lineNumber: 68,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/components/signout-button.tsx",
-                                    lineNumber: 57,
+                                    lineNumber: 61,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/components/signout-button.tsx",
-                            lineNumber: 52,
+                            lineNumber: 56,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/components/signout-button.tsx",
-                        lineNumber: 51,
+                        lineNumber: 55,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/signout-button.tsx",
-                lineNumber: 45,
+                lineNumber: 49,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/components/signout-button.tsx",
-        lineNumber: 29,
+        lineNumber: 33,
         columnNumber: 5
     }, this);
 }

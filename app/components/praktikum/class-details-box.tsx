@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import AddCollaboratorsButton from "@/app/components/praktikum/add-collaborators-button";
 import { IGetClassByIdResponseBody } from "@/app/interfaces/class/class.interface";
 import useAuthStore from "@/app/store/useAuthStore";
@@ -64,7 +65,13 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({ data, assistant }) => {
       <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
       <div className="flex h-full w-[100px] flex-col justify-between space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Modul</p>
-        <button className="flex w-full flex-row items-center justify-between">
+        <Link
+          href={{
+            pathname: "/dashboard/segera-hadir",
+            query: { fitur: "Modul" },
+          }}
+          className="flex w-full flex-row items-center justify-between"
+        >
           <p className="w-[53px] text-start text-[14px] font-semibold leading-none text-[#3272CA]">
             Click to Open
           </p>
@@ -76,7 +83,7 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({ data, assistant }) => {
               style={{ objectFit: "contain" }}
             />
           </div>
-        </button>
+        </Link>
       </div>
     </div>
   );

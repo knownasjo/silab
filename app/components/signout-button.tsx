@@ -17,13 +17,17 @@ export default function SignOutButton() {
 
   let [isOpen, setIsOpen] = useState(false);
 
-  const { logout, userData } = useAuthStore();
+  const { logout, userData, isLoading, error } = useAuthStore();
 
+  // Tunggu sampai me() benar-benar gagal. Saat halaman baru dimuat, userData
+  // masih null karena me() belum selesai; mengalihkan pada saat itu membuat
+  // middleware memantulkan /auth ke /dashboard, sehingga halaman apa pun yang
+  // di-refresh selalu terlempar ke /dashboard.
   useEffect(() => {
-    if (!userData) {
+    if (!userData && !isLoading && error) {
       router.replace("/auth");
     }
-  }, [router, userData]);
+  }, [router, userData, isLoading, error]);
 
   return (
     <div className="group/sidebaritem">
@@ -66,6 +70,7 @@ export default function SignOutButton() {
                 onClick={async () => {
                   await logout();
                   setIsOpen(false);
+                  router.replace("/auth");
                 }}
               >
                 Keluar
