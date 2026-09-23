@@ -23,10 +23,6 @@ export default function SignOutButton({
 
   const { logout, userData, isLoading, error } = useAuthStore();
 
-  // Tunggu sampai me() benar-benar gagal. Saat halaman baru dimuat, userData
-  // masih null karena me() belum selesai; mengalihkan pada saat itu membuat
-  // middleware memantulkan /auth ke /dashboard, sehingga halaman apa pun yang
-  // di-refresh selalu terlempar ke /dashboard.
   useEffect(() => {
     if (!userData && !isLoading && error) {
       router.replace("/auth");

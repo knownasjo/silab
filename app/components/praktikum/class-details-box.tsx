@@ -37,7 +37,6 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({ data, assistant }) => {
           )}
         </div>
         <div className="flex flex-col space-y-2">
-          {/* asprak */}
           {assistant.length !== 0 &&
             assistant.map((assistant, idx) => (
               <div className="flex flex-row space-x-[10px]" key={idx}>

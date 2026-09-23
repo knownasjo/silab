@@ -27,10 +27,6 @@ interface SidebarGroupProps {
   collapsed: boolean;
 }
 
-/**
- * Menu bertingkat di sidebar (Master Data, Pengumuman). Saat sidebar lebar,
- * submenu terbuka ke bawah; saat diperkecil, submenu muncul di samping ikon.
- */
 export default function SidebarGroup({
   title,
   icon,

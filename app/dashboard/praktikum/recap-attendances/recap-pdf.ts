@@ -15,7 +15,6 @@ interface PdfColumn {
   align: "left" | "center";
 }
 
-// Satuan mm, A4 landscape (297 x 210).
 const MARGIN = 12;
 const ROW_HEIGHT = 7;
 const HEADER_LINE_HEIGHT = 3.5;
@@ -37,7 +36,6 @@ const slugify = (text: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-/** Potong teks yang lebih lebar dari kolom, pakai font yang sedang aktif. */
 const fitText = (pdf: jsPDF, text: string, maxWidth: number) => {
   if (pdf.getTextWidth(text) <= maxWidth) return text;
 
@@ -52,14 +50,7 @@ const fitText = (pdf: jsPDF, text: string, maxWidth: number) => {
 const textX = (column: PdfColumn, x: number) =>
   column.align === "center" ? x + column.width / 2 : x + 2;
 
-/**
- * Menggambar tabel langsung dengan jsPDF, bukan screenshot html2canvas:
- * teks tetap tajam dan bisa dicari, tabel panjang otomatis pindah halaman,
- * dan tidak bergantung pada warna oklch DaisyUI yang tidak dipahami
- * html2canvas.
- */
 export const downloadRecapPdf = async (recap: Recap, info: RecapPdfInfo) => {
-  // Build ES jspdf (yang dipakai bundler) hanya punya named export.
   const { jsPDF: JsPDF } = await import("jspdf");
 
   const pdf = new JsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
@@ -67,13 +58,11 @@ export const downloadRecapPdf = async (recap: Recap, info: RecapPdfInfo) => {
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
   const contentWidth = pageWidth - MARGIN * 2;
-  const bottomLimit = pageHeight - MARGIN - 6; // sisakan tempat nomor halaman
+  const bottomLimit = pageHeight - MARGIN - 6;
 
   const meetingCount = recap.columns.length;
   const showTotal = meetingCount > 1;
 
-  // No, NIM, dan Hadir lebarnya tetap; sisanya dibagi antara Nama
-  // (minimal 50 mm) dan kolom pertemuan (maksimal 14 mm).
   const fixedWidth = 10 + 26 + (showTotal ? 16 : 0);
   const meetingWidth = Math.min(
     14,
@@ -108,15 +97,14 @@ export const downloadRecapPdf = async (recap: Recap, info: RecapPdfInfo) => {
     pdf.setTextColor(TEXT_COLOR);
 
     const labels = columns.map(
-      (column) => pdf.splitTextToSize(column.label, column.width - 2) as string[],
+      (column) =>
+        pdf.splitTextToSize(column.label, column.width - 2) as string[],
     );
     const height =
       Math.max(...labels.map((lines) => lines.length)) * HEADER_LINE_HEIGHT + 3;
 
     let x = MARGIN;
     columns.forEach((column, index) => {
-      // Di PDF, warna teks dan warna isian memakai state yang sama, jadi
-      // warna isian harus diset ulang setelah label sebelumnya digambar.
       pdf.setFillColor(HEADER_FILL);
       pdf.setTextColor(TEXT_COLOR);
       pdf.rect(x, y, column.width, height, "FD");
@@ -139,7 +127,6 @@ export const downloadRecapPdf = async (recap: Recap, info: RecapPdfInfo) => {
     return y + height;
   };
 
-  // Judul
   const subtitle = [
     `Praktikum ${info.subjectName}`,
     `Kelas ${info.className}`,
@@ -167,7 +154,6 @@ export const downloadRecapPdf = async (recap: Recap, info: RecapPdfInfo) => {
   pdf.setFontSize(8);
   pdf.text(`Dicetak ${printedAt}`, MARGIN, MARGIN + 15);
 
-  // Tabel
   let y = drawHeaderRow(MARGIN + 20);
 
   recap.rows.forEach((row, index) => {
@@ -207,7 +193,6 @@ export const downloadRecapPdf = async (recap: Recap, info: RecapPdfInfo) => {
     y += ROW_HEIGHT;
   });
 
-  // Keterangan
   if (y + 8 > bottomLimit) {
     pdf.addPage();
     y = MARGIN;
@@ -218,7 +203,6 @@ export const downloadRecapPdf = async (recap: Recap, info: RecapPdfInfo) => {
   pdf.setTextColor(TEXT_COLOR);
   pdf.text(`Keterangan: ${statusLegend}`, MARGIN, y + 6);
 
-  // Nomor halaman
   const pageCount = pdf.getNumberOfPages();
   for (let page = 1; page <= pageCount; page++) {
     pdf.setPage(page);

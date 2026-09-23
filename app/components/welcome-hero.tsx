@@ -1,6 +1,5 @@
 import Image from "next/image";
 
-/** Ilustrasi dan sambutan yang sama di halaman awal dan halaman login. */
 export default function WelcomeHero() {
   return (
     <div className="flex flex-col items-center">

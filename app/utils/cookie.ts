@@ -2,11 +2,8 @@
 
 import { cookies } from "next/headers";
 
-// Access token diperbarui sedikit sebelum kedaluwarsa, supaya permintaan yang
-// sedang berjalan tidak ditolak backend di tengah jalan.
 const REFRESH_MARGIN_MS = 30_000;
 
-/** Waktu kedaluwarsa JWT dalam milidetik, atau 0 bila token tidak terbaca. */
 function readExpiry(token: string): number {
   try {
     const payload = JSON.parse(
@@ -19,10 +16,6 @@ function readExpiry(token: string): number {
   }
 }
 
-/**
- * Access token yang masih berlaku. Bila cookie-nya sudah habis atau hampir
- * habis, token baru diminta lebih dulu dengan refresh token.
- */
 export async function getToken(): Promise<string | undefined> {
   const cookie = await cookies();
 
@@ -35,11 +28,6 @@ export async function getToken(): Promise<string | undefined> {
   return (await refreshAccessToken()) ?? token;
 }
 
-/**
- * Menukar refresh token dengan access token baru di backend lalu
- * menyimpannya. Bila backend menolak (sesi lewat 1 hari), semua cookie sesi
- * dihapus supaya pengguna diarahkan ke halaman login.
- */
 export async function refreshAccessToken(): Promise<string | undefined> {
   const cookie = await cookies();
 
@@ -56,8 +44,6 @@ export async function refreshAccessToken(): Promise<string | undefined> {
       cache: "no-store",
     });
   } catch {
-    // Backend tidak terjangkau: sesi dibiarkan, dicoba lagi pada permintaan
-    // berikutnya.
     return undefined;
   }
 
@@ -110,10 +96,6 @@ export async function setToken(token: string): Promise<void> {
   }
 }
 
-/**
- * Refresh token hanya dibaca di server (lihat refreshAccessToken), jadi
- * cookie-nya httpOnly: JavaScript di halaman tidak bisa membacanya.
- */
 export async function setRefreshToken(token: string): Promise<void> {
   const cookie = await cookies();
 

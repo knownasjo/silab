@@ -43,8 +43,6 @@ __turbopack_context__.n(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$c
 
 var { g: global, __dirname } = __turbopack_context__;
 {
-// Dibaca layout di server supaya lebar sidebar sudah benar sejak render
-// pertama, tanpa kedipan saat halaman dimuat ulang.
 __turbopack_context__.s({
     "SIDEBAR_COLLAPSED_COOKIE": (()=>SIDEBAR_COLLAPSED_COOKIE)
 });

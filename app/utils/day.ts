@@ -1,4 +1,3 @@
-// Nama hari untuk enum DaysOfWeek dari backend (MONDAY, TUESDAY, ...).
 export const DAY_LABELS: Record<string, string> = {
   MONDAY: "Senin",
   TUESDAY: "Selasa",

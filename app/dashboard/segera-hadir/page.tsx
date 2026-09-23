@@ -1,9 +1,5 @@
 import BackButton from "./back-button";
 
-/**
- * Tujuan tautan fitur yang belum tersedia, misalnya Modul di detail kelas:
- * /dashboard/segera-hadir?fitur=Modul
- */
 export default async function SegeraHadirPage({
   searchParams,
 }: {

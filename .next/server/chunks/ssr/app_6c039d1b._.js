@@ -128,7 +128,6 @@ function AddPracticumBanner() {
 
 var { g: global, __dirname } = __turbopack_context__;
 {
-// Nama hari untuk enum DaysOfWeek dari backend (MONDAY, TUESDAY, ...).
 __turbopack_context__.s({
     "DAY_LABELS": (()=>DAY_LABELS),
     "formatDay": (()=>formatDay)

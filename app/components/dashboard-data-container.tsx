@@ -22,8 +22,6 @@ export default function DashboardDataContainer({
       </p>
       <div className="flex flex-col text-white">
         <p className="text-[24px] font-bold">{title}</p>
-        {/* Dua baris supaya judul semua kartu sejajar walau subjudul
-            ada yang muat satu baris. */}
         <p className="min-h-[3.5rem] text-[18px] font-semibold">{subTitle}</p>
       </div>
     </div>

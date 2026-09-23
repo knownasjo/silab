@@ -202,8 +202,6 @@ const useMeetingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                 });
             }
         },
-        // Dipanggil berulang selama dialog QR terbuka, jadi sengaja tidak memakai
-        // isLoading/error bersama agar tombol lain di halaman tidak ikut berkedip.
         getQrToken: async (meetingId)=>{
             try {
                 const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$meeting$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getMeetingQrToken"])(meetingId);
@@ -905,9 +903,7 @@ var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.sign
 ;
 ;
 ;
-// Minta token baru sedikit setelah token lama berganti di server.
 const REFRESH_DELAY_MS = 300;
-// Jeda sebelum mencoba lagi bila permintaan gagal, misal sesi belum dibuka.
 const RETRY_DELAY_MS = 3000;
 function ShowQrCodeButton({ meetingId, meetingName }) {
     _s();
@@ -924,12 +920,12 @@ function ShowQrCodeButton({ meetingId, meetingName }) {
                     height: 32
                 }, void 0, false, {
                     fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                    lineNumber: 36,
+                    lineNumber: 34,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                lineNumber: 32,
+                lineNumber: 30,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$headlessui$2f$react$2f$dist$2f$components$2f$dialog$2f$dialog$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -941,7 +937,7 @@ function ShowQrCodeButton({ meetingId, meetingName }) {
                         className: "fixed inset-0 bg-black/30"
                     }, void 0, false, {
                         fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                        lineNumber: 43,
+                        lineNumber: 41,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -957,31 +953,31 @@ function ShowQrCodeButton({ meetingId, meetingName }) {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                                    lineNumber: 46,
+                                    lineNumber: 44,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(RotatingQrCode, {
                                     meetingId: meetingId
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                                    lineNumber: 49,
+                                    lineNumber: 47,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                            lineNumber: 45,
+                            lineNumber: 43,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                        lineNumber: 44,
+                        lineNumber: 42,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                lineNumber: 38,
+                lineNumber: 36,
                 columnNumber: 7
             }, this)
         ]
@@ -989,12 +985,7 @@ function ShowQrCodeButton({ meetingId, meetingName }) {
 }
 _s(ShowQrCodeButton, "4xfoga81PPCuRfQRpWeU47IiBeI=");
 _c = ShowQrCodeButton;
-/**
- * QR berisi token yang berganti setiap beberapa detik. Komponen ini hanya
- * dirender selama dialog terbuka, jadi permintaan token berhenti saat dialog
- * ditutup. Token sengaja tidak ditampilkan sebagai teks supaya tidak bisa
- * diketik ulang oleh orang di luar kelas.
- */ function RotatingQrCode({ meetingId }) {
+function RotatingQrCode({ meetingId }) {
     _s1();
     const { qrToken, qrError, getQrToken, clearQrToken } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useMeetingStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
     const [now, setNow] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({
@@ -1008,7 +999,6 @@ _c = ShowQrCodeButton;
                 "RotatingQrCode.useEffect.refresh": async ()=>{
                     await getQrToken(meetingId);
                     if (!isActive) return;
-                    // Jadwal berikutnya mengikuti sisa waktu dari server, bukan jam laptop.
                     const { qrToken } = __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useMeetingStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].getState();
                     const delay = qrToken ? Math.max(qrToken.expiresAt - Date.now(), 0) + REFRESH_DELAY_MS : RETRY_DELAY_MS;
                     timer = setTimeout(refresh, delay);
@@ -1048,12 +1038,12 @@ _c = ShowQrCodeButton;
                 children: qrError ?? "Memuat kode QR..."
             }, void 0, false, {
                 fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                lineNumber: 105,
+                lineNumber: 96,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-            lineNumber: 104,
+            lineNumber: 95,
             columnNumber: 7
         }, this);
     }
@@ -1066,7 +1056,7 @@ _c = ShowQrCodeButton;
                 value: current.token
             }, void 0, false, {
                 fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                lineNumber: 121,
+                lineNumber: 112,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1081,12 +1071,12 @@ _c = ShowQrCodeButton;
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                            lineNumber: 124,
+                            lineNumber: 115,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                        lineNumber: 123,
+                        lineNumber: 114,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1094,19 +1084,19 @@ _c = ShowQrCodeButton;
                         children: remainingMs > 0 ? `QR berganti dalam ${Math.ceil(remainingMs / 1000)} detik` : "Memperbarui QR..."
                     }, void 0, false, {
                         fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                        lineNumber: 129,
+                        lineNumber: 120,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-                lineNumber: 122,
+                lineNumber: 113,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/components/praktikum/show-qr-code-button.tsx",
-        lineNumber: 120,
+        lineNumber: 111,
         columnNumber: 5
     }, this);
 }
@@ -1819,7 +1809,6 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 
 var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
 {
-// Nama hari untuk enum DaysOfWeek dari backend (MONDAY, TUESDAY, ...).
 __turbopack_context__.s({
     "DAY_LABELS": (()=>DAY_LABELS),
     "formatDay": (()=>formatDay)
@@ -2554,7 +2543,7 @@ const ClassDetailsBox = ({ data, assistant })=>{
                                             className: "h-full w-[6px] rounded-full bg-[#D2E3F1]"
                                         }, void 0, false, {
                                             fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                                            lineNumber: 44,
+                                            lineNumber: 43,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2562,13 +2551,13 @@ const ClassDetailsBox = ({ data, assistant })=>{
                                             children: assistant.fullname
                                         }, void 0, false, {
                                             fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                                            lineNumber: 45,
+                                            lineNumber: 44,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, idx, true, {
                                     fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                                    lineNumber: 43,
+                                    lineNumber: 42,
                                     columnNumber: 15
                                 }, this)),
                             assistant.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2578,12 +2567,12 @@ const ClassDetailsBox = ({ data, assistant })=>{
                                     children: "Asisten Praktikum Belum Ditambahkan"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                                    lineNumber: 52,
+                                    lineNumber: 51,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                                lineNumber: 51,
+                                lineNumber: 50,
                                 columnNumber: 13
                             }, this)
                         ]
@@ -2602,7 +2591,7 @@ const ClassDetailsBox = ({ data, assistant })=>{
                 className: "h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"
             }, void 0, false, {
                 fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                lineNumber: 59,
+                lineNumber: 58,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2613,7 +2602,7 @@ const ClassDetailsBox = ({ data, assistant })=>{
                         children: "Kuota"
                     }, void 0, false, {
                         fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                        lineNumber: 61,
+                        lineNumber: 60,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2625,20 +2614,20 @@ const ClassDetailsBox = ({ data, assistant })=>{
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                        lineNumber: 62,
+                        lineNumber: 61,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                lineNumber: 60,
+                lineNumber: 59,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"
             }, void 0, false, {
                 fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                lineNumber: 66,
+                lineNumber: 65,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2649,7 +2638,7 @@ const ClassDetailsBox = ({ data, assistant })=>{
                         children: "Modul"
                     }, void 0, false, {
                         fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                        lineNumber: 68,
+                        lineNumber: 67,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -2666,7 +2655,7 @@ const ClassDetailsBox = ({ data, assistant })=>{
                                 children: "Click to Open"
                             }, void 0, false, {
                                 fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                                lineNumber: 76,
+                                lineNumber: 75,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2680,24 +2669,24 @@ const ClassDetailsBox = ({ data, assistant })=>{
                                     }
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                                    lineNumber: 80,
+                                    lineNumber: 79,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                                lineNumber: 79,
+                                lineNumber: 78,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                        lineNumber: 69,
+                        lineNumber: 68,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/praktikum/class-details-box.tsx",
-                lineNumber: 67,
+                lineNumber: 66,
                 columnNumber: 7
             }, this)
         ]

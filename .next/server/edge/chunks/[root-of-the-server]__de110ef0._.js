@@ -31,8 +31,6 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 async function middleware(req) {
     try {
         const { pathname } = req.nextUrl;
-        // Cookie accessToken hilang setiap 15 menit, tetapi sesi masih berlaku
-        // selama refresh token ada; token baru diminta pada permintaan berikutnya.
         const hasSession = Boolean(req.cookies.get("accessToken")?.value || req.cookies.get("refreshToken")?.value);
         const isProtectedRoute = pathname.startsWith("/dashboard");
         const isAuthPage = pathname === "/auth";

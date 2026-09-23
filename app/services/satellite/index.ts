@@ -6,17 +6,6 @@ const satellite = axios.create({
   timeout: 20_000,
 });
 
-/**
- * Membaca cookie accessToken langsung dari browser.
- *
- * Sebelumnya setiap permintaan memanggil getToken(), sebuah server action,
- * sehingga harus bolak-balik ke server hanya untuk membaca cookie. Tepat
- * setelah login, panggilan itu mengantre di belakang navigasi yang sedang
- * berjalan dan membuat halaman tampak kosong sampai di-refresh.
- *
- * Cookie ini memang terbaca JavaScript karena diset tanpa httpOnly, jadi
- * membacanya di sini tidak menambah risiko apa pun yang belum ada.
- */
 const readTokenFromBrowser = (): string | undefined => {
   if (typeof document === "undefined") return undefined;
 
@@ -27,8 +16,6 @@ const readTokenFromBrowser = (): string | undefined => {
 
 satellite.interceptors.request.use(
   async (request) => {
-    // Cookie accessToken hilang sendiri saat tokennya kedaluwarsa; getToken()
-    // lalu meminta token baru dengan refresh token.
     const token = readTokenFromBrowser() ?? (await getToken());
 
     if (token) request.headers["Authorization"] = `Bearer ${token}`;
@@ -38,7 +25,6 @@ satellite.interceptors.request.use(
   async (error) => Promise.reject(error),
 );
 
-// Beberapa permintaan yang gagal bersamaan cukup memicu satu refresh.
 let pendingRefresh: Promise<string | undefined> | null = null;
 
 const refreshOnce = () =>
@@ -53,9 +39,6 @@ satellite.interceptors.response.use(
       | (InternalAxiosRequestConfig & { _retried?: boolean })
       | undefined;
 
-    // Jam browser bisa tertinggal dari jam server, sehingga cookie masih
-    // terkirim padahal backend sudah menganggap tokennya kedaluwarsa.
-    // Permintaan itu diulang sekali dengan token baru.
     if (
       error.response?.data?.message === "jwt expired" &&
       request &&

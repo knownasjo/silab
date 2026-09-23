@@ -8,10 +8,6 @@ export const statusStyle: Record<AttendanceStatus, string> = {
   "Belum Presensi": "bg-[#F1F1F2] text-[#181C32]",
 };
 
-/**
- * Backend selalu mengirim `is_attended` sebagai boolean, tidak pernah `null`.
- * Penanda "belum presensi" adalah `submitted_at === null`.
- */
 export const getAttendanceStatus = (
   student: IMeetingParticipants,
 ): AttendanceStatus => {

@@ -120,7 +120,7 @@ function DashboardDataContainer({ data, data2, title, subTitle }) {
                         children: subTitle
                     }, void 0, false, {
                         fileName: "[project]/app/components/dashboard-data-container.tsx",
-                        lineNumber: 27,
+                        lineNumber: 25,
                         columnNumber: 9
                     }, this)
                 ]

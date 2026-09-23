@@ -20,7 +20,6 @@ export interface Recap {
   rows: RecapRow[];
 }
 
-/** Kode satu huruf, dipakai di sel tabel web maupun PDF. */
 export const statusCode: Record<AttendanceStatus, string> = {
   Hadir: "H",
   "Tidak Hadir": "A",
@@ -31,25 +30,21 @@ export const statusLegend = Object.entries(statusCode)
   .map(([status, code]) => `${code} = ${status}`)
   .join(", ");
 
-/**
- * Backend menyeragamkan nama pertemuan menjadi "Pertemuan <angka>", jadi
- * label kolom bisa diambil dari nama, bukan dari urutan array. Nama lain
- * (misal "Responsi") ditampilkan apa adanya.
- */
 const toColumnLabel = (meetingName: string): string => {
   const match = meetingName.match(/^Pertemuan (\d+)$/);
 
   return match ? `P${match[1]}` : meetingName;
 };
 
-export const buildRecap = (meetings: IGetAllClassMeetingResponseBody[]): Recap => {
+export const buildRecap = (
+  meetings: IGetAllClassMeetingResponseBody[],
+): Recap => {
   const columns = meetings.map((meeting) => ({
     meetingId: meeting.id,
     label: toColumnLabel(meeting.meeting_name),
     meetingName: meeting.meeting_name,
   }));
 
-  // Setiap pertemuan membawa daftar peserta kelas yang sama.
   const students = [...(meetings[0]?.students ?? [])].sort((a, b) =>
     a.nim.localeCompare(b.nim),
   );

@@ -10,7 +10,6 @@ import { downloadRecapPdf } from "./recap-pdf";
 
 interface RecapAttendancesContentProps {
   classId: string;
-  /** Bila diisi, rekap hanya untuk satu pertemuan. */
   meetingId?: string;
 }
 
@@ -21,8 +20,6 @@ export default function RecapAttendancesContent({
   const { getClassById, classData } = useClassStore();
   const { getMeetings, meetingsData, error } = useMeetingStore();
 
-  // Store bersifat global dan bisa masih menyimpan data kelas lain, jadi
-  // jangan render apa pun sebelum kedua permintaan untuk kelas ini selesai.
   const [isReady, setIsReady] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -54,7 +51,6 @@ export default function RecapAttendancesContent({
     if (meetingsData.length === 0)
       return "Kelas ini belum punya pertemuan. Tambahkan pertemuan dulu sebelum membuat rekap.";
     if (meetings.length === 0) return "Pertemuan tidak ditemukan.";
-    // Backend tidak mengirim daftar mahasiswa untuk role MAHASISWA.
     if (meetings[0].students === undefined)
       return "Rekap presensi hanya bisa dilihat asisten dan laboran.";
     if (recap.rows.length === 0) return "Belum ada mahasiswa di kelas ini.";

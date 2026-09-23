@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 export default async function middleware(req: NextRequest) {
   try {
     const { pathname } = req.nextUrl;
-    // Cookie accessToken hilang setiap 15 menit, tetapi sesi masih berlaku
-    // selama refresh token ada; token baru diminta pada permintaan berikutnya.
     const hasSession = Boolean(
       req.cookies.get("accessToken")?.value ||
         req.cookies.get("refreshToken")?.value,

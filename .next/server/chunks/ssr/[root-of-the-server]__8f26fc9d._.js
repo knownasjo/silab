@@ -51,10 +51,8 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 ;
-// Access token diperbarui sedikit sebelum kedaluwarsa, supaya permintaan yang
-// sedang berjalan tidak ditolak backend di tengah jalan.
 const REFRESH_MARGIN_MS = 30_000;
-/** Waktu kedaluwarsa JWT dalam milidetik, atau 0 bila token tidak terbaca. */ function readExpiry(token) {
+function readExpiry(token) {
     try {
         const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString());
         return typeof payload.exp === "number" ? payload.exp * 1000 : 0;
@@ -87,8 +85,6 @@ async function refreshAccessToken() {
             cache: "no-store"
         });
     } catch  {
-        // Backend tidak terjangkau: sesi dibiarkan, dicoba lagi pada permintaan
-        // berikutnya.
         return undefined;
     }
     if (response.status >= 400 && response.status < 500) {

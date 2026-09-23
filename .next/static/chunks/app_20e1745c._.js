@@ -390,7 +390,6 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 
 var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
 {
-// Nama hari untuk enum DaysOfWeek dari backend (MONDAY, TUESDAY, ...).
 __turbopack_context__.s({
     "DAY_LABELS": (()=>DAY_LABELS),
     "formatDay": (()=>formatDay)

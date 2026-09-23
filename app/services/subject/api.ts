@@ -13,13 +13,6 @@ export const getAllSubjects = async () => {
   return res.data;
 };
 
-/**
- * Mengambil daftar aktivasi.
- *
- * status dikosongkan  -> seluruh aktivasi
- * status "true"       -> yang sudah membayar
- * status "false"      -> yang belum membayar
- */
 export const getActivations = async (status?: "true" | "false") => {
   const res = await satellite.get<IBaseResponse<IGetActivationResponseBody[]>>(
     `/activation/?status=${status ?? ""}`,

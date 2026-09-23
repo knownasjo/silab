@@ -211,8 +211,6 @@ const useMeetingStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node
                 });
             }
         },
-        // Dipanggil berulang selama dialog QR terbuka, jadi sengaja tidak memakai
-        // isLoading/error bersama agar tombol lain di halaman tidak ikut berkedip.
         getQrToken: async (meetingId)=>{
             try {
                 const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$meeting$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getMeetingQrToken"])(meetingId);
@@ -407,11 +405,7 @@ const statusCode = {
     "Belum Presensi": "-"
 };
 const statusLegend = Object.entries(statusCode).map(([status, code])=>`${code} = ${status}`).join(", ");
-/**
- * Backend menyeragamkan nama pertemuan menjadi "Pertemuan <angka>", jadi
- * label kolom bisa diambil dari nama, bukan dari urutan array. Nama lain
- * (misal "Responsi") ditampilkan apa adanya.
- */ const toColumnLabel = (meetingName)=>{
+const toColumnLabel = (meetingName)=>{
     const match = meetingName.match(/^Pertemuan (\d+)$/);
     return match ? `P${match[1]}` : meetingName;
 };
@@ -421,7 +415,6 @@ const buildRecap = (meetings)=>{
             label: toColumnLabel(meeting.meeting_name),
             meetingName: meeting.meeting_name
         }));
-    // Setiap pertemuan membawa daftar peserta kelas yang sama.
     const students = [
         ...meetings[0]?.students ?? []
     ].sort((a, b)=>a.nim.localeCompare(b.nim));
@@ -457,7 +450,6 @@ __turbopack_context__.s({
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$dashboard$2f$praktikum$2f$recap$2d$attendances$2f$recap$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/dashboard/praktikum/recap-attendances/recap.ts [app-client] (ecmascript)");
 ;
-// Satuan mm, A4 landscape (297 x 210).
 const MARGIN = 12;
 const ROW_HEIGHT = 7;
 const HEADER_LINE_HEIGHT = 3.5;
@@ -471,7 +463,7 @@ const statusColor = {
     "Belum Presensi": "#A1A5B7"
 };
 const slugify = (text)=>text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-/** Potong teks yang lebih lebar dari kolom, pakai font yang sedang aktif. */ const fitText = (pdf, text, maxWidth)=>{
+const fitText = (pdf, text, maxWidth)=>{
     if (pdf.getTextWidth(text) <= maxWidth) return text;
     let fitted = text;
     while(fitted.length > 0 && pdf.getTextWidth(`${fitted}...`) > maxWidth){
@@ -481,7 +473,6 @@ const slugify = (text)=>text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/
 };
 const textX = (column, x)=>column.align === "center" ? x + column.width / 2 : x + 2;
 const downloadRecapPdf = async (recap, info)=>{
-    // Build ES jspdf (yang dipakai bundler) hanya punya named export.
     const { jsPDF: JsPDF } = await __turbopack_context__.r("[project]/node_modules/jspdf/dist/jspdf.es.min.js [app-client] (ecmascript, async loader)")(__turbopack_context__.i);
     const pdf = new JsPDF({
         orientation: "landscape",
@@ -491,11 +482,9 @@ const downloadRecapPdf = async (recap, info)=>{
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const contentWidth = pageWidth - MARGIN * 2;
-    const bottomLimit = pageHeight - MARGIN - 6; // sisakan tempat nomor halaman
+    const bottomLimit = pageHeight - MARGIN - 6;
     const meetingCount = recap.columns.length;
     const showTotal = meetingCount > 1;
-    // No, NIM, dan Hadir lebarnya tetap; sisanya dibagi antara Nama
-    // (minimal 50 mm) dan kolom pertemuan (maksimal 14 mm).
     const fixedWidth = 10 + 26 + (showTotal ? 16 : 0);
     const meetingWidth = Math.min(14, (contentWidth - fixedWidth - 50) / meetingCount);
     const nameWidth = Math.min(90, contentWidth - fixedWidth - meetingWidth * meetingCount);
@@ -538,8 +527,6 @@ const downloadRecapPdf = async (recap, info)=>{
         const height = Math.max(...labels.map((lines)=>lines.length)) * HEADER_LINE_HEIGHT + 3;
         let x = MARGIN;
         columns.forEach((column, index)=>{
-            // Di PDF, warna teks dan warna isian memakai state yang sama, jadi
-            // warna isian harus diset ulang setelah label sebelumnya digambar.
             pdf.setFillColor(HEADER_FILL);
             pdf.setTextColor(TEXT_COLOR);
             pdf.rect(x, y, column.width, height, "FD");
@@ -555,7 +542,6 @@ const downloadRecapPdf = async (recap, info)=>{
         });
         return y + height;
     };
-    // Judul
     const subtitle = [
         `Praktikum ${info.subjectName}`,
         `Kelas ${info.className}`,
@@ -577,7 +563,6 @@ const downloadRecapPdf = async (recap, info)=>{
     pdf.text(subtitle, MARGIN, MARGIN + 10);
     pdf.setFontSize(8);
     pdf.text(`Dicetak ${printedAt}`, MARGIN, MARGIN + 15);
-    // Tabel
     let y = drawHeaderRow(MARGIN + 20);
     recap.rows.forEach((row, index)=>{
         if (y + ROW_HEIGHT > bottomLimit) {
@@ -619,7 +604,6 @@ const downloadRecapPdf = async (recap, info)=>{
         });
         y += ROW_HEIGHT;
     });
-    // Keterangan
     if (y + 8 > bottomLimit) {
         pdf.addPage();
         y = MARGIN;
@@ -628,7 +612,6 @@ const downloadRecapPdf = async (recap, info)=>{
     pdf.setFontSize(8);
     pdf.setTextColor(TEXT_COLOR);
     pdf.text(`Keterangan: ${__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$dashboard$2f$praktikum$2f$recap$2d$attendances$2f$recap$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["statusLegend"]}`, MARGIN, y + 6);
-    // Nomor halaman
     const pageCount = pdf.getNumberOfPages();
     for(let page = 1; page <= pageCount; page++){
         pdf.setPage(page);
@@ -680,8 +663,6 @@ function RecapAttendancesContent({ classId, meetingId }) {
     _s();
     const { getClassById, classData } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useClassStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
     const { getMeetings, meetingsData, error } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useMeetingStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
-    // Store bersifat global dan bisa masih menyimpan data kelas lain, jadi
-    // jangan render apa pun sebelum kedua permintaan untuk kelas ini selesai.
     const [isReady, setIsReady] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isDownloading, setIsDownloading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
@@ -716,7 +697,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
         children: "Loading..."
     }, void 0, false, {
         fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-        lineNumber: 46,
+        lineNumber: 43,
         columnNumber: 24
     }, this);
     const classInfo = classData?.id === classId ? classData : null;
@@ -726,7 +707,6 @@ function RecapAttendancesContent({ classId, meetingId }) {
         if (error) return error;
         if (meetingsData.length === 0) return "Kelas ini belum punya pertemuan. Tambahkan pertemuan dulu sebelum membuat rekap.";
         if (meetings.length === 0) return "Pertemuan tidak ditemukan.";
-        // Backend tidak mengirim daftar mahasiswa untuk role MAHASISWA.
         if (meetings[0].students === undefined) return "Rekap presensi hanya bisa dilihat asisten dan laboran.";
         if (recap.rows.length === 0) return "Belum ada mahasiswa di kelas ini.";
         return null;
@@ -762,7 +742,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                lineNumber: 85,
+                                lineNumber: 81,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -770,7 +750,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                 children: "Rekap Presensi"
                             }, void 0, false, {
                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                lineNumber: 89,
+                                lineNumber: 85,
                                 columnNumber: 11
                             }, this),
                             classInfo && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -784,13 +764,13 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                lineNumber: 91,
+                                lineNumber: 87,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                        lineNumber: 83,
+                        lineNumber: 79,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -802,7 +782,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                 children: "Kembali"
                             }, void 0, false, {
                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                lineNumber: 98,
+                                lineNumber: 94,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -813,19 +793,19 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                 children: isDownloading ? "Menyiapkan PDF..." : "Unduh PDF"
                             }, void 0, false, {
                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                lineNumber: 104,
+                                lineNumber: 100,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                        lineNumber: 97,
+                        lineNumber: 93,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                lineNumber: 82,
+                lineNumber: 78,
                 columnNumber: 7
             }, this),
             emptyMessage ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -834,12 +814,12 @@ function RecapAttendancesContent({ classId, meetingId }) {
                     children: emptyMessage
                 }, void 0, false, {
                     fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                    lineNumber: 117,
+                    lineNumber: 113,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                lineNumber: 116,
+                lineNumber: 112,
                 columnNumber: 9
             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "w-full overflow-x-auto rounded-2xl bg-white p-5",
@@ -856,7 +836,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                             children: "No"
                                         }, void 0, false, {
                                             fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                            lineNumber: 124,
+                                            lineNumber: 120,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -864,7 +844,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                             children: "NIM"
                                         }, void 0, false, {
                                             fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                            lineNumber: 125,
+                                            lineNumber: 121,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -872,7 +852,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                             children: "Nama"
                                         }, void 0, false, {
                                             fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                            lineNumber: 126,
+                                            lineNumber: 122,
                                             columnNumber: 17
                                         }, this),
                                         recap.columns.map((column)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -881,7 +861,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                                 children: column.label
                                             }, column.meetingId, false, {
                                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                                lineNumber: 128,
+                                                lineNumber: 124,
                                                 columnNumber: 19
                                             }, this)),
                                         showTotal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -889,18 +869,18 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                             children: "Hadir"
                                         }, void 0, false, {
                                             fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                            lineNumber: 136,
+                                            lineNumber: 132,
                                             columnNumber: 31
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                    lineNumber: 123,
+                                    lineNumber: 119,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                lineNumber: 122,
+                                lineNumber: 118,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -912,7 +892,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                                 children: index + 1
                                             }, void 0, false, {
                                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                                lineNumber: 145,
+                                                lineNumber: 141,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -920,7 +900,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                                 children: row.nim
                                             }, void 0, false, {
                                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                                lineNumber: 146,
+                                                lineNumber: 142,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -928,7 +908,7 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                                 children: row.studentName
                                             }, void 0, false, {
                                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                                lineNumber: 147,
+                                                lineNumber: 143,
                                                 columnNumber: 19
                                             }, this),
                                             row.statuses.map((status, statusIndex)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -939,12 +919,12 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                                         children: __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$dashboard$2f$praktikum$2f$recap$2d$attendances$2f$recap$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["statusCode"][status]
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                                        lineNumber: 153,
+                                                        lineNumber: 149,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, recap.columns[statusIndex].meetingId, false, {
                                                     fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                                    lineNumber: 149,
+                                                    lineNumber: 145,
                                                     columnNumber: 21
                                                 }, this)),
                                             showTotal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -956,24 +936,24 @@ function RecapAttendancesContent({ classId, meetingId }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                                lineNumber: 162,
+                                                lineNumber: 158,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, row.studentId, true, {
                                         fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                        lineNumber: 141,
+                                        lineNumber: 137,
                                         columnNumber: 17
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                                lineNumber: 139,
+                                lineNumber: 135,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                        lineNumber: 121,
+                        lineNumber: 117,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -984,19 +964,19 @@ function RecapAttendancesContent({ classId, meetingId }) {
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                        lineNumber: 170,
+                        lineNumber: 166,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-                lineNumber: 120,
+                lineNumber: 116,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/dashboard/praktikum/recap-attendances/recap-attendances-content.tsx",
-        lineNumber: 81,
+        lineNumber: 77,
         columnNumber: 5
     }, this);
 }

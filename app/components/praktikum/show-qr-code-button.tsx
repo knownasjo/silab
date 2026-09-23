@@ -16,9 +16,7 @@ interface ShowQrCodeButtonProps {
   meetingName?: string;
 }
 
-// Minta token baru sedikit setelah token lama berganti di server.
 const REFRESH_DELAY_MS = 300;
-// Jeda sebelum mencoba lagi bila permintaan gagal, misal sesi belum dibuka.
 const RETRY_DELAY_MS = 3000;
 
 export default function ShowQrCodeButton({
@@ -54,12 +52,6 @@ export default function ShowQrCodeButton({
   );
 }
 
-/**
- * QR berisi token yang berganti setiap beberapa detik. Komponen ini hanya
- * dirender selama dialog terbuka, jadi permintaan token berhenti saat dialog
- * ditutup. Token sengaja tidak ditampilkan sebagai teks supaya tidak bisa
- * diketik ulang oleh orang di luar kelas.
- */
 function RotatingQrCode({ meetingId }: { meetingId: string }) {
   const { qrToken, qrError, getQrToken, clearQrToken } = useMeetingStore();
   const [now, setNow] = useState(() => Date.now());
@@ -72,7 +64,6 @@ function RotatingQrCode({ meetingId }: { meetingId: string }) {
       await getQrToken(meetingId);
       if (!isActive) return;
 
-      // Jadwal berikutnya mengikuti sisa waktu dari server, bukan jam laptop.
       const { qrToken } = useMeetingStore.getState();
       const delay = qrToken
         ? Math.max(qrToken.expiresAt - Date.now(), 0) + REFRESH_DELAY_MS

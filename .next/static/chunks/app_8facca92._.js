@@ -372,10 +372,6 @@ function SignOutButton({ collapsed = false }) {
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
     let [isOpen, setIsOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const { logout, userData, isLoading, error } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useAuthStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
-    // Tunggu sampai me() benar-benar gagal. Saat halaman baru dimuat, userData
-    // masih null karena me() belum selesai; mengalihkan pada saat itu membuat
-    // middleware memantulkan /auth ke /dashboard, sehingga halaman apa pun yang
-    // di-refresh selalu terlempar ke /dashboard.
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "SignOutButton.useEffect": ()=>{
             if (!userData && !isLoading && error) {
@@ -405,7 +401,7 @@ function SignOutButton({ collapsed = false }) {
                         alt: "logout"
                     }, void 0, false, {
                         fileName: "[project]/app/components/signout-button.tsx",
-                        lineNumber: 44,
+                        lineNumber: 40,
                         columnNumber: 9
                     }, this),
                     !collapsed && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -413,13 +409,13 @@ function SignOutButton({ collapsed = false }) {
                         children: "Sign Out"
                     }, void 0, false, {
                         fileName: "[project]/app/components/signout-button.tsx",
-                        lineNumber: 56,
+                        lineNumber: 52,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/signout-button.tsx",
-                lineNumber: 38,
+                lineNumber: 34,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$headlessui$2f$react$2f$dist$2f$components$2f$dialog$2f$dialog$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -431,7 +427,7 @@ function SignOutButton({ collapsed = false }) {
                         className: "fixed inset-0 bg-black/30"
                     }, void 0, false, {
                         fileName: "[project]/app/components/signout-button.tsx",
-                        lineNumber: 66,
+                        lineNumber: 62,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -444,14 +440,14 @@ function SignOutButton({ collapsed = false }) {
                                     children: "Sign Out"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/signout-button.tsx",
-                                    lineNumber: 69,
+                                    lineNumber: 65,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                     children: "Apakah anda ingin keluar?"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/signout-button.tsx",
-                                    lineNumber: 72,
+                                    lineNumber: 68,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -463,7 +459,7 @@ function SignOutButton({ collapsed = false }) {
                                             children: "Batal"
                                         }, void 0, false, {
                                             fileName: "[project]/app/components/signout-button.tsx",
-                                            lineNumber: 74,
+                                            lineNumber: 70,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -476,36 +472,36 @@ function SignOutButton({ collapsed = false }) {
                                             children: "Keluar"
                                         }, void 0, false, {
                                             fileName: "[project]/app/components/signout-button.tsx",
-                                            lineNumber: 80,
+                                            lineNumber: 76,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/components/signout-button.tsx",
-                                    lineNumber: 73,
+                                    lineNumber: 69,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/components/signout-button.tsx",
-                            lineNumber: 68,
+                            lineNumber: 64,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/components/signout-button.tsx",
-                        lineNumber: 67,
+                        lineNumber: 63,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/signout-button.tsx",
-                lineNumber: 61,
+                lineNumber: 57,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/components/signout-button.tsx",
-        lineNumber: 37,
+        lineNumber: 33,
         columnNumber: 5
     }, this);
 }
@@ -562,12 +558,12 @@ function SidebarGroup({ title, icon, basePath, links, collapsed }) {
                         }
                     }, void 0, false, {
                         fileName: "[project]/app/components/sidebar-group.tsx",
-                        lineNumber: 50,
+                        lineNumber: 46,
                         columnNumber: 9
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/components/sidebar-group.tsx",
-                    lineNumber: 49,
+                    lineNumber: 45,
                     columnNumber: 7
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -575,7 +571,7 @@ function SidebarGroup({ title, icon, basePath, links, collapsed }) {
                     children: link.title
                 }, void 0, false, {
                     fileName: "[project]/app/components/sidebar-group.tsx",
-                    lineNumber: 52,
+                    lineNumber: 48,
                     columnNumber: 7
                 }, this)
             ]
@@ -595,12 +591,12 @@ function SidebarGroup({ title, icon, basePath, links, collapsed }) {
                         height: 24
                     }, void 0, false, {
                         fileName: "[project]/app/components/sidebar-group.tsx",
-                        lineNumber: 66,
+                        lineNumber: 62,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/components/sidebar-group.tsx",
-                    lineNumber: 61,
+                    lineNumber: 57,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$headlessui$2f$react$2f$dist$2f$components$2f$popover$2f$popover$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PopoverPanel"], {
@@ -615,7 +611,7 @@ function SidebarGroup({ title, icon, basePath, links, collapsed }) {
                             children: title
                         }, void 0, false, {
                             fileName: "[project]/app/components/sidebar-group.tsx",
-                            lineNumber: 72,
+                            lineNumber: 68,
                             columnNumber: 11
                         }, this),
                         links.map((link)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$headlessui$2f$react$2f$dist$2f$components$2f$close$2d$button$2f$close$2d$button$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CloseButton"], {
@@ -625,19 +621,19 @@ function SidebarGroup({ title, icon, basePath, links, collapsed }) {
                                 children: linkContent(link)
                             }, link.href, false, {
                                 fileName: "[project]/app/components/sidebar-group.tsx",
-                                lineNumber: 76,
+                                lineNumber: 72,
                                 columnNumber: 13
                             }, this))
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/components/sidebar-group.tsx",
-                    lineNumber: 68,
+                    lineNumber: 64,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/app/components/sidebar-group.tsx",
-            lineNumber: 60,
+            lineNumber: 56,
             columnNumber: 7
         }, this);
     }
@@ -659,7 +655,7 @@ function SidebarGroup({ title, icon, basePath, links, collapsed }) {
                                     height: 24
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/sidebar-group.tsx",
-                                    lineNumber: 97,
+                                    lineNumber: 93,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -667,13 +663,13 @@ function SidebarGroup({ title, icon, basePath, links, collapsed }) {
                                     children: title
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/sidebar-group.tsx",
-                                    lineNumber: 98,
+                                    lineNumber: 94,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/components/sidebar-group.tsx",
-                            lineNumber: 96,
+                            lineNumber: 92,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -688,18 +684,18 @@ function SidebarGroup({ title, icon, basePath, links, collapsed }) {
                                 className: "duration-300 group-hover/sidebaritem:translate-x-3 group-data-[open]:rotate-180"
                             }, void 0, false, {
                                 fileName: "[project]/app/components/sidebar-group.tsx",
-                                lineNumber: 103,
+                                lineNumber: 99,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/app/components/sidebar-group.tsx",
-                            lineNumber: 102,
+                            lineNumber: 98,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/components/sidebar-group.tsx",
-                    lineNumber: 93,
+                    lineNumber: 89,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$headlessui$2f$react$2f$dist$2f$components$2f$disclosure$2f$disclosure$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DisclosurePanel"], {
@@ -710,23 +706,23 @@ function SidebarGroup({ title, icon, basePath, links, collapsed }) {
                             children: linkContent(link)
                         }, link.href, false, {
                             fileName: "[project]/app/components/sidebar-group.tsx",
-                            lineNumber: 114,
+                            lineNumber: 110,
                             columnNumber: 13
                         }, this))
                 }, void 0, false, {
                     fileName: "[project]/app/components/sidebar-group.tsx",
-                    lineNumber: 112,
+                    lineNumber: 108,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/app/components/sidebar-group.tsx",
-            lineNumber: 92,
+            lineNumber: 88,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/app/components/sidebar-group.tsx",
-        lineNumber: 91,
+        lineNumber: 87,
         columnNumber: 5
     }, this);
 }

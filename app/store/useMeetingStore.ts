@@ -16,7 +16,6 @@ type MeetingQrToken = {
   meetingId: string;
   token: string;
   periodSeconds: number;
-  /** Waktu lokal (ms) saat token ini berganti. */
   expiresAt: number;
 };
 
@@ -80,8 +79,6 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
     }
   },
 
-  // Dipanggil berulang selama dialog QR terbuka, jadi sengaja tidak memakai
-  // isLoading/error bersama agar tombol lain di halaman tidak ikut berkedip.
   getQrToken: async (meetingId) => {
     try {
       const res = await getMeetingQrToken(meetingId);
