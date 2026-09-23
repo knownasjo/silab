@@ -8,12 +8,13 @@ import useClassStore from "@/app/store/useClassStore";
 import { useParams } from "next/navigation";
 import useMeetingStore from "@/app/store/useMeetingStore";
 import useCollaboratorStore from "@/app/store/useCollaboratorStore";
+import { watchClassEvents } from "@/app/services/class/events";
 
 const ClassDetails: React.FC = () => {
   const params = useParams<{ classId: string }>();
 
   const { getClassById, classData, isLoading } = useClassStore();
-  const { getMeetings, meetingsData } = useMeetingStore();
+  const { getMeetings, refreshMeetings, meetingsData } = useMeetingStore();
   const { getClassCollaborators, collaboratorsData } = useCollaboratorStore();
 
   useEffect(() => {
@@ -21,6 +22,12 @@ const ClassDetails: React.FC = () => {
     getClassById(params.classId);
     getMeetings(params.classId);
   }, [getClassById, getMeetings, params.classId, getClassCollaborators]);
+
+  useEffect(
+    () =>
+      watchClassEvents(params.classId, () => refreshMeetings(params.classId)),
+    [params.classId, refreshMeetings],
+  );
 
   return (
     <div className="flex h-full w-full flex-col space-y-10 overflow-auto overscroll-contain">

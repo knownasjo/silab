@@ -14,9 +14,12 @@ const readTokenFromBrowser = (): string | undefined => {
   return match ? decodeURIComponent(match[1]) : undefined;
 };
 
+export const getRequestToken = async (): Promise<string | undefined> =>
+  readTokenFromBrowser() ?? (await getToken());
+
 satellite.interceptors.request.use(
   async (request) => {
-    const token = readTokenFromBrowser() ?? (await getToken());
+    const token = await getRequestToken();
 
     if (token) request.headers["Authorization"] = `Bearer ${token}`;
 
@@ -27,7 +30,7 @@ satellite.interceptors.request.use(
 
 let pendingRefresh: Promise<string | undefined> | null = null;
 
-const refreshOnce = () =>
+export const refreshOnce = () =>
   (pendingRefresh ??= refreshAccessToken().finally(() => {
     pendingRefresh = null;
   }));

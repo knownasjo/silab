@@ -7,6 +7,7 @@ import useMeetingStore from "@/app/store/useMeetingStore";
 import { statusStyle } from "@/app/utils/attendance";
 import { buildRecap, statusCode, statusLegend } from "./recap";
 import { downloadRecapPdf } from "./recap-pdf";
+import { watchClassEvents } from "@/app/services/class/events";
 
 interface RecapAttendancesContentProps {
   classId: string;
@@ -18,7 +19,8 @@ export default function RecapAttendancesContent({
   meetingId,
 }: RecapAttendancesContentProps) {
   const { getClassById, classData } = useClassStore();
-  const { getMeetings, meetingsData, error } = useMeetingStore();
+  const { getMeetings, refreshMeetings, meetingsData, error } =
+    useMeetingStore();
 
   const [isReady, setIsReady] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -29,6 +31,11 @@ export default function RecapAttendancesContent({
       setIsReady(true),
     );
   }, [classId, getClassById, getMeetings]);
+
+  useEffect(
+    () => watchClassEvents(classId, () => refreshMeetings(classId)),
+    [classId, refreshMeetings],
+  );
 
   const meetings = useMemo(
     () =>

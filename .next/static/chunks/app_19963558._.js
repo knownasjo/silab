@@ -2856,6 +2856,107 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
     __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
 }
 }}),
+"[project]/app/services/class/events.ts [app-client] (ecmascript)": ((__turbopack_context__) => {
+"use strict";
+
+var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
+{
+__turbopack_context__.s({
+    "watchClassEvents": (()=>watchClassEvents)
+});
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/services/satellite/index.ts [app-client] (ecmascript)");
+;
+const RETRY_BASE_MS = 1_000;
+const RETRY_MAX_MS = 30_000;
+const IDLE_TIMEOUT_MS = 60_000;
+const EXPIRED_TOKEN_MESSAGE = "jwt expired";
+const CHANGE_EVENTS = new Set([
+    "ready",
+    "meeting",
+    "attendance"
+]);
+const wait = (ms, signal)=>new Promise((resolve)=>{
+        if (signal.aborted) return resolve();
+        const timer = setTimeout(resolve, ms);
+        signal.addEventListener("abort", ()=>{
+            clearTimeout(timer);
+            resolve();
+        }, {
+            once: true
+        });
+    });
+async function connect(classId, signal) {
+    const open = (token)=>fetch(`${("TURBOPACK compile-time value", "http://localhost:3000")}/class/${classId}/events`, {
+            headers: {
+                Accept: "text/event-stream",
+                ...token ? {
+                    Authorization: `Bearer ${token}`
+                } : {}
+            },
+            cache: "no-store",
+            signal
+        });
+    let response = await open(await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getRequestToken"])());
+    if (!response.ok) {
+        const message = (await response.json().catch(()=>null))?.message;
+        const token = message === EXPIRED_TOKEN_MESSAGE ? await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$satellite$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["refreshOnce"])() : undefined;
+        if (token) response = await open(token);
+    }
+    if (!response.ok || !response.body) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+    return response.body;
+}
+async function readEvents(body, onEvent) {
+    const reader = body.pipeThrough(new TextDecoderStream()).getReader();
+    let idleTimer;
+    let buffer = "";
+    const resetIdleTimer = ()=>{
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(()=>reader.cancel(), IDLE_TIMEOUT_MS);
+    };
+    try {
+        for(resetIdleTimer();; resetIdleTimer()){
+            const { value, done } = await reader.read();
+            if (done) return;
+            buffer += value;
+            let boundary;
+            while((boundary = buffer.indexOf("\n\n")) !== -1){
+                const type = buffer.slice(0, boundary).match(/^event: ?(.*)$/m)?.[1];
+                buffer = buffer.slice(boundary + 2);
+                if (type) onEvent(type);
+            }
+        }
+    } finally{
+        clearTimeout(idleTimer);
+    }
+}
+function watchClassEvents(classId, onChange) {
+    const controller = new AbortController();
+    const { signal } = controller;
+    (async ()=>{
+        let failures = 0;
+        while(!signal.aborted){
+            try {
+                const body = await connect(classId, signal);
+                await readEvents(body, (type)=>{
+                    failures = 0;
+                    if (CHANGE_EVENTS.has(type)) onChange();
+                });
+            } catch  {
+                if (signal.aborted) return;
+                failures += 1;
+            }
+            await wait(Math.min(RETRY_BASE_MS * 2 ** failures, RETRY_MAX_MS), signal);
+        }
+    })();
+    return ()=>controller.abort();
+}
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
+}
+}}),
 "[project]/app/dashboard/praktikum/[classId]/page.tsx [app-client] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
 
@@ -2873,9 +2974,11 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useClassStor
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/navigation.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useMeetingStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/store/useMeetingStore.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useCollaboratorStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/store/useCollaboratorStore.ts [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$class$2f$events$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/services/class/events.ts [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
 "use client";
+;
 ;
 ;
 ;
@@ -2888,7 +2991,7 @@ const ClassDetails = ()=>{
     _s();
     const params = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useParams"])();
     const { getClassById, classData, isLoading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useClassStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
-    const { getMeetings, meetingsData } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useMeetingStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
+    const { getMeetings, refreshMeetings, meetingsData } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useMeetingStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
     const { getClassCollaborators, collaboratorsData } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useCollaboratorStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "ClassDetails.useEffect": ()=>{
@@ -2902,6 +3005,14 @@ const ClassDetails = ()=>{
         params.classId,
         getClassCollaborators
     ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "ClassDetails.useEffect": ()=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$services$2f$class$2f$events$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["watchClassEvents"])(params.classId, {
+                "ClassDetails.useEffect": ()=>refreshMeetings(params.classId)
+            }["ClassDetails.useEffect"])
+    }["ClassDetails.useEffect"], [
+        params.classId,
+        refreshMeetings
+    ]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "flex h-full w-full flex-col space-y-10 overflow-auto overscroll-contain",
         children: !isLoading && classData && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -2910,7 +3021,7 @@ const ClassDetails = ()=>{
                     data: classData
                 }, void 0, false, {
                     fileName: "[project]/app/dashboard/praktikum/[classId]/page.tsx",
-                    lineNumber: 29,
+                    lineNumber: 36,
                     columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$praktikum$2f$class$2d$details$2d$box$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -2918,7 +3029,7 @@ const ClassDetails = ()=>{
                     assistant: collaboratorsData
                 }, void 0, false, {
                     fileName: "[project]/app/dashboard/praktikum/[classId]/page.tsx",
-                    lineNumber: 30,
+                    lineNumber: 37,
                     columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$praktikum$2f$class$2d$meetings$2d$content$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -2926,18 +3037,18 @@ const ClassDetails = ()=>{
                     meetingData: meetingsData
                 }, void 0, false, {
                     fileName: "[project]/app/dashboard/praktikum/[classId]/page.tsx",
-                    lineNumber: 31,
+                    lineNumber: 38,
                     columnNumber: 11
                 }, this)
             ]
         }, void 0, true)
     }, void 0, false, {
         fileName: "[project]/app/dashboard/praktikum/[classId]/page.tsx",
-        lineNumber: 26,
+        lineNumber: 33,
         columnNumber: 5
     }, this);
 };
-_s(ClassDetails, "5GGur3hmwW6uSf/iYlKzqULwTk8=", false, function() {
+_s(ClassDetails, "IPLr7Vc0N5Odsd/Vit8MMTMrvMQ=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useParams"],
         __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useClassStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"],
@@ -2955,4 +3066,4 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 }}),
 }]);
 
-//# sourceMappingURL=app_2f82d435._.js.map
+//# sourceMappingURL=app_19963558._.js.map

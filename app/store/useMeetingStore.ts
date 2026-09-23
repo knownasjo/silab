@@ -21,6 +21,7 @@ type MeetingQrToken = {
 
 type MeetingState = GlobalState & {
   meetingsData: IGetAllClassMeetingResponseBody[];
+  meetingsClassId: string | null;
   message: string | null;
   qrToken: MeetingQrToken | null;
   qrError: string | null;
@@ -28,6 +29,7 @@ type MeetingState = GlobalState & {
 
 type MeetingActions = {
   getMeetings: (classId: string) => Promise<void>;
+  refreshMeetings: (classId: string) => Promise<void>;
   getQrToken: (meetingId: string) => Promise<void>;
   clearQrToken: () => void;
   addMeeting: (body: IAddClassMeetingRequestBody) => Promise<void>;
@@ -53,16 +55,19 @@ const initialState = {
   isLoading: false,
   error: null,
   meetingsData: [],
+  meetingsClassId: null,
   message: null,
   qrToken: null,
   qrError: null,
 };
 
+let pendingRefresh: { classId: string; queued: boolean } | null = null;
+
 const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
   ...initialState,
 
   getMeetings: async (classId) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, meetingsClassId: classId });
 
     try {
       const res = await getMeetings(classId);
@@ -76,6 +81,35 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
       set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  refreshMeetings: async (classId) => {
+    if (pendingRefresh?.classId === classId) {
+      pendingRefresh.queued = true;
+      return;
+    }
+
+    const refresh = { classId, queued: false };
+    pendingRefresh = refresh;
+
+    try {
+      do {
+        refresh.queued = false;
+
+        const res = await getMeetings(classId).catch(() => null);
+
+        if (
+          pendingRefresh === refresh &&
+          get().meetingsClassId === classId &&
+          res?.status &&
+          res.data
+        ) {
+          set({ meetingsData: res.data });
+        }
+      } while (refresh.queued && pendingRefresh === refresh);
+    } finally {
+      if (pendingRefresh === refresh) pendingRefresh = null;
     }
   },
 

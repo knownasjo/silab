@@ -161,6 +161,14 @@ catch (error: any) {
 - Login tidak lagi habis setelah 15 menit (lihat Autentikasi). Sebelumnya QR
   di dialog presensi hilang dan diganti pesan error begitu token asisten
   kedaluwarsa
+- Detail kelas dan rekap presensi diperbarui real-time lewat
+  `GET /class/:id/events` (`app/services/class/events.ts`): presensi yang masuk
+  dari HP, perubahan dari laboran/asisten lain, dan buka/tutup sesi langsung
+  tampil tanpa refresh. Data dimuat ulang diam-diam lewat
+  `refreshMeetings()` di `useMeetingStore`, tanpa `isLoading`, sehingga
+  tombol tidak berkedip; event yang datang beruntun digabung menjadi satu
+  permintaan. Stream memakai `fetch` (bukan `EventSource`) agar token tetap
+  dikirim di header, lalu tersambung ulang sendiri bila putus
 - Tombol Modul "Click to Open" di detail kelas membuka halaman Segera Hadir;
   sebelumnya tombol itu tidak melakukan apa-apa karena backend belum
   menyimpan modul

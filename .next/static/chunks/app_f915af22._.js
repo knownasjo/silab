@@ -271,7 +271,9 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
 {
 __turbopack_context__.s({
-    "default": (()=>__TURBOPACK__default__export__)
+    "default": (()=>__TURBOPACK__default__export__),
+    "getRequestToken": (()=>getRequestToken),
+    "refreshOnce": (()=>refreshOnce)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$utils$2f$data$3a$ee2c83__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__ = __turbopack_context__.i("[project]/app/utils/data:ee2c83 [app-client] (ecmascript) <text/javascript>");
@@ -288,8 +290,9 @@ const readTokenFromBrowser = ()=>{
     const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/);
     return match ? decodeURIComponent(match[1]) : undefined;
 };
+const getRequestToken = async ()=>readTokenFromBrowser() ?? await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$utils$2f$data$3a$ee2c83__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__["getToken"])();
 satellite.interceptors.request.use(async (request)=>{
-    const token = readTokenFromBrowser() ?? await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$utils$2f$data$3a$ee2c83__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$text$2f$javascript$3e$__["getToken"])();
+    const token = await getRequestToken();
     if (token) request.headers["Authorization"] = `Bearer ${token}`;
     return request;
 }, async (error)=>Promise.reject(error));
