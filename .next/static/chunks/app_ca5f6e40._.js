@@ -915,7 +915,7 @@ var _s = __turbopack_context__.k.signature();
 ;
 const ListPengumuman = ()=>{
     _s();
-    const { announcementsData, getAllAnnouncements } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useAnnouncementStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
+    const { announcementsData, getAllAnnouncements, isLoading } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useAnnouncementStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])();
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "ListPengumuman.useEffect": ()=>{
             getAllAnnouncements();
@@ -936,43 +936,53 @@ const ListPengumuman = ()=>{
                             children: "Semua"
                         }, void 0, false, {
                             fileName: "[project]/app/dashboard/pengumuman/list-pengumuman/page.tsx",
-                            lineNumber: 19,
+                            lineNumber: 20,
                             columnNumber: 11
                         }, this),
                         " pengumuman."
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/dashboard/pengumuman/list-pengumuman/page.tsx",
-                    lineNumber: 18,
+                    lineNumber: 19,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/dashboard/pengumuman/list-pengumuman/page.tsx",
-                lineNumber: 17,
+                lineNumber: 18,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "mt-10 flex flex-col space-y-10",
-                children: announcementsData && announcementsData.map((announcement)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$pengumuman$2f$announcement$2d$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                        announcement: announcement
-                    }, announcement.id, false, {
+                children: [
+                    !isLoading && announcementsData?.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "rounded-2xl bg-white p-8 text-center text-base font-semibold text-[#5E6278]",
+                        children: "Belum ada pengumuman."
+                    }, void 0, false, {
                         fileName: "[project]/app/dashboard/pengumuman/list-pengumuman/page.tsx",
-                        lineNumber: 26,
-                        columnNumber: 15
-                    }, this))
-            }, void 0, false, {
+                        lineNumber: 25,
+                        columnNumber: 11
+                    }, this),
+                    announcementsData && announcementsData.map((announcement)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$pengumuman$2f$announcement$2d$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                            announcement: announcement
+                        }, announcement.id, false, {
+                            fileName: "[project]/app/dashboard/pengumuman/list-pengumuman/page.tsx",
+                            lineNumber: 32,
+                            columnNumber: 15
+                        }, this))
+                ]
+            }, void 0, true, {
                 fileName: "[project]/app/dashboard/pengumuman/list-pengumuman/page.tsx",
-                lineNumber: 22,
+                lineNumber: 23,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/dashboard/pengumuman/list-pengumuman/page.tsx",
-        lineNumber: 16,
+        lineNumber: 17,
         columnNumber: 5
     }, this);
 };
-_s(ListPengumuman, "qv5c459wqAJdKxCu4r+yYRZGQ4o=", false, function() {
+_s(ListPengumuman, "tMtZ3xXbEMEpZ/gzfr4LJxFbdQ8=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$useAnnouncementStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
     ];

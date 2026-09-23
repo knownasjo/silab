@@ -33,6 +33,17 @@
         "app/page": "rsc"
       }
     },
+    "00e6fdd9efd39a070309a1e2c81e074e08e73b2e25": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/page": "rsc"
+      }
+    },
     "400766dd8b9e4dbb6ff82ea71693332a2e871cba65": {
       "workers": {
         "app/page": {

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { formatDay } from "@/app/utils/day";
 import AddCollaboratorsButton from "@/app/components/praktikum/add-collaborators-button";
 import { IGetClassByIdResponseBody } from "@/app/interfaces/class/class.interface";
 import useAuthStore from "@/app/store/useAuthStore";
@@ -17,7 +18,7 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({ data, assistant }) => {
       <div className="flex h-full flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Hari, Jam</p>
         <p className="text-[18px] font-semibold text-black">
-          {data.day}, <br /> {data.startAt} - {data.endAt}
+          {formatDay(data.day)}, <br /> {data.startAt} - {data.endAt}
         </p>
       </div>
       <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
@@ -27,7 +28,7 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({ data, assistant }) => {
       </div>
       <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
       <div className="flex h-full flex-col space-y-4">
-        <div className="flex flex-row items-center justify-between">
+        <div className="flex flex-row items-center justify-between space-x-2">
           <p className="text-[16px] font-semibold text-[#5E6278]">
             Asisten Praktikum
           </p>
@@ -63,7 +64,7 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({ data, assistant }) => {
         </p>
       </div>
       <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
-      <div className="flex h-full w-[100px] flex-col justify-between space-y-4">
+      <div className="flex h-full w-[100px] flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Modul</p>
         <Link
           href={{

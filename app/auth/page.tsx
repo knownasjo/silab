@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import ErrorDialog from "../components/error-dialog";
+import WelcomeHero from "../components/welcome-hero";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { loginSchema } from "../validations/validation.schema";
@@ -44,69 +45,88 @@ export default function Authentication() {
     router.refresh();
   };
 
+  const inputClassName = (hasError: boolean) =>
+    `h-[56px] w-full rounded-[30px] border px-4 focus:outline-[#3272CA] ${hasError ? "border-[#F1416C]" : "border-[#E1E3EA]"}`;
+
   return (
     <>
-      <div className="flex w-full flex-row items-center justify-between px-[60px] pb-4">
-        <div className="flex w-2/3 flex-col items-center justify-center">
-          <div className="relative h-[300px] w-[250px]">
-            <Image
-              alt="illustration"
-              src={"illustration-1.svg"}
-              fill
-              style={{ objectFit: "contain" }}
-            />
-          </div>
-          <div className="w-[543px] text-center">
-            <p className="text-[54px] font-bold text-[#1D1D1D]">
-              Selamat datang di Dashboard{" "}
-              <span className="font-semibold text-[#3272CA]">SILAB.</span>
-            </p>
-            <p className="text-2xl font-semibold text-[#5E6278]">
-              Atur dan pantau semua informasi praktikum dengan mudah di sini.
-            </p>
-          </div>
+      <div className="flex min-h-screen w-full flex-row items-center justify-between gap-12 px-[60px] py-10">
+        <div className="flex min-w-0 flex-1 justify-center">
+          <WelcomeHero />
         </div>
-        <div className="flex w-1/3 flex-col items-center space-y-[32px] rounded-2xl border border-[#1d1d1d]/30 p-6">
-          <p className="text-[42px] font-extrabold text-[#3272CA]">Log In</p>
+        <div className="flex w-full max-w-[448px] shrink-0 flex-col items-center space-y-8 rounded-2xl border border-[#1d1d1d]/30 p-6">
+          <h1 className="text-[42px] font-extrabold text-[#3272CA]">Log In</h1>
           <form
+            noValidate
             onSubmit={handleSubmit(onSubmit)}
-            className="flex w-full flex-col items-center space-y-[20px]"
+            className="flex w-full flex-col space-y-5"
           >
-            <label htmlFor="login" />
-            <input
-              type="nim"
-              className="h-[56px] w-[400px] rounded-[30px] border border-[#E1E3EA] px-4 py-6 focus:outline-[#3272CA]"
-              placeholder="NIM"
-              {...register("nim")}
-              required
-            />
-            {errors && <p>{errors.nim?.message}</p>}
-            <div className="flex w-full flex-col items-center space-y-[16px]">
-              <div>
-                <label htmlFor="login" />
+            <div className="space-y-2">
+              <label htmlFor="nim" className="sr-only">
+                NIM
+              </label>
+              <input
+                id="nim"
+                type="text"
+                inputMode="numeric"
+                autoComplete="username"
+                className={inputClassName(!!errors.nim)}
+                placeholder="NIM"
+                aria-invalid={!!errors.nim}
+                {...register("nim")}
+              />
+              {errors.nim && (
+                <p
+                  role="alert"
+                  className="px-4 text-sm font-semibold text-[#F1416C]"
+                >
+                  {errors.nim.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <div className="relative">
                 <input
+                  id="password"
                   type={visible ? "text" : "password"}
-                  className="relative h-[56px] w-[400px] rounded-[30px] border border-[#E1E3EA] px-4 py-6 focus:outline-[#3272CA]"
+                  autoComplete="current-password"
+                  className={`${inputClassName(!!errors.password)} pr-14`}
                   placeholder="Password"
+                  aria-invalid={!!errors.password}
                   {...register("password")}
-                  required
                 />
-                <span className="absolute -translate-x-10 translate-y-4">
+                <button
+                  type="button"
+                  onClick={() => setVisible(!visible)}
+                  aria-label={
+                    visible ? "Sembunyikan password" : "Tampilkan password"
+                  }
+                  className="absolute inset-y-0 right-4 flex items-center"
+                >
                   <Image
-                    alt="password hide toggler"
+                    alt=""
                     src={visible ? "/eye-slash.svg" : "/eye.svg"}
-                    onClick={() => setVisible(!visible)}
                     width={24}
                     height={24}
                   />
-                </span>
+                </button>
               </div>
-              {errors && <p>{errors.nim?.message}</p>}
+              {errors.password && (
+                <p
+                  role="alert"
+                  className="px-4 text-sm font-semibold text-[#F1416C]"
+                >
+                  {errors.password.message}
+                </p>
+              )}
             </div>
             <button
               type="submit"
               disabled={isLoading}
-              className="h-[48px] w-[400px] rounded-[30px] bg-[#3272CA] text-[18px] font-semibold text-white disabled:opacity-60"
+              className="h-[48px] w-full rounded-[30px] bg-[#3272CA] text-[18px] font-semibold text-white disabled:opacity-60"
             >
               {isLoading ? (
                 <span className="loading loading-dots loading-md" />

@@ -20,7 +20,7 @@ const SubjectClasses: React.FC<ISubjectClassesCardProps> = ({
   );
 
   return (
-    <div className="mt-10 flex h-full w-full flex-row flex-wrap gap-4">
+    <div className="mt-10 grid w-full grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
       {filteredSubjectClasses.map((subjectClass) => (
         <ClassCard subjectClass={subjectClass} key={subjectClass.id} />
       ))}

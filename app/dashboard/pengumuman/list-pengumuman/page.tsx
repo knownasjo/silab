@@ -6,7 +6,8 @@ import useAnnouncementStore from "@/app/store/useAnnouncementStore";
 import { useEffect } from "react";
 
 const ListPengumuman = () => {
-  const { announcementsData, getAllAnnouncements } = useAnnouncementStore();
+  const { announcementsData, getAllAnnouncements, isLoading } =
+    useAnnouncementStore();
 
   useEffect(() => {
     getAllAnnouncements();
@@ -20,6 +21,11 @@ const ListPengumuman = () => {
         </p>
       </div>
       <div className="mt-10 flex flex-col space-y-10">
+        {!isLoading && announcementsData?.length === 0 && (
+          <div className="rounded-2xl bg-white p-8 text-center text-base font-semibold text-[#5E6278]">
+            Belum ada pengumuman.
+          </div>
+        )}
         {announcementsData &&
           announcementsData.map(
             (announcement: IGetAllAnnouncementsResponseBody) => (

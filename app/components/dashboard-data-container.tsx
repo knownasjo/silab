@@ -14,7 +14,7 @@ export default function DashboardDataContainer({
   const isReady = data !== null && data !== undefined;
 
   return (
-    <div className="flex h-[280px] w-1/3 flex-col justify-between rounded-3xl bg-[#3272CA] p-5">
+    <div className="flex h-[clamp(200px,32vh,280px)] w-1/3 flex-col justify-between rounded-3xl bg-[#3272CA] p-5">
       <p className="text-7xl font-bold text-[#FFBF01]">
         {!isReady && "-"}
         {isReady &&
@@ -22,7 +22,9 @@ export default function DashboardDataContainer({
       </p>
       <div className="flex flex-col text-white">
         <p className="text-[24px] font-bold">{title}</p>
-        <p className="text-[18px] font-semibold">{subTitle}</p>
+        {/* Dua baris supaya judul semua kartu sejajar walau subjudul
+            ada yang muat satu baris. */}
+        <p className="min-h-[3.5rem] text-[18px] font-semibold">{subTitle}</p>
       </div>
     </div>
   );

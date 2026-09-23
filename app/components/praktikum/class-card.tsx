@@ -5,6 +5,7 @@ import {
   IGetClassResponseBody,
 } from "@/app/interfaces/class/class.interface";
 import Link from "next/link";
+import { formatDay } from "@/app/utils/day";
 
 interface IClassCardProps {
   subjectClass: IGetClassResponseBody;
@@ -15,7 +16,7 @@ const ClassCard: React.FC<IClassCardProps> = ({ subjectClass }) => {
     <Link
       href={`praktikum/${subjectClass.id}`}
       key={subjectClass.id}
-      className="flex h-[175px] w-1/5 flex-col justify-between rounded-2xl bg-[#3272CA] p-3"
+      className="flex h-[175px] w-full flex-col justify-between rounded-2xl bg-[#3272CA] p-3"
     >
       <div className="flex flex-row justify-between">
         <p className="text-3xl font-bold text-[#FFBF01]">{subjectClass.name}</p>
@@ -32,7 +33,7 @@ const ClassCard: React.FC<IClassCardProps> = ({ subjectClass }) => {
       <div className="flex flex-col text-white">
         <p className="text-lg">{subjectClass.subject_name}</p>
         <p className="text-sm">
-          {subjectClass.day}, Sesi ke - {subjectClass.startAt} -{" "}
+          {formatDay(subjectClass.day)}, {subjectClass.startAt} -{" "}
           {subjectClass.endAt}
         </p>
       </div>

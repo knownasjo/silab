@@ -12,7 +12,11 @@ import { useEffect, useState } from "react";
 import useAuthStore from "../store/useAuthStore";
 import { useRouter } from "next/navigation";
 
-export default function SignOutButton() {
+export default function SignOutButton({
+  collapsed = false,
+}: {
+  collapsed?: boolean;
+}) {
   const router = useRouter();
 
   let [isOpen, setIsOpen] = useState(false);
@@ -33,18 +37,26 @@ export default function SignOutButton() {
     <div className="group/sidebaritem">
       <button
         onClick={() => setIsOpen(true)}
-        className={`flex w-full flex-row space-x-3 rounded-full px-4 py-3 font-semibold text-[#FE2F60] transition-all duration-300 group-hover/sidebaritem:bg-[#FBEFEF]`}
+        title={collapsed ? "Sign Out" : undefined}
+        aria-label={collapsed ? "Sign Out" : undefined}
+        className={`flex w-full flex-row rounded-full py-3 font-semibold text-[#FE2F60] transition-all duration-300 group-hover/sidebaritem:bg-[#FBEFEF] ${collapsed ? "justify-center" : "space-x-3 px-4"}`}
       >
         <Image
-          className="transition-all duration-300 group-hover/sidebaritem:translate-x-3"
+          className={
+            collapsed
+              ? ""
+              : "transition-all duration-300 group-hover/sidebaritem:translate-x-3"
+          }
           src={"/logout.png"}
           height={24}
           width={24}
           alt={"logout"}
         />
-        <p className="transition-all duration-300 group-hover/sidebaritem:translate-x-3">
-          Sign Out
-        </p>
+        {!collapsed && (
+          <p className="whitespace-nowrap transition-all duration-300 group-hover/sidebaritem:translate-x-3">
+            Sign Out
+          </p>
+        )}
       </button>
       <Dialog
         onClose={() => setIsOpen(false)}

@@ -8,6 +8,7 @@ import {
 } from "@headlessui/react";
 import Image from "next/image";
 import { day } from "../../types/day";
+import { DAY_LABELS, formatDay } from "@/app/utils/day";
 import { useEffect, useState } from "react";
 
 interface ClassDayDropdownProps {
@@ -21,13 +22,10 @@ export default function ClassDayDropdown({
 }: ClassDayDropdownProps) {
   const [selectedDay, setSelectedDay] = useState<string>("");
 
-  const days: day[] = [
-    { title: "Monday", value: "MONDAY" },
-    { title: "Tuesday", value: "TUESDAY" },
-    { title: "Wednesday", value: "WEDNESDAY" },
-    { title: "Thursday", value: "THURSDAY" },
-    { title: "Friday", value: "FRIDAY" },
-  ];
+  const days: day[] = Object.entries(DAY_LABELS).map(([value, title]) => ({
+    title,
+    value,
+  }));
 
   useEffect(() => setSelectedDay(value), [value]);
 
@@ -39,7 +37,7 @@ export default function ClassDayDropdown({
           value={value}
           className={`flex h-full w-full flex-row items-center justify-between rounded-2xl bg-[#f5f5f5] px-[15px] font-semibold text-[#1D1D1D]`}
         >
-          {selectedDay === "" ? "Hari" : selectedDay}
+          {selectedDay === "" ? "Hari" : formatDay(selectedDay)}
           <div className="relative h-[24px] w-[24px]">
             <Image src={"/down.png"} alt="chevron down" fill />
           </div>

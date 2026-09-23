@@ -20,11 +20,13 @@ export default function Praktikum() {
     <div className="h-full w-full space-y-10 overflow-auto overscroll-contain">
       <AddPracticumBanner />
       {userData?.role === "LABORAN" && <SubjectsList />}
-      {userData?.role === "MAHASISWA" &&
-        classesData &&
-        classesData.map((subjectClass) => (
-          <ClassCard subjectClass={subjectClass} key={subjectClass.id} />
-        ))}
+      {userData?.role === "MAHASISWA" && classesData && (
+        <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+          {classesData.map((subjectClass) => (
+            <ClassCard subjectClass={subjectClass} key={subjectClass.id} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

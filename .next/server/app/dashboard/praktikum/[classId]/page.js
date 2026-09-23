@@ -8,7 +8,7 @@ runtime.loadChunk("server/chunks/ssr/[root-of-the-server]__8f26fc9d._.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_96715ba7._.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_next_dist_client_components_forbidden-error_ea7ea172.js");
 runtime.loadChunk("server/chunks/ssr/node_modules_next_dist_client_components_unauthorized-error_c8949b27.js");
-runtime.loadChunk("server/chunks/ssr/app_8b29e56b._.js");
+runtime.loadChunk("server/chunks/ssr/app_190565ab._.js");
 runtime.loadChunk("server/chunks/ssr/app_dashboard_praktikum_[classId]_loading_tsx_a903ff11._.js");
 runtime.loadChunk("server/chunks/ssr/_07ff6d13._.js");
 runtime.getOrInstantiateRuntimeModule("[project]/.next-internal/server/app/dashboard/praktikum/[classId]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/utils/cookie.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)", CHUNK_PUBLIC_PATH);

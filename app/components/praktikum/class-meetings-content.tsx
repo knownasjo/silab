@@ -59,12 +59,12 @@ export default function ClassMeetingsContent({
         </div>
       </div>
       {!selectedMeeting && (
-        <div className="flex h-full w-full items-center justify-center">
+        <div className="flex w-full flex-1 items-center justify-center">
           <p>Pilih Pertemuan untuk Melihat Daftar Presensi! </p>
         </div>
       )}
       {selectedMeeting && (
-        <div className="h-full w-full space-y-14 bg-white p-5">
+        <div className="w-full flex-1 space-y-10 rounded-[20px] bg-white p-5">
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center space-x-4">
               <ShowQrCodeButton
@@ -108,15 +108,12 @@ export default function ClassMeetingsContent({
                   : "Presensi Ditutup"}
               </p>
             </div>
-            <div className="flex flex-col items-end">
-              <p>Tanggal Meeting</p>
-              <p>
-                Jumlah hadir {attendedCount}/{students.length}
-              </p>
-            </div>
+            <p className="text-base font-semibold text-[#5E6278]">
+              Jumlah hadir {attendedCount}/{students.length}
+            </p>
           </div>
           <div id="recap-attendances">
-            <div className="flex w-full flex-row text-base font-bold text-[#5E6278]">
+            <div className="flex w-full flex-row border-b border-[#F1F1F2] pb-3 text-base font-bold text-[#5E6278]">
               <p className="flex w-2/12 items-center justify-center">NIM</p>
               <p className="flex w-5/12 items-center justify-center">Nama</p>
               <p className="flex w-3/12 items-center justify-center">
@@ -130,7 +127,7 @@ export default function ClassMeetingsContent({
               return (
                 <div
                   key={student.student_id}
-                  className="flex w-full flex-row text-base font-semibold text-[#5E6278]"
+                  className="flex w-full flex-row items-center border-b border-[#F1F1F2] py-3 text-base font-semibold text-[#5E6278] last:border-b-0"
                 >
                   <p className="flex w-2/12 items-center justify-center">
                     {student.nim}

@@ -164,6 +164,30 @@ catch (error: any) {
 - Tombol Modul "Click to Open" di detail kelas membuka halaman Segera Hadir;
   sebelumnya tombol itu tidak melakukan apa-apa karena backend belum
   menyimpan modul
+- Sidebar bisa diperkecil lewat tombol bulat di tepinya: hanya ikon yang
+  tampil (tooltip saat disorot), dan submenu Master Data/Pengumuman muncul di
+  samping ikon (`sidebar-group.tsx`, menggantikan dua komponen disclosure yang
+  isinya kembar). Pilihan disimpan di cookie `sidebar-collapsed` dan dibaca
+  `dashboard/layout.tsx` di server, jadi lebarnya benar sejak render pertama.
+  Lebar sidebar kini tetap (300px / 104px), bukan ¼ layar
+- Kerapian tampilan, desain tidak diubah: kelebihan tinggi 32px di semua
+  halaman hilang (panel utama kini punya jarak bawah dan konten menggulir di
+  dalamnya); hari tampil dalam bahasa Indonesia (`app/utils/day.ts`) termasuk
+  di pilihan hari form kelas; kartu kelas memakai grid yang menyesuaikan
+  lebar; tabel presensi punya jarak dan garis antarbaris, tanpa label
+  "Tanggal Meeting" yang tidak pernah berisi; baris tabel Pembayaran sejajar
+  dan lebar kolomnya tidak lagi melebihi 100%; tombol filter seragam; kartu
+  dashboard langsung di bawah sambutan dan menyesuaikan tinggi layar; daftar
+  pengumuman kosong menampilkan keterangan
+- Halaman login (`/auth`) dan halaman awal (`/`) dirapikan: isi di tengah
+  layar dan kotak login sejajar dengan sambutan (ilustrasi dan sambutan kini
+  satu komponen, `welcome-hero.tsx`); kolom input mengikuti lebar kotak
+  sehingga tidak keluar kotak di layar 1280 ke bawah; jarak antarkolom
+  seragam (sebelumnya `<label>` kosong dan `<p>` error yang selalu dirender
+  ikut menambah jarak). Validasi memakai pesan zod berbahasa Indonesia di
+  bawah kolom yang tepat, bukan balon bawaan browser; sebelumnya error NIM
+  tampil dua kali dan error password tidak pernah tampil. Tombol mata kini
+  `<button>` yang bisa dipakai lewat keyboard
 
 ## Pekerjaan yang masih tersisa
 
@@ -175,13 +199,15 @@ catch (error: any) {
 - [ ] Dependensi `html2canvas` tidak dipakai lagi dan bisa dihapus
 - [ ] Pindahkan enam file terakhir dari `app/actions/` ke `app/services/`,
       lalu hapus folder `actions/` dan `app/types/`
-- [ ] Halaman Praktikum: asisten melihat **semua** kelas, bukan hanya kelas
-      yang diampu — butuh endpoint baru di backend
+- [ ] Halaman Praktikum: asisten **tidak melihat kelas apa pun**
+      (`dashboard/praktikum/page.tsx` hanya menampilkan kartu untuk LABORAN
+      dan MAHASISWA), jadi asisten tidak bisa membuka detail kelas untuk
+      menampilkan QR dari menu. Idealnya hanya kelas yang diampu, yang butuh
+      endpoint baru di backend
 - [ ] Kartu dashboard MAHASISWA "Jumlah Kelas Praktikum" menampilkan seluruh
       kelas, bukan kelas yang diampu (alasan sama)
 - [ ] `app/validations/validation.schema.ts`: `addClassSchema.name.max(1)`
-      (nama kelas maksimal 1 karakter) dan pesan error field NIM berbunyi
-      "Email can't be empty!"
+      (nama kelas maksimal 1 karakter)
 - [ ] Cookie `accessToken` diset tanpa `httpOnly`, `secure`, `sameSite`
       (sengaja terbaca JavaScript, lihat Autentikasi). `refreshToken` sudah
       `httpOnly` tetapi belum `secure` karena lab masih memakai HTTP

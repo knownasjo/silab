@@ -3,7 +3,7 @@ import DashboardDataCards from "./dashboard-data-cards";
 
 export default function BannerDashboard() {
   return (
-    <div className="flex h-[300px] w-full flex-row items-start justify-between">
+    <div className="flex h-[clamp(220px,33vh,300px)] w-full shrink-0 flex-row items-start justify-between">
       <div className="flex w-[534px] flex-col space-y-4">
         <p className="text-[54px] font-bold leading-tight text-[#1d1d1d]">
           Selamat datang di Dashboard{" "}
@@ -18,6 +18,7 @@ export default function BannerDashboard() {
         alt="illustration"
         width={222}
         height={300}
+        className="h-full w-auto"
         priority
       />
     </div>

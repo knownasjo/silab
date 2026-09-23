@@ -9,7 +9,7 @@ export default function ClassesPreview({
   subjectClasses,
 }: ClassesPreviewProps) {
   return (
-    <div className="mt-10 flex w-full flex-row flex-wrap gap-4">
+    <div className="mt-10 grid w-full grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
       {subjectClasses.map((subjectClass) => (
         <SmallClassCard subjectClass={subjectClass} key={subjectClass.id} />
       ))}

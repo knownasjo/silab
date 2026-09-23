@@ -23,6 +23,7 @@ import {
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash";
+import { formatDay } from "@/app/utils/day";
 
 export default function Pembayaran() {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -150,7 +151,10 @@ export default function Pembayaran() {
       <div className="flex h-fit w-full flex-row space-x-9">
         <div className="flex h-[200px] w-[300px] flex-col justify-between rounded-3xl bg-[#3272CA] p-5">
           <h1 className="text-6xl font-bold text-[#FFBF01]">
-            {activationData.filter((student) => student.status === false).length}
+            {
+              activationData.filter((student) => student.status === false)
+                .length
+            }
           </h1>
           <p className="text-base font-semibold text-white">
             Jumlah aktivasi mahasiswa yang{" "}
@@ -190,19 +194,19 @@ export default function Pembayaran() {
         <div className="flex w-full flex-row space-x-3">
           <button
             onClick={() => setStatusQuery("")}
-            className={`h-fit w-fit rounded-full p-3 text-xs font-semibold ${status === "" ? "bg-[#3272CA] text-white" : "border-2 border-[#BFD9EF] text-[#3272CA]"}`}
+            className={`h-fit w-fit rounded-full border-2 p-3 text-xs font-semibold ${status === "" ? "border-[#3272CA] bg-[#3272CA] text-white" : "border-[#BFD9EF] text-[#3272CA]"}`}
           >
             Show All
           </button>
           <button
             onClick={() => setStatusQuery("true")}
-            className={`h-fit w-fit rounded-full p-3 text-xs font-semibold ${status === "true" ? "bg-[#3272CA] text-white" : "border-2 border-[#BFD9EF] text-[#3272CA]"}`}
+            className={`h-fit w-fit rounded-full border-2 p-3 text-xs font-semibold ${status === "true" ? "border-[#3272CA] bg-[#3272CA] text-white" : "border-[#BFD9EF] text-[#3272CA]"}`}
           >
             Sudah Bayar
           </button>
           <button
             onClick={() => setStatusQuery("false")}
-            className={`h-fit w-fit rounded-full p-3 text-xs font-semibold ${status === "false" ? "bg-[#3272CA] text-white" : "border-2 border-[#BFD9EF] text-[#3272CA]"}`}
+            className={`h-fit w-fit rounded-full border-2 p-3 text-xs font-semibold ${status === "false" ? "border-[#3272CA] bg-[#3272CA] text-white" : "border-[#BFD9EF] text-[#3272CA]"}`}
           >
             Belum Bayar
           </button>
@@ -212,7 +216,7 @@ export default function Pembayaran() {
             <p className="flex w-2/12 justify-center">NIM</p>
             <p className="flex w-3/12 justify-center">Nama</p>
             <p className="flex w-3/12 justify-center">Mata Kuliah</p>
-            <p className="flex w-2/12 justify-center">Kelas</p>
+            <p className="flex w-1/12 justify-center">Kelas</p>
             <p className="flex w-2/12 justify-center">Status Pembayaran</p>
             <p className="flex w-1/12 justify-center"></p>
           </div>
@@ -225,16 +229,16 @@ export default function Pembayaran() {
           {activationData.map((student) => (
             <div
               key={student.id}
-              className="flex flex-row text-sm font-semibold text-[#5E6278]"
+              className="flex flex-row items-center text-sm font-semibold text-[#5E6278]"
             >
               <p className="flex w-2/12 justify-center">{student.nim}</p>
               <p className="flex w-3/12 justify-center">{student.student}</p>
-              <div className="flex w-3/12 flex-col justify-center space-y-2">
+              <ul className="flex w-3/12 list-disc flex-col justify-center space-y-2 pl-5">
                 {student.subjects.map((subject) => (
                   <li key={subject.subject_name}>{subject.subject_name}</li>
                 ))}
-              </div>
-              <p className="flex w-2/12 justify-center">
+              </ul>
+              <p className="flex w-1/12 justify-center">
                 {student.registered_class ? student.registered_class.name : "-"}
               </p>
               <p
@@ -323,7 +327,7 @@ export default function Pembayaran() {
                     <ListboxButton className="mt-2 flex w-full flex-row items-center justify-between rounded-2xl border-2 border-[#BFD9EF] p-3 text-left text-sm font-semibold text-[#3272CA]">
                       <span>
                         {selectedClass
-                          ? `Kelas ${selectedClass.name} — ${selectedClass.day}, ${selectedClass.session_time}`
+                          ? `Kelas ${selectedClass.name} — ${formatDay(selectedClass.day)}, ${selectedClass.session_time}`
                           : "Pilih Kelas"}
                       </span>
                       <Image
@@ -352,8 +356,9 @@ export default function Pembayaran() {
                               disabled={availableClass.is_full && !isCurrent}
                               className="cursor-pointer rounded-xl p-2 text-sm font-semibold text-[#1D1D1D] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40 data-[focus]:bg-[#D2E3F1]"
                             >
-                              Kelas {availableClass.name} — {availableClass.day}
-                              , {availableClass.session_time} (
+                              Kelas {availableClass.name} —{" "}
+                              {formatDay(availableClass.day)},{" "}
+                              {availableClass.session_time} (
                               {availableClass.registered_students}/
                               {availableClass.quota})
                               {isCurrent && " — kelas sekarang"}

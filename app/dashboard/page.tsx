@@ -20,7 +20,7 @@ export default function Dashboard() {
   }, [getDashboardData]);
 
   return (
-    <div className="flex h-full w-full flex-col justify-between space-y-6 overflow-auto overscroll-contain">
+    <div className="flex h-full w-full flex-col space-y-6 overflow-auto overscroll-contain">
       <BannerDashboard />
       <DashboardDataCards
         totalSubject={totalSubject}
