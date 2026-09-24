@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///Users/jordanbramada/Documents/GitHub/silab/silab/app/dashboard/segera-hadir/back-button.tsx"],"sourcesContent":["\"use client\";\n\nimport { useRouter } from \"next/navigation\";\n\nexport default function BackButton() {\n  const router = useRouter();\n\n  const goBack = () =>\n    window.history.length > 1 ? router.back() : router.push(\"/dashboard\");\n\n  return (\n    <button\n      onClick={goBack}\n      className=\"rounded-full bg-[#3272CA] px-6 py-3 text-sm font-semibold text-white\"\n    >\n      Kembali\n    </button>\n  );\n}\n"],"names":[],"mappings":";;;;AAEA;AAFA;;;AAIe,SAAS;IACtB,MAAM,SAAS,CAAA,GAAA,kIAAA,CAAA,YAAS,AAAD;IAEvB,MAAM,SAAS,IACb,OAAO,OAAO,CAAC,MAAM,GAAG,IAAI,OAAO,IAAI,KAAK,OAAO,IAAI,CAAC;IAE1D,qBACE,8OAAC;QACC,SAAS;QACT,WAAU;kBACX;;;;;;AAIL","debugId":null}}]
-}

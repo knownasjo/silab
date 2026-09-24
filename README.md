@@ -23,7 +23,7 @@ npm run dev -- -p 3001      # backend memakai port 3000
 
 ### Environment
 
-File `.env.local` di root:
+File `.env.local` di root (tidak di-commit; salin dari `.env.example`):
 
 ```
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
