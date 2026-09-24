@@ -61,6 +61,12 @@ export async function refreshAccessToken(): Promise<string | undefined> {
   return accessToken;
 }
 
+export async function hasRefreshToken(): Promise<boolean> {
+  const cookie = await cookies();
+
+  return Boolean(cookie.get("refreshToken")?.value);
+}
+
 export async function getUserData(): Promise<{
   role: string;
   fullname: string;

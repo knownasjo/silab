@@ -1,4 +1,8 @@
-import { getToken, refreshAccessToken } from "@/app/utils/cookie";
+import {
+  getToken,
+  hasRefreshToken,
+  refreshAccessToken,
+} from "@/app/utils/cookie";
 import axios, { InternalAxiosRequestConfig } from "axios";
 
 const satellite = axios.create({
@@ -31,10 +35,22 @@ satellite.interceptors.request.use(
 
 let pendingRefresh: Promise<string | undefined> | null = null;
 
+const leaveEndedSession = async () => {
+  if (typeof window === "undefined" || window.location.pathname === "/auth")
+    return;
+
+  if (!(await hasRefreshToken())) window.location.replace("/auth");
+};
+
 export const refreshOnce = () =>
-  (pendingRefresh ??= refreshAccessToken().finally(() => {
-    pendingRefresh = null;
-  }));
+  (pendingRefresh ??= refreshAccessToken()
+    .then(async (token) => {
+      if (!token) await leaveEndedSession();
+      return token;
+    })
+    .finally(() => {
+      pendingRefresh = null;
+    }));
 
 satellite.interceptors.response.use(
   async (response) => response,

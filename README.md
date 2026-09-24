@@ -86,8 +86,20 @@ Access token berlaku 15 menit dan diperbarui sendiri (`app/utils/cookie.ts`):
 - Bila jam browser tertinggal dari jam server, backend bisa membalas
   `jwt expired` walau cookie masih ada. Interceptor lalu memperbarui token
   dan mengulang permintaan itu sekali.
-- Setelah 1 hari backend menolak refresh token; semua cookie sesi dihapus
-  dan `SignOutButton` mengalihkan ke `/auth`.
+- Backend menolak refresh token setelah 1 hari, setelah password akun itu
+  diganti (lihat "Lupa password" di README backend), atau setelah akunnya
+  dihapus. `refreshAccessToken()` lalu menghapus semua cookie sesi. Saat
+  halaman dimuat, `SignOutButton` mengalihkan ke `/auth`; di halaman yang
+  sedang terbuka, `refreshOnce()` (`app/services/satellite/index.ts`)
+  mengalihkan ke `/auth` bila cookie `refreshToken` memang sudah tidak ada
+  (`hasRefreshToken()`), jadi gangguan jaringan sesaat tidak mengeluarkan
+  pengguna. Karena backend memutus stream SSE akun yang password-nya diganti,
+  halaman dashboard yang terbuka kembali ke `/auth` sekitar 2 detik kemudian.
+
+Lupa password tidak punya alur di web. Halaman `/auth` hanya menulis "Lupa
+password? Hubungi laboran.", karena akun laboran dan dosen diganti password-nya
+oleh laboran lewat `PUT /user/:nimAtauId/password` (lihat README backend).
+Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 
 ## Halaman
 

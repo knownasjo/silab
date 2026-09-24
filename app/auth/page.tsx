@@ -134,6 +134,9 @@ export default function Authentication() {
                 "Log In"
               )}
             </button>
+            <p className="text-center text-sm text-[#5E6278]">
+              Lupa password? Hubungi laboran.
+            </p>
           </form>
         </div>
       </div>
