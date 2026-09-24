@@ -13,6 +13,15 @@ export const postCollaborators = async (
   return res.data;
 };
 
+export const deleteCollaborator = async (
+  classId: string,
+  userId: string,
+): Promise<IBaseResponse> => {
+  const res = await satellite.delete(`/collaborator/${classId}/${userId}`);
+
+  return res.data;
+};
+
 export const getClassCollaborators = async (
   id: string,
 ): Promise<IBaseResponse<IGetCollaboratorsResponseBody[]>> => {

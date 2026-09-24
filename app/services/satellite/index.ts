@@ -21,7 +21,8 @@ satellite.interceptors.request.use(
   async (request) => {
     const token = await getRequestToken();
 
-    if (token) request.headers["Authorization"] = `Bearer ${token}`;
+    if (token && !request.headers["Authorization"])
+      request.headers["Authorization"] = `Bearer ${token}`;
 
     return request;
   },

@@ -10,10 +10,12 @@ export const getDosen = async (): Promise<
   return res.data;
 };
 
-export const getAsisten = async (
-  query: string | undefined,
+export const getMahasiswa = async (
+  query: string,
 ): Promise<IBaseResponse<IGetUserResponseBody[]>> => {
-  const res = await satellite.get(`/user/asisten?name=${query}`);
+  const res = await satellite.get(
+    `/user/mahasiswa?name=${encodeURIComponent(query)}`,
+  );
 
   return res.data;
 };

@@ -56,7 +56,13 @@ Membereskan sisa ini adalah utang teknis terbesar yang tersisa.
 
 ## Autentikasi
 
-1. `/auth` → `useAuthStore.login()` → `POST /auth/login`
+1. `/auth` → `useAuthStore.login()` → `POST /auth/login`. Sebelum cookie
+   disimpan, token baru dipakai langsung untuk `GET /auth/me`; bila perannya
+   MAHASISWA, `GET /class` harus berisi minimal satu kelas yang ia pegang
+   sebagai asisten. Bila kosong, login ditolak dengan pesan "Web hanya untuk
+   laboran, dosen, dan asisten." Pemeriksaan ini sengaja dilakukan sebelum
+   cookie disimpan, karena begitu cookie ada, `middleware.ts` langsung
+   memindahkan halaman `/auth` ke `/dashboard`
 2. `setToken()` dan `setRefreshToken()` (server action) menyimpan cookie
    `accessToken` dan `refreshToken`; masa berlakunya di-decode dari payload
    JWT. Cookie `refreshToken` bersifat `httpOnly` karena hanya dibaca server
@@ -89,7 +95,7 @@ Access token berlaku 15 menit dan diperbarui sendiri (`app/utils/cookie.ts`):
 |---|---|
 | `/auth` | Login NIM + password |
 | `/dashboard` | Kartu statistik |
-| `/dashboard/praktikum` | LABORAN: accordion mata kuliah. MAHASISWA: kartu kelas |
+| `/dashboard/praktikum` | LABORAN: accordion mata kuliah. Asisten (MAHASISWA): kartu kelas yang ia pegang |
 | `/dashboard/praktikum/[classId]` | Detail kelas + panel pertemuan & presensi |
 | `.../tambah-praktikum` | Buat kelas baru |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
@@ -216,23 +222,32 @@ catch (error: any) {
   tampil dua kali dan error password tidak pernah tampil. Tombol mata kini
   `<button>` yang bisa dipakai lewat keyboard
 
+### Asisten per kelas
+
+Asisten adalah mahasiswa yang ditugaskan laboran ke kelas tertentu (lihat
+README backend). Di web:
+
+- Laboran mengelola asisten dari ikon pensil di kotak "Asisten Praktikum" pada
+  detail kelas (`components/praktikum/add-collaborators-button.tsx`): cari
+  mahasiswa berdasarkan nama/NIM (`GET /user/mahasiswa`), tombol Tambah per
+  mahasiswa, dan Hapus dengan konfirmasi. Penolakan dari backend (sedang
+  mengikuti praktikum yang sama, jadwal bentrok) tampil di dialog.
+- Asisten login dengan NIM + password yang sama dengan aplikasi mobile. Menu
+  yang tampil hanya Dashboard dan Praktikum; Praktikum berisi kelas yang ia
+  pegang, dan kartu dashboard menghitung kelas itu. Di detail kelas ia bisa
+  menambah pertemuan, membuka/menutup presensi, menampilkan QR, mengubah
+  presensi, dan melihat rekap; backend menolak aksi di kelas lain.
+- Menambah/menghapus asisten memicu event `class`, jadi daftar kelas asisten
+  ikut berubah tanpa refresh.
+
 ## Pekerjaan yang masih tersisa
 
-- [ ] Folder `.next/` ikut ter-commit (tidak ada di `.gitignore`), jadi
-      menjalankan `npm run dev` mengubah ratusan file yang terlacak git
 - [ ] `app/components/subjects-disclosure.tsx` baris 41 gagal `tsc`
       (`subjects` tidak ada di tipe `SubjectBySemester`), sehingga
       `next build` akan gagal
 - [ ] Dependensi `html2canvas` tidak dipakai lagi dan bisa dihapus
 - [ ] Pindahkan enam file terakhir dari `app/actions/` ke `app/services/`,
       lalu hapus folder `actions/` dan `app/types/`
-- [ ] Halaman Praktikum: asisten **tidak melihat kelas apa pun**
-      (`dashboard/praktikum/page.tsx` hanya menampilkan kartu untuk LABORAN
-      dan MAHASISWA), jadi asisten tidak bisa membuka detail kelas untuk
-      menampilkan QR dari menu. Idealnya hanya kelas yang diampu, yang butuh
-      endpoint baru di backend
-- [ ] Kartu dashboard MAHASISWA "Jumlah Kelas Praktikum" menampilkan seluruh
-      kelas, bukan kelas yang diampu (alasan sama)
 - [ ] `app/validations/validation.schema.ts`: `addClassSchema.name.max(1)`
       (nama kelas maksimal 1 karakter)
 - [ ] Cookie `accessToken` diset tanpa `httpOnly`, `secure`, `sameSite`
@@ -247,6 +262,6 @@ catch (error: any) {
 |---|---|---|
 | 2000016002 | laboran002 | LABORAN |
 | 2000016099 | mahasiswa001 | MAHASISWA |
-| 2000016101 | asisten001 | ASISTEN |
+| 2000016101 | asisten001 | MAHASISWA, asisten Alpro B |
 
 Pola password: fullname dalam huruf kecil.

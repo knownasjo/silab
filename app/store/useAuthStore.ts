@@ -4,6 +4,7 @@ import {
   IMeResponseBody,
 } from "../interfaces/auth/auth.interface";
 import { getMe, postLogin } from "../services/auth/api";
+import { getAllClass } from "../services/class/api";
 import { deleteToken, setRefreshToken, setToken } from "../utils/cookie";
 
 type AuthState = GlobalState & {
@@ -33,8 +34,20 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
       const res = await postLogin(body);
 
       if (res.status && res.data) {
-        await setToken(res.data.accessToken);
-        await setRefreshToken(res.data.refreshToken);
+        const { accessToken, refreshToken } = res.data;
+        const me = await getMe(accessToken);
+
+        if (me.data?.role === "MAHASISWA") {
+          const assisted = await getAllClass(accessToken);
+
+          if (!assisted.data?.length) {
+            set({ error: "Web hanya untuk laboran, dosen, dan asisten." });
+            return false;
+          }
+        }
+
+        await setToken(accessToken);
+        await setRefreshToken(refreshToken);
         return true;
       }
 

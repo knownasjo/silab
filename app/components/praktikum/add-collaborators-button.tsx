@@ -1,123 +1,239 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
-import { postCollaborators } from "../../actions/dashboard/praktikum/[classId]/actions";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogBackdrop,
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
-import ClassAssistantsComboBox from "../class-assistants";
-import SuccessDialog from "../success-dialog";
 import { IGetUserResponseBody } from "@/app/interfaces/user/user.interface";
 import useCollaboratorStore from "@/app/store/useCollaboratorStore";
+import { getMahasiswa } from "@/app/services/user/api";
 
 interface AddCollaboratorsButtonProps {
-  classId?: string;
+  classId: string;
+  classLabel: string;
 }
+
+type Feedback = { ok: boolean; message: string } | null;
 
 export default function AddCollaboratorsButton({
   classId,
+  classLabel,
 }: AddCollaboratorsButtonProps) {
-  const [isAddCollaboratorsOpen, setIsAddCollaboratorsOpen] =
-    useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
-  const [isSuccessDialogOpen, setIsSuccessDialogOpen] =
-    useState<boolean>(false);
-  const [selectedCollaborators, setSelectedCollaborators] = useState<User[]>(
-    [],
-  );
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>("");
+  const [candidates, setCandidates] = useState<IGetUserResponseBody[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Feedback>(null);
 
-  const { addClassCollaborators } = useCollaboratorStore();
+  const { collaboratorsData, addClassCollaborators, removeClassCollaborator } =
+    useCollaboratorStore();
 
-  // const addCollaborators = async (
-  //   collaborators: string[],
-  //   classId?: string,
-  // ) => {
-  //   setLoading(true);
-  //   try {
-  //     const response: any = await postCollaborators(collaborators, classId);
+  useEffect(() => {
+    if (!isOpen) return;
 
-  //     if (response["status"] === "success") {
-  //       setMessage(response["message"]);
-  //       setIsSuccessDialogOpen(true);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   } finally {
-  //     setLoading(false);
-  //     setIsAddCollaboratorsOpen(false);
-  //   }
-  // };
+    let isCurrent = true;
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
 
-  const handleCollaboratorsChange = (value: IGetUserResponseBody[]) => {
-    const validCollaborators = value.filter(
-      (collaborator): collaborator is User => collaborator != null,
-    );
+      try {
+        const res = await getMahasiswa(query.trim());
+        if (isCurrent) setCandidates(res.data ?? []);
+      } catch {
+        if (isCurrent) setCandidates([]);
+      } finally {
+        if (isCurrent) setIsSearching(false);
+      }
+    }, 300);
 
-    setSelectedCollaborators(validCollaborators);
+    return () => {
+      isCurrent = false;
+      clearTimeout(timer);
+    };
+  }, [isOpen, query]);
+
+  const open = () => {
+    setQuery("");
+    setFeedback(null);
+    setConfirmingId(null);
+    setIsOpen(true);
   };
+
+  const add = async (student: IGetUserResponseBody) => {
+    setPendingId(student.id);
+    setConfirmingId(null);
+    setFeedback(
+      await addClassCollaborators({ classId, collaborators: [student.id] }),
+    );
+    setPendingId(null);
+  };
+
+  const remove = async (userId: string) => {
+    setPendingId(userId);
+    setConfirmingId(null);
+    setFeedback(await removeClassCollaborator(classId, userId));
+    setPendingId(null);
+  };
+
+  const available = candidates.filter(
+    (candidate) =>
+      !collaboratorsData.some((assistant) => assistant.id === candidate.id),
+  );
 
   return (
     <>
       <button
-        onClick={() => setIsAddCollaboratorsOpen(true)}
+        onClick={open}
+        aria-label="Kelola asisten"
         className="relative size-4"
       >
         <Image
           src={"/edit.png"}
-          alt={"Edit Collaborators"}
+          alt={"Kelola asisten"}
           fill
           style={{ objectFit: "contain" }}
         />
       </button>
       <Dialog
-        onClose={() => setIsAddCollaboratorsOpen(false)}
-        open={isAddCollaboratorsOpen}
+        onClose={() => setIsOpen(false)}
+        open={isOpen}
         className={"relative z-50 h-full w-full"}
       >
         <DialogBackdrop className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 flex h-full w-screen items-center justify-center p-4">
-          <DialogPanel className="flex h-3/4 w-[500px] flex-col space-y-4 rounded-2xl bg-white p-10">
-            <DialogTitle className="font-bold text-[#1d1d1d]">
-              Edit Kolaborator / Asisten
-            </DialogTitle>
-            <ClassAssistantsComboBox
-              onClassAssistantsChange={handleCollaboratorsChange}
-              value={selectedCollaborators}
-            />
-            <div className="flex h-full flex-col justify-end">
-              <button
-                disabled={selectedCollaborators.length === 0 ? true : false}
-                onClick={() => {
-                  const collaboratorsId = selectedCollaborators.map(
-                    (collaborator) => collaborator.id,
-                  );
-                  addClassCollaborators({
-                    classId: classId!,
-                    collaborators: collaboratorsId,
-                  });
-                }}
-                className="h-fit w-1/3 self-end rounded-full bg-[#D2E3F1] py-3 font-bold text-[#3272CA] disabled:bg-gray-300 disabled:text-white"
-              >
-                {loading ? (
-                  <span className="loading loading-dots loading-sm" />
-                ) : (
-                  "Simpan"
-                )}
-              </button>
+          <DialogPanel className="flex max-h-[85vh] w-[560px] flex-col space-y-5 overflow-y-auto rounded-2xl bg-white p-10">
+            <div className="flex flex-col">
+              <DialogTitle className="font-bold text-[#1d1d1d]">
+                Asisten Praktikum
+              </DialogTitle>
+              <p className="text-sm font-semibold text-[#5E6278]">
+                {classLabel}
+              </p>
             </div>
+
+            {feedback && (
+              <p
+                className={`rounded-xl p-3 text-sm font-semibold ${feedback.ok ? "bg-[#E8FFF3] text-[#50CD89]" : "bg-[#FFF5F8] text-[#F1416C]"}`}
+              >
+                {feedback.message}
+              </p>
+            )}
+
+            <div className="flex flex-col space-y-3">
+              <p className="text-xs font-bold text-[#5E6278]">
+                Asisten saat ini
+              </p>
+              {collaboratorsData.length === 0 && (
+                <p className="text-sm text-[#5E6278]">Belum ada asisten.</p>
+              )}
+              {collaboratorsData.map((assistant) => (
+                <div
+                  key={assistant.id}
+                  className="flex flex-row items-center justify-between rounded-2xl border-2 border-[#F1F1F2] px-4 py-3"
+                >
+                  <div className="flex flex-col">
+                    <p className="text-sm font-bold text-[#1D1D1D]">
+                      {assistant.fullname}
+                    </p>
+                    <p className="text-xs font-semibold text-[#5E6278]">
+                      {assistant.nim}
+                    </p>
+                  </div>
+                  {confirmingId === assistant.id ? (
+                    <div className="flex flex-row items-center space-x-2">
+                      <button
+                        onClick={() => remove(assistant.id)}
+                        className="rounded-full bg-[#F1416C] px-4 py-2 text-xs font-semibold text-white"
+                      >
+                        Ya, hapus
+                      </button>
+                      <button
+                        onClick={() => setConfirmingId(null)}
+                        className="rounded-full border-2 border-[#F1F1F2] px-4 py-2 text-xs font-semibold text-[#5E6278]"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmingId(assistant.id)}
+                      disabled={pendingId !== null}
+                      aria-label={`Hapus asisten ${assistant.fullname}`}
+                      className="rounded-full border-2 border-[#FFE2E5] px-4 py-2 text-xs font-semibold text-[#F1416C] disabled:opacity-50"
+                    >
+                      {pendingId === assistant.id ? "Menghapus..." : "Hapus"}
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col space-y-3">
+              <p className="text-xs font-bold text-[#5E6278]">Tambah asisten</p>
+              <div className="relative">
+                <Image
+                  alt=""
+                  src={"/search.png"}
+                  width={20}
+                  height={20}
+                  className="absolute left-4 top-1/2 -translate-y-1/2"
+                />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Cari nama atau NIM mahasiswa"
+                  className="h-12 w-full rounded-2xl bg-[#F5F5F5] pl-12 pr-4 text-sm focus:outline-[#3272CA]"
+                />
+              </div>
+              {isSearching && available.length === 0 && (
+                <p className="text-sm text-[#5E6278]">Mencari...</p>
+              )}
+              {!isSearching && available.length === 0 && (
+                <p className="text-sm text-[#5E6278]">
+                  {candidates.length > 0
+                    ? "Mahasiswa yang cocok sudah menjadi asisten kelas ini."
+                    : "Mahasiswa tidak ditemukan."}
+                </p>
+              )}
+              {available.map((student) => (
+                <div
+                  key={student.id}
+                  className="flex flex-row items-center justify-between rounded-2xl bg-[#F5F8FA] px-4 py-3"
+                >
+                  <div className="flex flex-col">
+                    <p className="text-sm font-bold text-[#1D1D1D]">
+                      {student.fullname}
+                    </p>
+                    <p className="text-xs font-semibold text-[#5E6278]">
+                      {student.nim}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => add(student)}
+                    disabled={pendingId !== null}
+                    aria-label={`Tambah asisten ${student.fullname}`}
+                    className="rounded-full border-2 border-[#BFD9EF] px-4 py-2 text-xs font-semibold text-[#3272CA] disabled:opacity-50"
+                  >
+                    {pendingId === student.id ? "Menambahkan..." : "Tambah"}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-full rounded-full bg-[#D2E3F1] p-4 font-semibold text-[#3272CA]"
+            >
+              Tutup
+            </button>
           </DialogPanel>
         </div>
       </Dialog>
-      <SuccessDialog
-        dialogOpen={isSuccessDialogOpen}
-        onClose={() => setIsSuccessDialogOpen(false)}
-        title={message}
-      />
     </>
   );
 }

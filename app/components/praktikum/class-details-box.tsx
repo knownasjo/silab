@@ -33,7 +33,10 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({ data, assistant }) => {
             Asisten Praktikum
           </p>
           {userData?.role === "LABORAN" && (
-            <AddCollaboratorsButton classId={data.id} />
+            <AddCollaboratorsButton
+              classId={data.id}
+              classLabel={`${data.subject_name} — Kelas ${data.name}`}
+            />
           )}
         </div>
         <div className="flex flex-col space-y-2">

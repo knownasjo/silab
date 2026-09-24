@@ -15,8 +15,13 @@ export const postLogin = async (body: ILoginRequestBody) => {
   return res.data;
 };
 
-export const getMe = async () => {
-  const res = await satellite.get<IBaseResponse<IMeResponseBody>>("/auth/me");
+export const getMe = async (accessToken?: string) => {
+  const res = await satellite.get<IBaseResponse<IMeResponseBody>>(
+    "/auth/me",
+    accessToken
+      ? { headers: { Authorization: `Bearer ${accessToken}` } }
+      : undefined,
+  );
 
   return res.data;
 };

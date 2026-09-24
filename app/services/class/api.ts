@@ -6,9 +6,13 @@ import {
   IGetClassResponseBody,
 } from "@/app/interfaces/class/class.interface";
 
-export const getAllClass = async () => {
-  const res =
-    await satellite.get<IBaseResponse<IGetClassResponseBody[]>>("/class");
+export const getAllClass = async (accessToken?: string) => {
+  const res = await satellite.get<IBaseResponse<IGetClassResponseBody[]>>(
+    "/class",
+    accessToken
+      ? { headers: { Authorization: `Bearer ${accessToken}` } }
+      : undefined,
+  );
 
   return res.data;
 };

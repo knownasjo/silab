@@ -4,6 +4,7 @@ import {
   IGetCollaboratorsResponseBody,
 } from "../interfaces/collaborator/collaborator.interface";
 import {
+  deleteCollaborator,
   getClassCollaborators,
   postCollaborators,
 } from "../services/collaborator/api";
@@ -13,10 +14,18 @@ type CollaboratorState = GlobalState & {
   collaboratorsData: IGetCollaboratorsResponseBody[];
 };
 
+type CollaboratorResult = { ok: boolean; message: string };
+
 type CollaboratorActions = {
   getClassCollaborators: (id: string) => Promise<void>;
   refreshClassCollaborators: (id: string) => Promise<void>;
-  addClassCollaborators: (body: IAddCollaboratorRequestBody) => Promise<void>;
+  addClassCollaborators: (
+    body: IAddCollaboratorRequestBody,
+  ) => Promise<CollaboratorResult>;
+  removeClassCollaborator: (
+    classId: string,
+    userId: string,
+  ) => Promise<CollaboratorResult>;
 };
 
 const initialState = {
@@ -35,11 +44,31 @@ const useCollaboratorStore = create<CollaboratorState & CollaboratorActions>(
       try {
         const res = await postCollaborators(body);
 
-        if (!res.status) {
-          set({ error: res.message });
-        }
-      } catch {
-        console.log(get().error);
+        await get().refreshClassCollaborators(body.classId);
+        return { ok: res.status, message: res.message };
+      } catch (error: any) {
+        const message = error?.message ?? "Terjadi kesalahan";
+
+        set({ error: message });
+        return { ok: false, message };
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
+    removeClassCollaborator: async (classId, userId) => {
+      set({ isLoading: true, error: null });
+
+      try {
+        const res = await deleteCollaborator(classId, userId);
+
+        await get().refreshClassCollaborators(classId);
+        return { ok: res.status, message: res.message };
+      } catch (error: any) {
+        const message = error?.message ?? "Terjadi kesalahan";
+
+        set({ error: message });
+        return { ok: false, message };
       } finally {
         set({ isLoading: false });
       }

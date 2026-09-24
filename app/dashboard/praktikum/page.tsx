@@ -11,7 +11,8 @@ import useSubjectStore from "@/app/store/useSubjectStore";
 
 export default function Praktikum() {
   const { userData, me } = useAuthStore();
-  const { classesData, getAllClass, refreshAllClass } = useClassStore();
+  const { classesData, getAllClass, refreshAllClass, isLoading } =
+    useClassStore();
   const { refreshAllSubjects } = useSubjectStore();
 
   useEffect(() => {
@@ -35,6 +36,13 @@ export default function Praktikum() {
           ))}
         </div>
       )}
+      {userData?.role === "MAHASISWA" &&
+        !isLoading &&
+        classesData.length === 0 && (
+          <p className="text-sm font-semibold text-[#5E6278]">
+            Anda belum memegang kelas praktikum mana pun.
+          </p>
+        )}
     </div>
   );
 }

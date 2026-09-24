@@ -54,7 +54,7 @@ export default function DashboardDataCards({
             <DashboardDataContainer
               data={totalClass}
               title="Jumlah Kelas Praktikum"
-              subTitle="Seluruh kelas yang berjalan"
+              subTitle="Kelas yang Anda pegang sebagai asisten"
             />
           </>
         )}
