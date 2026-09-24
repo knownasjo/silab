@@ -43,7 +43,6 @@ const useActivationStore = create<ActivationState & ActivationActions>(
 
     setStatusQuery: (query) => {
       set({ status: query ?? "" });
-      get().getAllActivations();
     },
 
     setNameQuery: (query) => {
@@ -52,12 +51,12 @@ const useActivationStore = create<ActivationState & ActivationActions>(
     },
 
     getAllActivations: async () => {
-      const { status, name } = get();
+      const { name } = get();
 
       set({ isLoading: true, error: null });
 
       try {
-        const res = await getAllActivation(status, name);
+        const res = await getAllActivation(name);
 
         if (res.data && res.status) {
           set({ activationData: res.data });
@@ -72,16 +71,10 @@ const useActivationStore = create<ActivationState & ActivationActions>(
     },
 
     refreshActivations: coalesce(async () => {
-      const { status, name } = get();
-      const res = await getAllActivation(status, name);
-      const current = get();
+      const { name } = get();
+      const res = await getAllActivation(name);
 
-      if (
-        current.status === status &&
-        current.name === name &&
-        res.status &&
-        res.data
-      ) {
+      if (get().name === name && res.status && res.data) {
         set({ activationData: res.data });
       }
     }),

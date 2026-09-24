@@ -95,7 +95,7 @@ Access token berlaku 15 menit dan diperbarui sendiri (`app/utils/cookie.ts`):
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah |
 | `/dashboard/segera-hadir` | Pengganti fitur yang belum ada (`?fitur=Modul`), dituju tombol Modul "Click to Open" di detail kelas |
-| `/dashboard/master-data/pembayaran` | Konfirmasi bayar + pilih/pindah kelas |
+| `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up |
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman |
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman |
 
@@ -135,6 +135,14 @@ catch (error: any) {
 - Tombol Buka/Tutup Presensi tersambung ke `PUT /meeting/:id/status`
 - Edit presensi manual dan "Kembalikan ke Belum Presensi" berfungsi
 - Halaman Pembayaran: pilih kelas saat konfirmasi lunas, dan pindah kelas
+- Halaman Pembayaran dikelompokkan per mahasiswa (`app/utils/payment.ts`):
+  tabel berisi satu baris per mahasiswa dengan ringkasan ("Lunas semua",
+  "2 dari 3 lunas", "Belum Bayar"). Klik baris membuka pop-up
+  `components/master-data/student-payment-dialog.tsx` berisi kelas dan status
+  tiap mata kuliah; tombol Ubah membuka form ubah status/kelas di pop-up yang
+  sama. Filter "Belum Bayar" = masih ada mata kuliah belum lunas, "Sudah
+  Bayar" = semua lunas; filter dihitung di browser, jadi `GET /activation`
+  hanya dikirim dengan `?name=`. Kartu angka tetap menghitung per aktivasi
 - Kartu dashboard: fungsi store yang tertukar diperbaiki, endpoint kembar
   dipisah dengan `?status=true/false`
 - Pengumuman: validasi judul/deskripsi, Lihat Detail, Edit, dan Hapus

@@ -30,3 +30,11 @@ export interface IAvailableClass {
   registered_students: number;
   is_full: boolean;
 }
+
+export interface IStudentActivations {
+  user_id: string;
+  nim: string;
+  student: string;
+  paid: number;
+  activations: IGetActivationResponseBody[];
+}
