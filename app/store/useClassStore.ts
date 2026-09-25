@@ -3,13 +3,21 @@ import {
   IAddClassRequestBody,
   IGetClassByIdResponseBody,
   IGetClassResponseBody,
+  IUpdateClassRequestBody,
 } from "../interfaces/class/class.interface";
-import { getAllClass, getClassById, postClass } from "../services/class/api";
+import {
+  deleteClass,
+  getAllClass,
+  getClassById,
+  postClass,
+  putClass,
+} from "../services/class/api";
 import { coalesce } from "../utils/coalesce";
 
 type ClassState = GlobalState & {
   classesData: IGetClassResponseBody[];
   classData?: IGetClassByIdResponseBody | null;
+  classNotice: string | null;
 };
 
 type ClassResult = { ok: boolean; message: string };
@@ -20,6 +28,12 @@ type ClassActions = {
   refreshAllClass: () => Promise<void>;
   refreshClassById: (id: string) => Promise<void>;
   addClass: (body: IAddClassRequestBody) => Promise<ClassResult>;
+  updateClass: (
+    id: string,
+    body: IUpdateClassRequestBody,
+  ) => Promise<ClassResult>;
+  removeClass: (id: string) => Promise<ClassResult>;
+  clearClassNotice: () => void;
 };
 
 const initialState = {
@@ -27,6 +41,7 @@ const initialState = {
   error: null,
   classesData: [],
   classData: null,
+  classNotice: null,
 };
 
 const useClassStore = create<ClassState & ClassActions>((set, get) => ({
@@ -92,6 +107,35 @@ const useClassStore = create<ClassState & ClassActions>((set, get) => ({
       return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
     }
   },
+
+  updateClass: async (id, body) => {
+    try {
+      const res = await putClass(id, body);
+
+      await get().refreshClassById(id);
+      return { ok: true, message: res.message };
+    } catch (error: any) {
+      return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
+    }
+  },
+
+  removeClass: async (id) => {
+    try {
+      const res = await deleteClass(id);
+
+      set((state) => ({
+        classesData: state.classesData.filter(
+          (subjectClass) => subjectClass.id !== id,
+        ),
+        classNotice: res.message,
+      }));
+      return { ok: true, message: res.message };
+    } catch (error: any) {
+      return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
+    }
+  },
+
+  clearClassNotice: () => set({ classNotice: null }),
 }));
 
 export default useClassStore;

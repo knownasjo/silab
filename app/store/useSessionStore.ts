@@ -14,6 +14,7 @@ import { coalesce } from "../utils/coalesce";
 
 type SessionState = GlobalState & {
   sessionsData: ISessionResponseBody[];
+  isLoaded: boolean;
 };
 
 type SessionResult = { ok: boolean; message: string };
@@ -33,6 +34,7 @@ const initialState = {
   isLoading: false,
   error: null,
   sessionsData: [],
+  isLoaded: false,
 };
 
 const failure = (error: any): SessionResult => ({
@@ -49,7 +51,7 @@ const useSessionStore = create<SessionState & SessionActions>((set, get) => ({
     try {
       const res = await getSessions();
 
-      set({ sessionsData: res.data ?? [] });
+      set({ sessionsData: res.data ?? [], isLoaded: true });
     } catch (error: any) {
       set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
@@ -60,7 +62,7 @@ const useSessionStore = create<SessionState & SessionActions>((set, get) => ({
   refreshSessions: coalesce(async () => {
     const res = await getSessions();
 
-    if (res.data) set({ sessionsData: res.data });
+    if (res.data) set({ sessionsData: res.data, isLoaded: true });
   }),
 
   addSession: async (body) => {

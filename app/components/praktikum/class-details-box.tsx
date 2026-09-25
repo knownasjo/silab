@@ -23,6 +23,11 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({ data, assistant }) => {
       </div>
       <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
       <div className="flex h-full flex-col space-y-4">
+        <p className="text-[16px] font-semibold text-[#5E6278]">Ruangan</p>
+        <p className="text-[18px] font-semibold text-black">{data.room}</p>
+      </div>
+      <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
+      <div className="flex h-full flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Dosen</p>
         <p className="text-[18px] font-semibold text-black">{data.lecturer}</p>
       </div>

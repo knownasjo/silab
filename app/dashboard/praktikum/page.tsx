@@ -5,20 +5,31 @@ import ClassCard from "@/app/components/praktikum/class-card";
 import SubjectsList from "@/app/components/praktikum/subjects-list";
 import useAuthStore from "@/app/store/useAuthStore";
 import useClassStore from "@/app/store/useClassStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import FeedbackBox from "@/app/components/feedback-box";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 import useSubjectStore from "@/app/store/useSubjectStore";
 
 export default function Praktikum() {
   const { userData, me } = useAuthStore();
-  const { classesData, getAllClass, refreshAllClass, isLoading } =
-    useClassStore();
+  const {
+    classesData,
+    getAllClass,
+    refreshAllClass,
+    isLoading,
+    clearClassNotice,
+  } = useClassStore();
+  const [notice] = useState(() => useClassStore.getState().classNotice);
   const { refreshAllSubjects } = useSubjectStore();
 
   useEffect(() => {
     getAllClass();
     me();
   }, [getAllClass, me]);
+
+  useEffect(() => {
+    clearClassNotice();
+  }, [clearClassNotice]);
 
   useRealtimeEvents(({ type }) => {
     if (["ready", "class", "subject"].includes(type)) refreshAllClass();
@@ -27,6 +38,7 @@ export default function Praktikum() {
 
   return (
     <div className="h-full w-full space-y-10 overflow-auto overscroll-contain">
+      <FeedbackBox feedback={notice ? { ok: true, message: notice } : null} />
       <AddPracticumBanner />
       {userData?.role === "LABORAN" && <SubjectsList />}
       {userData?.role === "DOSEN" && (

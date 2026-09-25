@@ -108,7 +108,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `/auth` | Login NIM/NIY + password (mahasiswa memakai NIM, dosen dan laboran NIY 8 angka) |
 | `/dashboard` | Kartu statistik. LABORAN: mata kuliah dan pembayaran. Asisten: kelas yang ia pegang. DOSEN: kelas, mahasiswa, pertemuan, dan rata-rata kehadiran mata kuliah yang ia ampu |
 | `/dashboard/praktikum` | LABORAN: accordion semua mata kuliah. DOSEN: accordion mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
-| `/dashboard/praktikum/[classId]` | Detail kelas + panel pertemuan & presensi (DOSEN hanya melihat) |
+| `/dashboard/praktikum/[classId]` | Detail kelas (hari, jam, ruangan, dosen, asisten, kuota) + panel pertemuan & presensi. LABORAN: tombol Ubah Kelas dan Hapus Kelas, lihat "Ubah dan Hapus Kelas". DOSEN hanya melihat |
 | `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah |
@@ -331,6 +331,41 @@ bertambah, dan jam sesi tertulis tetap di kode.
   Di bawahnya ada form Tambah Sesi.
 - Selain laboran, kedua halaman hanya menampilkan pesan bahwa halaman itu untuk
   laboran.
+- Isian kelas (Kelas, Kuota, Hari, Ruangan, Sesi Kelas), pemeriksaannya, dan
+  aturan sesi per hari ada di `components/praktikum/class-form-fields.tsx`,
+  dipakai bersama oleh Tambah Praktikum dan dialog Ubah Kelas.
+
+### Ubah dan Hapus Kelas
+
+Di halaman detail kelas, laboran melihat tombol **Ubah Kelas** dan **Hapus
+Kelas** di samping judul. Judul kini juga menyebut nama kelas ("Semester 3 ·
+Kelas C"), dan kotak detail menampilkan ruangan.
+
+- **Ubah Kelas** membuka dialog berisi form yang sama dengan Tambah Praktikum,
+  sudah terisi data kelas sekarang. Mata kuliah tidak bisa diganti. Tombol
+  Simpan baru aktif setelah ada yang diubah, jadi tidak ada permintaan tanpa
+  perubahan. Kuota di bawah jumlah peserta ditolak di browser ("Kuota minimal
+  n, sesuai jumlah peserta sekarang." tampil sebagai petunjuk). Penolakan
+  server (nama sudah dipakai, ruang bentrok, jadwal asisten atau peserta
+  bentrok) tampil merah di dialog tanpa menutupnya. Bila hari atau sesi kelas
+  yang sudah punya pertemuan diganti, muncul catatan bahwa jadwal baru berlaku
+  untuk pertemuan berikutnya dan presensi lama tetap tersimpan. Sesi kelas yang
+  sudah dinonaktifkan tetap muncul di pilihan untuk kelas itu sendiri.
+- Setelah berhasil, dialog tertutup, pesan hijau tampil di bawah judul, dan
+  isi halaman ikut berubah. Laboran atau dosen lain yang membuka kelas yang
+  sama melihat perubahan tanpa refresh.
+- **Hapus Kelas** membuka konfirmasi yang menyebut dampaknya dulu: jumlah
+  peserta yang kembali ke status lunas tanpa kelas, asisten yang dilepas, dan
+  pertemuan kosong yang ikut terhapus, ditambah "Penghapusan tidak bisa
+  dibatalkan." Kelas yang sudah punya presensi hanya menampilkan alasan tidak
+  bisa dihapus dan tombol Tutup.
+- Setelah dihapus, laboran dipindah ke halaman Praktikum dengan pesan hijau
+  "Kelas ... berhasil dihapus" (pesan ini hanya muncul sekali). Orang lain
+  yang sedang membuka kelas itu melihat "Kelas ini sudah dihapus." dan tautan
+  kembali ke Praktikum.
+- Detail kelas juga memuat ulang data kelas saat ada event `meeting` atau
+  `attendance`, supaya jumlah pertemuan dan presensi di dialog Hapus Kelas
+  selalu terbaru.
 
 ## Pekerjaan yang masih tersisa
 

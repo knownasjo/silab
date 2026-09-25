@@ -21,7 +21,11 @@ export interface IGetClassByIdResponseBody {
   day: string;
   startAt: string;
   endAt: string;
+  room: string;
+  sessionId: string | null;
   participants: number;
+  meetings: number;
+  recorded_meetings: number;
 }
 
 export interface IAddClassRequestBody {
@@ -31,4 +35,12 @@ export interface IAddClassRequestBody {
   day: string;
   room: string;
   sessionId: string;
+}
+
+export type IUpdateClassRequestBody = Omit<IAddClassRequestBody, "subjectId">;
+
+export interface IDeleteClassResponseBody {
+  participants: number;
+  assistants: number;
+  meetings: number;
 }
