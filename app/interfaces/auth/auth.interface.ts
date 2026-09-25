@@ -10,8 +10,14 @@ export interface ILoginResponseBody {
 
 export interface IMeResponseBody {
   id: string;
-  fullname: string;
+  name: string;
   email: string;
   nim: string;
   role: string;
+}
+
+export interface IChangePasswordRequestBody {
+  oldPassword: string;
+  password: string;
+  confirmPassword: string;
 }

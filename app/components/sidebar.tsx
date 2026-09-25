@@ -2,6 +2,7 @@
 
 import SideBarItem, { SideBarProps } from "./sidebar-item";
 import SignOutButton from "./signout-button";
+import SidebarAccount from "./sidebar-account";
 import SidebarGroup, { SidebarGroupLink } from "./sidebar-group";
 import useAuthStore from "../store/useAuthStore";
 import { SIDEBAR_COLLAPSED_COOKIE } from "../utils/sidebar";
@@ -129,7 +130,8 @@ export default function SideBar({
         )}
       </nav>
 
-      <div className="pt-5">
+      <div className="space-y-2 pt-5">
+        <SidebarAccount collapsed={collapsed} />
         <SignOutButton collapsed={collapsed} />
       </div>
     </aside>

@@ -1,4 +1,5 @@
 import {
+  IChangePasswordRequestBody,
   ILoginRequestBody,
   ILoginResponseBody,
   IMeResponseBody,
@@ -21,6 +22,24 @@ export const getMe = async (accessToken?: string) => {
     accessToken
       ? { headers: { Authorization: `Bearer ${accessToken}` } }
       : undefined,
+  );
+
+  return res.data;
+};
+
+export const updateMe = async (fullname: string) => {
+  const res = await satellite.put<IBaseResponse<IMeResponseBody>>(
+    "/auth/me",
+    { fullname },
+  );
+
+  return res.data;
+};
+
+export const changeMyPassword = async (body: IChangePasswordRequestBody) => {
+  const res = await satellite.put<IBaseResponse<ILoginResponseBody>>(
+    "/auth/me/password",
+    body,
   );
 
   return res.data;

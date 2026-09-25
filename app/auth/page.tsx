@@ -63,7 +63,7 @@ export default function Authentication() {
           >
             <div className="space-y-2">
               <label htmlFor="nim" className="sr-only">
-                NIM
+                NIM / NIY
               </label>
               <input
                 id="nim"
@@ -71,7 +71,7 @@ export default function Authentication() {
                 inputMode="numeric"
                 autoComplete="username"
                 className={inputClassName(!!errors.nim)}
-                placeholder="NIM"
+                placeholder="NIM / NIY"
                 aria-invalid={!!errors.nim}
                 {...register("nim")}
               />
@@ -141,7 +141,7 @@ export default function Authentication() {
         </div>
       </div>
       <ErrorDialog
-        title={error ?? "Gagal masuk. Periksa NIM dan password Anda."}
+        title={error ?? "Gagal masuk. Periksa NIM/NIY dan password Anda."}
         dialogOpen={dialogOpen}
         onClose={() => setDialogOpen(false)}
       />

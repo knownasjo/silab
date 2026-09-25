@@ -105,7 +105,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 
 | Route | Isi |
 |---|---|
-| `/auth` | Login NIM + password |
+| `/auth` | Login NIM/NIY + password (mahasiswa memakai NIM, dosen dan laboran NIY 8 angka) |
 | `/dashboard` | Kartu statistik |
 | `/dashboard/praktikum` | LABORAN: accordion mata kuliah. Asisten (MAHASISWA): kartu kelas yang ia pegang |
 | `/dashboard/praktikum/[classId]` | Detail kelas + panel pertemuan & presensi |
@@ -116,6 +116,28 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up |
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman |
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman |
+| `/dashboard/profil` | LABORAN/DOSEN: data akun, ubah nama, ganti password. Asisten: data akun saja + arahan memakai aplikasi mobile |
+
+### Profil
+
+Bagian bawah menu samping (`sidebar-account.tsx`, di atas Sign Out)
+menampilkan inisial, nama, dan peran pengguna. Untuk laboran dan dosen bagian
+ini adalah tautan ke `/dashboard/profil`; untuk asisten hanya tampilan, karena
+mahasiswa (termasuk asisten) mengelola akunnya di aplikasi mobile.
+
+- **Ubah nama**: `PUT /auth/me`, 3–100 karakter, spasi berlebih dirapikan.
+  Nama di menu samping langsung berganti karena store memakai data balasan
+  server. NIM/NIY dan email tidak bisa diubah; halaman Profil menulis "NIY"
+  untuk dosen dan laboran.
+- **Ganti password**: `PUT /auth/me/password` dengan password lama, password
+  baru (min. 8, harus berbeda), dan konfirmasi. Isian diperiksa dulu di
+  browser. Server membalas token baru yang langsung disimpan ke cookie, jadi
+  browser ini tetap masuk, sedangkan browser/HP lain dengan akun yang sama
+  kembali ke `/auth` sekitar 1,5 detik kemudian.
+- `GET /auth/me` membalas `name`, bukan `fullname`; `IMeResponseBody` sudah
+  disesuaikan. `app/appbar.tsx` dan `components/appbar-component.tsx` (nama di
+  bagian atas) tidak tampil karena cookie `fullname`/`nim`/`email` yang
+  dibacanya tidak pernah diisi.
 
 ## Logika status presensi
 
@@ -270,9 +292,10 @@ README backend). Di web:
 
 ## Akun uji
 
-| NIM | Password | Role |
+| NIM / NIY | Password | Role |
 |---|---|---|
-| 2000016002 | laboran002 | LABORAN |
+| 60010002 | laboran002 | LABORAN |
+| 60020001 | dosen001 | DOSEN |
 | 2000016099 | mahasiswa001 | MAHASISWA |
 | 2000016101 | asisten001 | MAHASISWA, asisten Alpro B |
 
