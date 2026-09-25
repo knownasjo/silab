@@ -107,7 +107,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 |---|---|
 | `/auth` | Login NIM/NIY + password (mahasiswa memakai NIM, dosen dan laboran NIY 8 angka) |
 | `/dashboard` | Kartu statistik. LABORAN: mata kuliah dan pembayaran. Asisten: kelas yang ia pegang. DOSEN: kelas, mahasiswa, pertemuan, dan rata-rata kehadiran mata kuliah yang ia ampu |
-| `/dashboard/praktikum` | LABORAN: accordion semua mata kuliah dengan tombol Ubah, lihat "Ubah Mata Kuliah". DOSEN: accordion mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
+| `/dashboard/praktikum` | LABORAN: semua mata kuliah dikelompokkan per semester dengan tombol Ubah, lihat "Praktikum per Semester" dan "Ubah Mata Kuliah". DOSEN: kelompok semester yang sama, hanya mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
 | `/dashboard/praktikum/[classId]` | Detail kelas (hari, jam, ruangan, dosen, asisten, kuota) + panel pertemuan & presensi. LABORAN: tombol Ubah Kelas dan Hapus Kelas, lihat "Ubah dan Hapus Kelas". DOSEN hanya melihat |
 | `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
@@ -290,7 +290,7 @@ membuka URL kelas dosen lain pun ditolak.
   `meeting`, atau `attendance`. Dashboard dosen tidak memanggil `/activation`.
   `useDashboardStore` memilih data laboran atau dosen setelah peran diketahui
   dari `GET /auth/me`.
-- **Praktikum**: accordion mata kuliah yang sama dengan laboran, tetapi hanya
+- **Praktikum**: daftar per semester yang sama dengan laboran, tetapi hanya
   berisi mata kuliah yang ia ampu dan tanpa tombol Tambah Praktikum. Dosen yang
   belum mengampu mata kuliah apa pun melihat pesan "Anda belum tercatat sebagai
   dosen pengampu mata kuliah praktikum mana pun."
@@ -398,19 +398,39 @@ sudah terisi data sekarang.
   yang sudah berjalan, sedangkan dosen lama tidak lagi.
 - Setelah berhasil, dialog tertutup dan pesan hijau tampil di dalam kartu mata
   kuliah itu. Urutan kartu tetap, karena `GET /subject` kini diurutkan menurut
-  waktu dibuat.
+  waktu dibuat. Bila semesternya diubah, kartu pindah ke kelompok semester
+  barunya dan kelompok itu otomatis terbuka supaya pesan hijaunya terlihat.
 - Dosen baru yang membuka halaman Praktikum melihat mata kuliah itu muncul
   tanpa refresh. Dosen lama yang sedang membuka salah satu kelasnya langsung
   melihat "Kelas ini bukan mata kuliah yang Anda ampu.": `refreshClassById`
   kini mengosongkan halaman bila server membalas 403 atau 404, sedangkan
   gangguan jaringan tetap diabaikan. Untuk itu `satellite` menyertakan kode
   status HTTP (`code`) pada error yang ditolaknya.
-- Isi kartu yang dibuka kini menampilkan "Dosen pengampu: ... · Kode ... ·
-  Semester ..." dari `GET /subject`. Sebelumnya nama dosen tidak pernah tampil
+- Isi kartu yang dibuka kini menampilkan "Dosen pengampu: ... · Kode ..." dari
+  `GET /subject` (semester sudah menjadi judul kelompoknya). Sebelumnya nama dosen tidak pernah tampil
   karena `subject-disclosure-details.tsx` memanggil endpoint `/subjects/:id`
   yang tidak ada; komponen itu sudah dihapus. Kelas di dalam kartu kini
   dicocokkan dengan id mata kuliah, bukan namanya, jadi tetap tampil setelah
   mata kuliah diganti nama.
+
+### Praktikum per Semester
+
+Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
+(`components/praktikum/subjects-list.tsx`), dihitung di browser dari
+`GET /subject` tanpa perubahan backend.
+
+- Hanya semester yang berisi mata kuliah yang tampil, urut dari yang terkecil,
+  dengan jumlah mata kuliahnya ("Semester 4 · 2 mata kuliah"). Semester tanpa
+  mata kuliah tidak tampil, karena praktikum biasanya tidak ada di semua
+  semester. Form mata kuliah tetap menerima semester 1–8.
+- Semua semester tertutup saat halaman dibuka. Bila hanya ada satu semester
+  yang berisi (misalnya dosen dengan satu mata kuliah), semester itu langsung
+  terbuka, termasuk saat mata kuliah pertamanya baru muncul lewat event
+  `subject`. Semester yang sedang terbuka tidak ikut tertutup saat ada mata
+  kuliah baru di semester lain.
+- Di dalam semester, urutan mata kuliah tetap menurut waktu dibuat, dan kartu
+  mata kuliah bekerja seperti sebelumnya: klik nama untuk melihat dosen, kode,
+  dan kelasnya.
 
 ## Pekerjaan yang masih tersisa
 

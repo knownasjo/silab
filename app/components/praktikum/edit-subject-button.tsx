@@ -18,7 +18,7 @@ import useSubjectStore from "@/app/store/useSubjectStore";
 
 interface EditSubjectButtonProps {
   subject: IGetSubjectResponseBody;
-  onSaved: (message: string) => void;
+  onSaved: (message: string, semester: string) => void;
 }
 
 const formOf = (subject: IGetSubjectResponseBody): SubjectForm => ({
@@ -83,7 +83,7 @@ export default function EditSubjectButton({
     }
 
     setIsOpen(false);
-    onSaved(result.message);
+    onSaved(result.message, tidied.semester);
   };
 
   return (
