@@ -7,6 +7,8 @@ export interface IGetClassResponseBody {
   day: string;
   startAt: string;
   endAt: string;
+  room: string;
+  sessionId: string | null;
   participants: number;
 }
 

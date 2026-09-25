@@ -1,15 +1,19 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
 import useSessionStore from "@/app/store/useSessionStore";
+import useClassStore from "@/app/store/useClassStore";
 import useAuthStore from "@/app/store/useAuthStore";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 import {
   ISessionResponseBody,
   SessionDayGroup,
 } from "@/app/interfaces/session/session.interface";
-import { DAY_GROUP_LABELS } from "@/app/utils/day";
+import { IGetClassResponseBody } from "@/app/interfaces/class/class.interface";
+import { DAY_GROUP_LABELS, DAY_LABELS, formatDay } from "@/app/utils/day";
 
 const DAY_GROUPS: SessionDayGroup[] = ["WEEKDAY", "FRIDAY"];
 
@@ -48,19 +52,34 @@ type Draft = { number: string; startAt: string; endAt: string };
 
 const emptyDraft: Draft = { number: "", startAt: "", endAt: "" };
 
+const DAY_ORDER = Object.keys(DAY_LABELS);
+
+const byDayThenRoom = (a: IGetClassResponseBody, b: IGetClassResponseBody) =>
+  DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day) ||
+  a.room.localeCompare(b.room) ||
+  a.subject_name.localeCompare(b.subject_name);
+
 function SessionRow({
   session,
+  classes,
   onFeedback,
 }: {
   session: ISessionResponseBody;
+  classes: IGetClassResponseBody[];
   onFeedback: (feedback: Feedback) => void;
 }) {
   const { updateSession, removeSession } = useSessionStore();
   const [isEditing, setIsEditing] = useState(false);
+  const [isShowingClasses, setIsShowingClasses] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const label = `Sesi ${session.number} ${DAY_GROUP_LABELS[session.day_group]}`;
+  const listId = `kelas-sesi-${session.id}`;
+
+  useEffect(() => {
+    if (session.classes === 0) setIsShowingClasses(false);
+  }, [session.classes]);
 
   const run = async (action: () => Promise<Feedback>) => {
     setIsBusy(true);
@@ -169,86 +188,132 @@ function SessionRow({
   }
 
   return (
-    <div className="grid grid-cols-[90px_1fr_110px_110px_340px] items-center gap-3 border-t border-[#F1F1F2] py-3 text-sm font-semibold text-[#5E6278]">
-      <p className="text-base font-bold text-[#1D1D1D]">
-        Sesi {session.number}
-      </p>
-      <p className="text-base text-[#1D1D1D]">
-        {session.startAt} – {session.endAt}
-      </p>
-      <p>
-        <span
-          className={`rounded-md px-2 py-1 text-xs ${session.is_active ? "bg-[#E8FFF3] text-[#50CD89]" : "bg-[#F1F1F2] text-[#181C32]"}`}
-        >
-          {session.is_active ? "Aktif" : "Nonaktif"}
-        </span>
-      </p>
-      <p>{session.classes} kelas</p>
-      <div className="flex flex-row justify-end space-x-2">
-        {isConfirmingDelete ? (
-          <>
-            <span className="self-center text-xs">Hapus {label}?</span>
-            <button
-              type="button"
-              disabled={isBusy}
-              onClick={() => run(() => removeSession(session.id))}
-              className={`${buttonClassName} bg-[#FFD9D9] text-[#FE2F60]`}
-            >
-              Ya, hapus
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsConfirmingDelete(false)}
-              className={`${buttonClassName} bg-[#F1F1F2] text-[#5E6278]`}
-            >
-              Batal
-            </button>
-          </>
+    <div className="border-t border-[#F1F1F2]">
+      <div className="grid grid-cols-[90px_1fr_110px_110px_340px] items-center gap-3 py-3 text-sm font-semibold text-[#5E6278]">
+        <p className="text-base font-bold text-[#1D1D1D]">
+          Sesi {session.number}
+        </p>
+        <p className="text-base text-[#1D1D1D]">
+          {session.startAt} – {session.endAt}
+        </p>
+        <p>
+          <span
+            className={`rounded-md px-2 py-1 text-xs ${session.is_active ? "bg-[#E8FFF3] text-[#50CD89]" : "bg-[#F1F1F2] text-[#181C32]"}`}
+          >
+            {session.is_active ? "Aktif" : "Nonaktif"}
+          </span>
+        </p>
+        {session.classes > 0 ? (
+          <button
+            type="button"
+            aria-expanded={isShowingClasses}
+            aria-controls={listId}
+            aria-label={`${isShowingClasses ? "Tutup" : "Lihat"} kelas ${label}`}
+            onClick={() => setIsShowingClasses((prev) => !prev)}
+            className="flex w-fit flex-row items-center space-x-1 text-[#3272CA] hover:opacity-70"
+          >
+            <span>{session.classes} kelas</span>
+            <Image
+              src="/down.png"
+              alt=""
+              width={16}
+              height={16}
+              className={isShowingClasses ? "" : "-rotate-90"}
+            />
+          </button>
         ) : (
-          <>
-            <button
-              type="button"
-              aria-label={`Ubah ${label}`}
-              onClick={startEditing}
-              className={`${buttonClassName} bg-[#D2E3F1] text-[#3272CA]`}
-            >
-              Ubah
-            </button>
-            <button
-              type="button"
-              aria-label={`${session.is_active ? "Nonaktifkan" : "Aktifkan"} ${label}`}
-              disabled={isBusy}
-              onClick={() =>
-                run(() =>
-                  updateSession(session.id, { is_active: !session.is_active }),
-                )
-              }
-              className={`${buttonClassName} bg-[#F1F1F2] text-[#5E6278]`}
-            >
-              {session.is_active ? "Nonaktifkan" : "Aktifkan"}
-            </button>
-            {session.classes === 0 && (
+          <p>0 kelas</p>
+        )}
+        <div className="flex flex-row justify-end space-x-2">
+          {isConfirmingDelete ? (
+            <>
+              <span className="self-center text-xs">Hapus {label}?</span>
               <button
                 type="button"
-                aria-label={`Hapus ${label}`}
-                onClick={() => {
-                  setIsConfirmingDelete(true);
-                  onFeedback(null);
-                }}
+                disabled={isBusy}
+                onClick={() => run(() => removeSession(session.id))}
                 className={`${buttonClassName} bg-[#FFD9D9] text-[#FE2F60]`}
               >
-                Hapus
+                Ya, hapus
               </button>
-            )}
-          </>
-        )}
+              <button
+                type="button"
+                onClick={() => setIsConfirmingDelete(false)}
+                className={`${buttonClassName} bg-[#F1F1F2] text-[#5E6278]`}
+              >
+                Batal
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                aria-label={`Ubah ${label}`}
+                onClick={startEditing}
+                className={`${buttonClassName} bg-[#D2E3F1] text-[#3272CA]`}
+              >
+                Ubah
+              </button>
+              <button
+                type="button"
+                aria-label={`${session.is_active ? "Nonaktifkan" : "Aktifkan"} ${label}`}
+                disabled={isBusy}
+                onClick={() =>
+                  run(() =>
+                    updateSession(session.id, {
+                      is_active: !session.is_active,
+                    }),
+                  )
+                }
+                className={`${buttonClassName} bg-[#F1F1F2] text-[#5E6278]`}
+              >
+                {session.is_active ? "Nonaktifkan" : "Aktifkan"}
+              </button>
+              {session.classes === 0 && (
+                <button
+                  type="button"
+                  aria-label={`Hapus ${label}`}
+                  onClick={() => {
+                    setIsConfirmingDelete(true);
+                    onFeedback(null);
+                  }}
+                  className={`${buttonClassName} bg-[#FFD9D9] text-[#FE2F60]`}
+                >
+                  Hapus
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
+      {isShowingClasses && session.classes > 0 && (
+        <ul
+          id={listId}
+          className="list-disc space-y-1 pb-3 pl-[120px] text-sm font-semibold text-[#5E6278]"
+        >
+          {classes.length === 0 && (
+            <li className="list-none">Memuat daftar kelas...</li>
+          )}
+          {classes.map((subjectClass) => (
+            <li key={subjectClass.id}>
+              <Link
+                href={`/dashboard/praktikum/${subjectClass.id}`}
+                className="text-[#1D1D1D] hover:text-[#3272CA]"
+              >
+                {subjectClass.subject_name} — Kelas {subjectClass.name}
+              </Link>{" "}
+              · {formatDay(subjectClass.day)} · {subjectClass.room}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
 
 function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
   const { sessionsData, addSession } = useSessionStore();
+  const { classesData } = useClassStore();
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -300,6 +365,9 @@ function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
           <SessionRow
             key={session.id}
             session={session}
+            classes={classesData
+              .filter((subjectClass) => subjectClass.sessionId === session.id)
+              .sort(byDayThenRoom)}
             onFeedback={setFeedback}
           />
         ))}
@@ -364,14 +432,17 @@ function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
 
 export default function JamSesi() {
   const { getSessions, refreshSessions, error } = useSessionStore();
+  const { getAllClass, refreshAllClass } = useClassStore();
   const { userData } = useAuthStore();
 
   useEffect(() => {
     getSessions();
-  }, [getSessions]);
+    getAllClass();
+  }, [getSessions, getAllClass]);
 
   useRealtimeEvents(({ type }) => {
     if (["ready", "session", "class"].includes(type)) refreshSessions();
+    if (["ready", "class", "subject"].includes(type)) refreshAllClass();
   });
 
   if (userData && userData.role !== "LABORAN") {

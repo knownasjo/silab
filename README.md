@@ -113,7 +113,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah |
 | `/dashboard/segera-hadir` | Pengganti fitur yang belum ada (`?fitur=Modul`), dituju tombol Modul "Click to Open" di detail kelas |
-| `/dashboard/master-data/jam-sesi` | Jam sesi Senin–Kamis dan Jumat: tambah, ubah jam, nonaktifkan, hapus (hanya LABORAN) |
+| `/dashboard/master-data/jam-sesi` | Jam sesi Senin–Kamis dan Jumat: tambah, ubah jam, nonaktifkan, hapus, dan daftar kelas di tiap sesi (hanya LABORAN) |
 | `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up |
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman |
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman |
@@ -329,6 +329,14 @@ bertambah, dan jam sesi tertulis tetap di kode.
   muncul keterangan "Jam n kelas di sesi ini ikut berubah."), Nonaktifkan/
   Aktifkan, dan Hapus dengan konfirmasi (hanya sesi yang belum dipakai kelas).
   Di bawahnya ada form Tambah Sesi.
+- Jumlah kelas di tiap sesi ("2 kelas") bisa diklik untuk membuka daftar
+  kelasnya di bawah baris itu, misalnya "Algoritma dan Pemrograman — Kelas D ·
+  Rabu · PSI", diurutkan per hari lalu ruang. Nama kelas membuka halaman
+  detail kelas, jadi kelas yang masih memakai sebuah sesi bisa langsung
+  dipindah lewat Ubah Kelas sebelum sesinya dihapus. Daftar ikut berubah tanpa
+  refresh saat kelas ditambah, diubah, atau dihapus, dan tertutup sendiri bila
+  sesinya tidak lagi punya kelas. Datanya dari `GET /class` (`sessionId` tiap
+  kelas).
 - Selain laboran, kedua halaman hanya menampilkan pesan bahwa halaman itu untuk
   laboran.
 - Isian kelas (Kelas, Kuota, Hari, Ruangan, Sesi Kelas), pemeriksaannya, dan
