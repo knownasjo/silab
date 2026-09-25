@@ -2,8 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import useAuthStore from "@/app/store/useAuthStore";
-
-type Feedback = { ok: boolean; message: string } | null;
+import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
 
 const ROLE_LABELS: Record<string, string> = {
   LABORAN: "Laboran",
@@ -13,19 +12,6 @@ const ROLE_LABELS: Record<string, string> = {
 
 const inputClassName =
   "h-[54px] w-full rounded-2xl bg-[#f5f5f5] p-5 font-semibold text-[#1D1D1D] focus:outline-[#3272CA]";
-
-function FeedbackBox({ feedback }: { feedback: Feedback }) {
-  if (!feedback) return null;
-
-  return (
-    <p
-      role={feedback.ok ? "status" : "alert"}
-      className={`rounded-xl p-3 text-sm font-semibold ${feedback.ok ? "bg-[#E8FFF3] text-[#50CD89]" : "bg-[#FFF5F8] text-[#F1416C]"}`}
-    >
-      {feedback.message}
-    </p>
-  );
-}
 
 function Field({
   id,

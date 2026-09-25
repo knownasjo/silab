@@ -31,6 +31,11 @@ const masterDataLinks: SidebarGroupLink[] = [
     title: "Pembayaran",
     icon: "/information.png",
   },
+  {
+    href: "/dashboard/master-data/jam-sesi",
+    title: "Jam Sesi",
+    icon: "/clock.svg",
+  },
 ];
 
 const pengumumanLinks: SidebarGroupLink[] = [

@@ -12,12 +12,14 @@ type ClassState = GlobalState & {
   classData?: IGetClassByIdResponseBody | null;
 };
 
+type ClassResult = { ok: boolean; message: string };
+
 type ClassActions = {
   getAllClass: () => Promise<void>;
   getClassById: (id: string) => Promise<void>;
   refreshAllClass: () => Promise<void>;
   refreshClassById: (id: string) => Promise<void>;
-  addClass: (body: IAddClassRequestBody) => Promise<void>;
+  addClass: (body: IAddClassRequestBody) => Promise<ClassResult>;
 };
 
 const initialState = {
@@ -81,18 +83,13 @@ const useClassStore = create<ClassState & ClassActions>((set, get) => ({
   }),
 
   addClass: async (body) => {
-    set({ isLoading: true, error: null });
-
     try {
       const res = await postClass(body);
 
-      if (!res.status) {
-        set({ error: res.message });
-      }
-    } catch {
-      console.log(get().error);
-    } finally {
-      set({ isLoading: false });
+      await get().refreshAllClass();
+      return { ok: true, message: res.message };
+    } catch (error: any) {
+      return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
     }
   },
 }));

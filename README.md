@@ -109,10 +109,11 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `/dashboard` | Kartu statistik. LABORAN: mata kuliah dan pembayaran. Asisten: kelas yang ia pegang. DOSEN: kelas, mahasiswa, pertemuan, dan rata-rata kehadiran mata kuliah yang ia ampu |
 | `/dashboard/praktikum` | LABORAN: accordion semua mata kuliah. DOSEN: accordion mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
 | `/dashboard/praktikum/[classId]` | Detail kelas + panel pertemuan & presensi (DOSEN hanya melihat) |
-| `.../tambah-praktikum` | Buat kelas baru |
+| `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah |
 | `/dashboard/segera-hadir` | Pengganti fitur yang belum ada (`?fitur=Modul`), dituju tombol Modul "Click to Open" di detail kelas |
+| `/dashboard/master-data/jam-sesi` | Jam sesi Senin–Kamis dan Jumat: tambah, ubah jam, nonaktifkan, hapus (hanya LABORAN) |
 | `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up |
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman |
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman |
@@ -303,16 +304,49 @@ membuka URL kelas dosen lain pun ditolak.
   mengosongkan data kelas sebelumnya dan menyimpan pesan error, sehingga tidak
   ada data kelas lama yang tertinggal di layar.
 
+### Tambah Praktikum dan Jam Sesi
+
+Halaman Tambah Praktikum ditulis ulang karena sebelumnya laboran tidak pernah
+mendapat pesan apa pun (dialog sukses/gagal tidak pernah dibuka dan error
+server diabaikan), form bisa dikirim kosong, pratinjau kelas tidak ikut
+bertambah, dan jam sesi tertulis tetap di kode.
+
+- Isian diperiksa di browser dulu (nama satu huruf A–Z, kuota 1–99, hari,
+  ruang, sesi), lalu hasil server tampil sebagai pesan hijau atau merah di
+  bawah form (`components/feedback-box.tsx`, dipakai juga halaman Profil).
+  Kolom Kelas otomatis menjadi satu huruf besar dan kolom Kuota hanya menerima
+  angka.
+- Pilihan **Sesi Kelas** diambil dari `GET /session`, terkunci sampai hari
+  dipilih, dan menyesuaikan hari: Senin–Kamis memakai sesi Senin–Kamis, Jumat
+  memakai sesi Jumat. Bila sesi hari itu belum ada, muncul "Jam sesi hari Jumat
+  belum diatur. Atur di Master Data → Jam Sesi."
+- Setelah berhasil, isian dikosongkan (mata kuliah tetap terpilih) dan kelas
+  baru langsung muncul di pratinjau. Pratinjau dan pilihan sesi ikut berubah
+  lewat event `class`, `subject`, dan `session`. Tombol "Hapus" diganti
+  "Kosongkan" dan tidak lagi menutup form.
+- Halaman **Master Data → Jam Sesi** menampilkan dua kartu (Senin–Kamis dan
+  Jumat). Tiap sesi punya tombol Ubah (nomor dan jam; bila sesi dipakai kelas
+  muncul keterangan "Jam n kelas di sesi ini ikut berubah."), Nonaktifkan/
+  Aktifkan, dan Hapus dengan konfirmasi (hanya sesi yang belum dipakai kelas).
+  Di bawahnya ada form Tambah Sesi.
+- Selain laboran, kedua halaman hanya menampilkan pesan bahwa halaman itu untuk
+  laboran.
+
 ## Pekerjaan yang masih tersisa
 
+- [ ] Tambah Mata Kuliah punya bug yang sama dengan Tambah Praktikum dulu:
+      dialog sukses/gagal tidak pernah dibuka dan error server (misalnya kode
+      mata kuliah sudah ada) diabaikan oleh `useSubjectStore.addSubject`
+- [ ] Pembayaran: untuk aktivasi yang belum punya kelas, "Simpan Perubahan"
+      tanpa mengubah apa pun tetap mengirim permintaan dan menampilkan
+      "Status pembayaran diubah ...". Pemeriksaan "Tidak ada perubahan" baru
+      berlaku untuk aktivasi yang sudah punya kelas
 - [ ] `subject-disclosure-details.tsx` memanggil `/subjects/:id` lewat
       `app/actions/`, endpoint yang tidak ada di backend, sehingga nama dosen
       di bawah judul mata kuliah (halaman Praktikum) tidak pernah tampil
 - [ ] Dependensi `html2canvas` tidak dipakai lagi dan bisa dihapus
-- [ ] Pindahkan enam file terakhir dari `app/actions/` ke `app/services/`,
+- [ ] Pindahkan tujuh file terakhir dari `app/actions/` ke `app/services/`,
       lalu hapus folder `actions/` dan `app/types/`
-- [ ] `app/validations/validation.schema.ts`: `addClassSchema.name.max(1)`
-      (nama kelas maksimal 1 karakter)
 - [ ] Cookie `accessToken` diset tanpa `httpOnly`, `secure`, `sameSite`
       (sengaja terbaca JavaScript, lihat Autentikasi). `refreshToken` sudah
       `httpOnly` tetapi belum `secure` karena lab masih memakai HTTP
@@ -326,6 +360,6 @@ membuka URL kelas dosen lain pun ditolak.
 | 60010002 | laboran002 | LABORAN |
 | 60020001 | dosen001 | DOSEN |
 | 2000016099 | mahasiswa001 | MAHASISWA |
-| 2000016101 | asisten001 | MAHASISWA, asisten Alpro B |
+| 2000016101 | asisten001 | MAHASISWA, asisten Alpro D |
 
 Pola password: fullname dalam huruf kecil.

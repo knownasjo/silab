@@ -1,101 +1,149 @@
 "use client";
 
+import Link from "next/link";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import SubjectDropdownMenu from "@/app/components/praktikum/subject-dropdown-menu";
-import { Subject } from "@/app/types/subject";
-import { useEffect, useState } from "react";
 import ClassNameField from "@/app/components/praktikum/class-name-field";
 import ClassQuotaField from "@/app/components/praktikum/class-quota-field";
 import ClassDayDropdown from "@/app/components/praktikum/class-day-dropdown";
-import SuccessDialog from "@/app/components/success-dialog";
-import ClassSessionListbox from "@/app/components/praktikum/class-sessions-listbox";
-import { SubjectBySemester } from "@/app/types/subject-by-semester";
-import ErrorDialog from "@/app/components/error-dialog";
-import ClassesPreview from "./components/classes-preview";
-import useClassStore from "@/app/store/useClassStore";
-import {
-  IAddClassRequestBody,
-  IGetClassResponseBody,
-} from "@/app/interfaces/class/class.interface";
-import useAuthStore from "@/app/store/useAuthStore";
 import ClassRoomDropdown from "@/app/components/praktikum/class-room-dropdown";
+import ClassSessionListbox from "@/app/components/praktikum/class-sessions-listbox";
+import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
+import ClassesPreview from "./components/classes-preview";
+import { SubjectBySemester } from "@/app/types/subject-by-semester";
+import useClassStore from "@/app/store/useClassStore";
+import useSessionStore from "@/app/store/useSessionStore";
+import useAuthStore from "@/app/store/useAuthStore";
+import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
+import { dayGroupOf } from "@/app/utils/day";
+
+type ClassForm = {
+  name: string;
+  quota: string;
+  day: string;
+  room: string;
+  sessionId: string;
+};
+
+const emptyForm: ClassForm = {
+  name: "",
+  quota: "",
+  day: "",
+  room: "",
+  sessionId: "",
+};
+
+const validate = (form: ClassForm) => {
+  const quota = Number(form.quota);
+
+  if (!/^[A-Z]$/.test(form.name)) return "Nama kelas harus satu huruf A–Z.";
+  if (!Number.isInteger(quota) || quota < 1 || quota > 99)
+    return "Kuota harus angka 1 sampai 99.";
+  if (!form.day) return "Pilih hari kelas.";
+  if (!form.room) return "Pilih ruangan kelas.";
+  if (!form.sessionId) return "Pilih sesi kelas.";
+  return null;
+};
 
 export default function TambahPraktikum() {
   const [selectedSubject, setSelectedSubject] = useState<SubjectBySemester>();
-  const [newClass, setNewClass] = useState<IAddClassRequestBody>({
-    name: "",
-    day: "",
-    endAt: "",
-    quota: 0,
-    room: "",
-    startAt: "",
-    subjectId: "",
-  });
-  const [addClassDisabled, setAddClassDisabled] = useState<boolean>(true);
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const [selectedSession, setSelectedSession] = useState<Sessions | null>(null);
-  const [subjectClasses, setSubjectClasses] = useState<IGetClassResponseBody[]>(
-    [],
-  );
-  const [message, setMessage] = useState<string>("");
+  const [form, setForm] = useState<ClassForm>(emptyForm);
+  const [feedback, setFeedback] = useState<Feedback>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const { getAllClass, classesData, addClass, isLoading, error } =
+  const { getAllClass, refreshAllClass, classesData, addClass } =
     useClassStore();
+  const { sessionsData, getSessions, refreshSessions } = useSessionStore();
   const { userData } = useAuthStore();
-
-  const open = () => {
-    setDialogOpen(true);
-  };
-
-  const close = () => {
-    setDialogOpen(false);
-  };
-
-  const handleAddNewClass = async () => {
-    if (newClass) {
-      if (selectedSession) {
-        newClass.startAt = selectedSession?.start_time;
-        newClass.endAt = selectedSession.end_time;
-
-        await addClass(newClass);
-        if (!error) {
-          await getAllClass();
-        }
-      }
-    }
-  };
-
-  const handleSubjectChange = (value: Subject | undefined) => {
-    if (value !== undefined) {
-      setSelectedSubject(value);
-      setAddClassDisabled(false);
-    } else {
-      setSelectedSubject(undefined);
-      setAddClassDisabled(true);
-    }
-  };
-
-  const handleClassChange = (key: string, value: any) => {
-    setNewClass((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleClassRoomChange = (key: string, value: any) => {
-    setNewClass((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleSessionChange = (value: Sessions | null) => {
-    setSelectedSession(value);
-  };
-
-  const handleSubjectClass = async (subject: SubjectBySemester | undefined) => {
-    const filteredSubjectClasses = classesData.filter(
-      (value) => value.subject_name === subject?.subject_name,
-    );
-    setSubjectClasses(filteredSubjectClasses);
-  };
 
   useEffect(() => {
     getAllClass();
-  }, [getAllClass]);
+    getSessions();
+  }, [getAllClass, getSessions]);
+
+  useRealtimeEvents(({ type }) => {
+    if (["ready", "class", "subject"].includes(type)) refreshAllClass();
+    if (["ready", "session"].includes(type)) refreshSessions();
+  });
+
+  const subjectClasses = useMemo(
+    () =>
+      classesData.filter(
+        (subjectClass) => subjectClass.subjectId === selectedSubject?.id,
+      ),
+    [classesData, selectedSubject],
+  );
+
+  const daySessions = useMemo(
+    () =>
+      form.day
+        ? sessionsData.filter(
+            (session) =>
+              session.is_active && session.day_group === dayGroupOf(form.day),
+          )
+        : [],
+    [sessionsData, form.day],
+  );
+
+  useEffect(() => {
+    if (
+      form.sessionId &&
+      !daySessions.some((session) => session.id === form.sessionId)
+    )
+      setForm((prev) => ({ ...prev, sessionId: "" }));
+  }, [daySessions, form.sessionId]);
+
+  const updateForm = (key: keyof ClassForm, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    setFeedback(null);
+  };
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+
+    if (!selectedSubject) return;
+
+    const problem = validate(form);
+
+    if (problem) {
+      setFeedback({ ok: false, message: problem });
+      return;
+    }
+
+    setIsSaving(true);
+    setFeedback(null);
+
+    const result = await addClass({
+      subjectId: selectedSubject.id,
+      name: form.name,
+      quota: Number(form.quota),
+      day: form.day,
+      room: form.room,
+      sessionId: form.sessionId,
+    });
+
+    setIsSaving(false);
+    setFeedback(result);
+
+    if (result.ok) setForm(emptyForm);
+  };
+
+  if (userData && userData.role !== "LABORAN") {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <p className="text-base font-semibold text-[#5E6278]">
+          Hanya laboran yang dapat menambah kelas praktikum.
+        </p>
+      </div>
+    );
+  }
+
+  const noSessionForDay = !!form.day && daySessions.length === 0;
+  const sessionPlaceholder = !form.day
+    ? "Pilih hari dulu"
+    : noSessionForDay
+      ? "Belum ada sesi"
+      : "Sesi Kelas";
 
   return (
     <div className="flex h-full w-full flex-col overflow-x-auto overflow-y-auto overscroll-contain">
@@ -105,96 +153,84 @@ export default function TambahPraktikum() {
           <SubjectDropdownMenu
             isDisabled={false}
             onSubjectChange={(value) => {
-              handleClassChange("subjectId", value?.id);
               setSelectedSubject(value);
-              handleSubjectClass(value);
+              setFeedback(null);
             }}
           />
         </div>
       </div>
+      {selectedSubject && subjectClasses.length === 0 && (
+        <p className="mt-10 text-sm font-semibold text-[#5E6278]">
+          Belum ada kelas untuk mata kuliah ini.
+        </p>
+      )}
       <ClassesPreview subjectClasses={subjectClasses} />
-      <div
+      <form
+        noValidate
+        onSubmit={handleSubmit}
         className={`mt-10 w-full flex-col space-y-6 rounded-[20px] bg-[#FFFFFF] p-5 ${selectedSubject !== undefined ? "flex" : "hidden"}`}
       >
         <div className="mt-5 flex h-[90px] w-full flex-row space-x-8">
           <ClassNameField
-            value={newClass?.name}
-            onClassNameChange={(value) => handleClassChange("name", value)}
+            value={form.name}
+            onClassNameChange={(value) => updateForm("name", value)}
           />
           <ClassQuotaField
-            value={
-              newClass?.quota !== undefined ? newClass?.quota.toString() : "0"
-            }
-            onClassQuotaChange={(value) => {
-              if (Number.parseInt(value) > 0) {
-                handleClassChange("quota", Number.parseInt(value));
-              } else {
-                handleClassChange("quota", 0);
-              }
-            }}
+            value={form.quota}
+            onClassQuotaChange={(value) => updateForm("quota", value)}
           />
           <ClassDayDropdown
-            value={newClass?.day ?? ""}
-            onDayChange={(value) => handleClassChange("day", value)}
+            value={form.day}
+            onDayChange={(value) => updateForm("day", value)}
           />
           <ClassRoomDropdown
-            value={newClass?.room ?? ""}
-            onRoomChange={(value) => handleClassRoomChange("room", value)}
+            value={form.room}
+            onRoomChange={(value) => updateForm("room", value)}
           />
           <ClassSessionListbox
-            value={selectedSession}
-            onClassSessionChange={(value) => {
-              handleSessionChange(value);
-            }}
+            sessions={daySessions}
+            value={form.sessionId}
+            placeholder={sessionPlaceholder}
+            disabled={daySessions.length === 0}
+            onClassSessionChange={(value) => updateForm("sessionId", value)}
           />
         </div>
-        <div className="mt-14 flex w-full flex-row justify-end space-x-4">
+        {noSessionForDay && (
+          <p className="text-sm font-semibold text-[#F1416C]">
+            Jam sesi{" "}
+            {dayGroupOf(form.day) === "FRIDAY" ? "hari Jumat" : "Senin–Kamis"}{" "}
+            belum diatur. Atur di{" "}
+            <Link href="/dashboard/master-data/jam-sesi" className="underline">
+              Master Data → Jam Sesi
+            </Link>
+            .
+          </p>
+        )}
+        <FeedbackBox feedback={feedback} />
+        <div className="flex w-full flex-row justify-end space-x-4">
           <button
+            type="button"
             onClick={() => {
-              setNewClass({
-                subjectId: selectedSubject?.id!,
-                name: "",
-                day: "",
-                startAt: "",
-                endAt: "",
-                quota: 0,
-                room: "",
-              });
-              handleSessionChange(null);
-              handleSubjectChange(undefined);
+              setForm(emptyForm);
+              setFeedback(null);
             }}
             className="rounded-full bg-[#FFD9D9] px-[16px] py-[8px] text-[16px] font-semibold text-[#FE2F60]"
           >
-            Hapus
+            Kosongkan
           </button>
           <button
-            onClick={() => {
-              handleAddNewClass();
-            }}
-            className="rounded-full bg-[#D2E3F1] px-[16px] py-[8px] text-[16px] font-semibold text-[#3272CA]"
+            type="submit"
+            disabled={isSaving}
+            className="rounded-full bg-[#D2E3F1] px-[16px] py-[8px] text-[16px] font-semibold text-[#3272CA] disabled:opacity-60"
           >
-            {!isLoading ? (
-              "Simpan"
-            ) : (
+            {isSaving ? (
               <span className="loading loading-dots loading-sm" />
+            ) : (
+              "Simpan"
             )}
           </button>
-          {!error && (
-            <SuccessDialog
-              dialogOpen={dialogOpen}
-              onClose={close}
-              title={message}
-            />
-          )}
-          {error && (
-            <ErrorDialog
-              dialogOpen={dialogOpen}
-              onClose={close}
-              title={message}
-            />
-          )}
         </div>
-      </div>
+      </form>
     </div>
   );
 }

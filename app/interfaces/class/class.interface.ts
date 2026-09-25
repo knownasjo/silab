@@ -29,7 +29,6 @@ export interface IAddClassRequestBody {
   name: string;
   quota: number;
   day: string;
-  startAt: string;
-  endAt: string;
   room: string;
+  sessionId: string;
 }
