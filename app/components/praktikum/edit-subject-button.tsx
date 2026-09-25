@@ -8,8 +8,11 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
-import LecturerListBox from "@/app/components/master-data/lecturer-listbox";
-import SemestersListBox from "@/app/components/semesters-listbox";
+import SubjectFormFields, {
+  SubjectForm,
+  tidySubjectForm,
+  validateSubjectForm,
+} from "@/app/components/master-data/subject-form-fields";
 import { IGetSubjectResponseBody } from "@/app/interfaces/subject/subject.interface";
 import useSubjectStore from "@/app/store/useSubjectStore";
 
@@ -18,24 +21,12 @@ interface EditSubjectButtonProps {
   onSaved: (message: string) => void;
 }
 
-type SubjectForm = {
-  subject_code: string;
-  subject_name: string;
-  semester: string;
-  lecturer_id: string;
-};
-
 const formOf = (subject: IGetSubjectResponseBody): SubjectForm => ({
   subject_code: subject.subject_code,
   subject_name: subject.subject_name,
   semester: subject.semester,
   lecturer_id: subject.lecturer_id,
 });
-
-const tidy = (value: string) => value.trim().replace(/\s+/g, " ");
-
-const inputClassName =
-  "h-[54px] w-full rounded-2xl bg-[#f5f5f5] p-5 font-semibold text-[#1D1D1D] focus:outline-[#3272CA]";
 
 export default function EditSubjectButton({
   subject,
@@ -64,31 +55,15 @@ export default function EditSubjectButton({
   };
 
   const initial = formOf(subject);
-  const isUnchanged =
-    tidy(form.subject_code) === initial.subject_code &&
-    tidy(form.subject_name) === initial.subject_name &&
-    form.semester === initial.semester &&
-    form.lecturer_id === initial.lecturer_id;
+  const tidied = tidySubjectForm(form);
+  const isUnchanged = (Object.keys(initial) as (keyof SubjectForm)[]).every(
+    (key) => tidied[key] === initial[key],
+  );
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
-    const body = {
-      subject_code: tidy(form.subject_code),
-      subject_name: tidy(form.subject_name),
-      semester: form.semester,
-      lecturer_id: form.lecturer_id,
-    };
-
-    const problem = !body.subject_code
-      ? "Kode mata kuliah wajib diisi."
-      : !body.subject_name
-        ? "Nama mata kuliah wajib diisi."
-        : !body.semester
-          ? "Pilih semester."
-          : !body.lecturer_id
-            ? "Pilih dosen pengampu."
-            : null;
+    const problem = validateSubjectForm(form);
 
     if (problem) {
       setFeedback({ ok: false, message: problem });
@@ -98,7 +73,7 @@ export default function EditSubjectButton({
     setIsSaving(true);
     setFeedback(null);
 
-    const result = await updateSubject(subject.id, body);
+    const result = await updateSubject(subject.id, tidied);
 
     setIsSaving(false);
 
@@ -138,54 +113,7 @@ export default function EditSubjectButton({
               onSubmit={handleSubmit}
               className="flex flex-col space-y-5"
             >
-              <div className="flex flex-row space-x-4">
-                <div className="flex w-2/3 flex-col space-y-3">
-                  <label
-                    htmlFor="subject-code"
-                    className="text-base font-semibold text-[#5E6278]"
-                  >
-                    Kode Mata Kuliah
-                  </label>
-                  <input
-                    id="subject-code"
-                    className={inputClassName}
-                    type="text"
-                    autoComplete="off"
-                    maxLength={20}
-                    value={form.subject_code}
-                    onChange={(event) =>
-                      updateForm("subject_code", event.target.value)
-                    }
-                  />
-                </div>
-                <SemestersListBox
-                  value={form.semester}
-                  onSemesterChange={(value) => updateForm("semester", value)}
-                />
-              </div>
-              <div className="flex flex-col space-y-3">
-                <label
-                  htmlFor="subject-name"
-                  className="text-base font-semibold text-[#5E6278]"
-                >
-                  Nama Mata Kuliah
-                </label>
-                <input
-                  id="subject-name"
-                  className={inputClassName}
-                  type="text"
-                  autoComplete="off"
-                  maxLength={100}
-                  value={form.subject_name}
-                  onChange={(event) =>
-                    updateForm("subject_name", event.target.value)
-                  }
-                />
-              </div>
-              <LecturerListBox
-                value={form.lecturer_id}
-                onLecturerChange={(value) => updateForm("lecturer_id", value)}
-              />
+              <SubjectFormFields form={form} onChange={updateForm} />
               {form.lecturer_id !== initial.lecturer_id && (
                 <p className="text-sm font-semibold text-[#5E6278]">
                   Dosen baru langsung bisa melihat semua kelas, pertemuan, dan

@@ -32,7 +32,12 @@ export default function LecturerListBox({
   }, [getDosen]);
 
   useEffect(() => {
-    if (value && dosenData.length > 0) {
+    if (!value) {
+      setSelectedLecturer(null);
+      return;
+    }
+
+    if (dosenData.length > 0) {
       const lecturer = dosenData.find((d) => d.id === value) || null;
       setSelectedLecturer(lecturer);
     }

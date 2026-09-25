@@ -111,7 +111,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `/dashboard/praktikum/[classId]` | Detail kelas (hari, jam, ruangan, dosen, asisten, kuota) + panel pertemuan & presensi. LABORAN: tombol Ubah Kelas dan Hapus Kelas, lihat "Ubah dan Hapus Kelas". DOSEN hanya melihat |
 | `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
-| `/dashboard/master-data/add-subject` | Tambah mata kuliah |
+| `/dashboard/master-data/add-subject` | Tambah mata kuliah (hanya LABORAN), lihat "Ubah Mata Kuliah" |
 | `/dashboard/segera-hadir` | Pengganti fitur yang belum ada (`?fitur=Modul`), dituju tombol Modul "Click to Open" di detail kelas |
 | `/dashboard/master-data/jam-sesi` | Jam sesi Senin–Kamis dan Jumat: tambah, ubah jam, nonaktifkan, hapus, dan daftar kelas di tiap sesi (hanya LABORAN) |
 | `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up |
@@ -377,6 +377,15 @@ Kelas C"), dan kotak detail menampilkan ruangan.
 
 ### Ubah Mata Kuliah
 
+Halaman Tambah Mata Kuliah dan dialog Ubah Mata Kuliah memakai form yang sama
+(`components/master-data/subject-form-fields.tsx`): kode, semester, nama, dan
+dosen pengampu, dengan pemeriksaan yang sama di browser dan di server.
+Halaman Tambah Mata Kuliah ditulis ulang karena dulu dialog sukses/gagalnya
+tidak pernah dibuka dan error server diabaikan. Sekarang pesan hijau atau merah
+tampil di bawah form, form dikosongkan setelah berhasil (termasuk pilihan
+semester dan dosen), ada tombol Kosongkan, dan selain laboran hanya melihat
+pesan bahwa halaman itu untuk laboran.
+
 Di halaman Praktikum, setiap mata kuliah punya tombol **Ubah** (hanya
 laboran) yang membuka dialog berisi kode, semester, nama, dan dosen pengampu,
 sudah terisi data sekarang.
@@ -405,9 +414,6 @@ sudah terisi data sekarang.
 
 ## Pekerjaan yang masih tersisa
 
-- [ ] Tambah Mata Kuliah punya bug yang sama dengan Tambah Praktikum dulu:
-      dialog sukses/gagal tidak pernah dibuka dan error server (misalnya kode
-      mata kuliah sudah ada) diabaikan oleh `useSubjectStore.addSubject`
 - [ ] Pembayaran: untuk aktivasi yang belum punya kelas, "Simpan Perubahan"
       tanpa mengubah apa pun tetap mengirim permintaan dan menampilkan
       "Status pembayaran diubah ...". Pemeriksaan "Tidak ada perubahan" baru

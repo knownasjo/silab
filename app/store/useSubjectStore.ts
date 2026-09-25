@@ -19,7 +19,9 @@ type SubjectState = GlobalState & {
 type SubjectActions = {
   getAllSubjects: () => Promise<void>;
   refreshAllSubjects: () => Promise<void>;
-  addSubject: (body: IAddSubjectRequestBody) => Promise<void>;
+  addSubject: (
+    body: IAddSubjectRequestBody,
+  ) => Promise<{ ok: boolean; message: string }>;
   updateSubject: (
     id: string,
     body: IUpdateSubjectRequestBody,
@@ -60,18 +62,13 @@ const useSubjectStore = create<SubjectState & SubjectActions>((set, get) => ({
   }),
 
   addSubject: async (body) => {
-    set({ isLoading: true, error: null });
-
     try {
       const res = await addSubject(body);
 
-      if (!res.status) {
-        set({ error: res.message });
-      }
-    } catch {
-      console.log(get().error);
-    } finally {
-      set({ isLoading: false });
+      await get().refreshAllSubjects();
+      return { ok: true, message: res.message };
+    } catch (error: any) {
+      return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
     }
   },
 
