@@ -4,10 +4,12 @@ import {
   IGetAllClassMeetingResponseBody,
 } from "../interfaces/meeting/meeting.interface";
 import {
+  deleteMeeting,
   deleteStudentAttendance,
   getMeetingQrToken,
   getMeetings,
   postMeeting,
+  putMeeting,
   putMeetingStatus,
   putStudentAttendance,
 } from "../services/meeting/api";
@@ -34,6 +36,15 @@ type MeetingActions = {
   getQrToken: (meetingId: string) => Promise<void>;
   clearQrToken: () => void;
   addMeeting: (body: IAddClassMeetingRequestBody) => Promise<void>;
+  updateMeeting: (
+    meetingId: string,
+    meetingName: string,
+    classId: string,
+  ) => Promise<{ ok: boolean; message: string }>;
+  removeMeeting: (
+    meetingId: string,
+    classId: string,
+  ) => Promise<{ ok: boolean; message: string }>;
   updateMeetingStatus: (
     meetingId: string,
     status: boolean,
@@ -133,6 +144,28 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
       set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  updateMeeting: async (meetingId, meetingName, classId) => {
+    try {
+      const res = await putMeeting(meetingId, { meetingName });
+
+      await get().getMeetings(classId);
+      return { ok: true, message: res.message };
+    } catch (error: any) {
+      return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
+    }
+  },
+
+  removeMeeting: async (meetingId, classId) => {
+    try {
+      const res = await deleteMeeting(meetingId);
+
+      await get().getMeetings(classId);
+      return { ok: true, message: res.message };
+    } catch (error: any) {
+      return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
     }
   },
 

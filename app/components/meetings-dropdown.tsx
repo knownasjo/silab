@@ -5,22 +5,20 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import Image from "next/image";
-import { useState } from "react";
 import useMeetingStore from "../store/useMeetingStore";
 
 interface MeetingsDropDownProps {
+  selectedMeeting?: string;
   onMeetingSelected?: (meetingId: string) => void;
 }
 
 export default function MeetingsDropDown({
+  selectedMeeting,
   onMeetingSelected,
 }: MeetingsDropDownProps) {
-  const [selectedMeeting, setSelectedMeeting] = useState<string>();
-
   const { meetingsData } = useMeetingStore();
 
   const handleSelectedMeeting = (meetingId: string) => {
-    setSelectedMeeting(meetingId);
     if (onMeetingSelected) onMeetingSelected(meetingId);
   };
 

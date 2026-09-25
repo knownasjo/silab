@@ -108,7 +108,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `/auth` | Login NIM/NIY + password (mahasiswa memakai NIM, dosen dan laboran NIY 8 angka) |
 | `/dashboard` | Kartu statistik. LABORAN: mata kuliah dan pembayaran. Asisten: kelas yang ia pegang. DOSEN: kelas, mahasiswa, pertemuan, dan rata-rata kehadiran mata kuliah yang ia ampu |
 | `/dashboard/praktikum` | LABORAN: semua mata kuliah dikelompokkan per semester dengan tombol Ubah, lihat "Praktikum per Semester" dan "Ubah Mata Kuliah". DOSEN: kelompok semester yang sama, hanya mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
-| `/dashboard/praktikum/[classId]` | Detail kelas (hari, jam, ruangan, dosen, asisten, kuota) + panel pertemuan & presensi. LABORAN: tombol Ubah Kelas dan Hapus Kelas, lihat "Ubah dan Hapus Kelas". DOSEN hanya melihat |
+| `/dashboard/praktikum/[classId]` | Detail kelas (hari, jam, ruangan, dosen, asisten, kuota) + panel pertemuan & presensi. LABORAN: tombol Ubah Kelas dan Hapus Kelas, lihat "Ubah dan Hapus Kelas". LABORAN dan asisten: tambah, ubah judul, dan hapus pertemuan, lihat "Tambah, Ubah, dan Hapus Pertemuan". DOSEN hanya melihat |
 | `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah (hanya LABORAN), lihat "Ubah Mata Kuliah" |
@@ -432,7 +432,7 @@ Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
   mata kuliah bekerja seperti sebelumnya: klik nama untuk melihat dosen, kode,
   dan kelasnya.
 
-### Tambah Pertemuan
+### Tambah, Ubah, dan Hapus Pertemuan
 
 - Dialog Tambah Pertemuan langsung terisi judul berikutnya: nomor terbesar
   dari judul berpola "Pertemuan <angka>" ditambah satu ("Pertemuan 1" bila
@@ -442,11 +442,32 @@ Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
   server (huruf besar-kecil dan spasi tidak dibedakan), dan pesannya
   ("Pertemuan 1 sudah ada di kelas ini!") tampil merah di dialog tanpa
   menutupnya. Pesan sukses kini menyebut judulnya ("Pertemuan 3 berhasil
-  ditambahkan").
+  ditambahkan"). Server menjadikan huruf pertama judul kapital ("pertemuan 3"
+  tersimpan sebagai "Pertemuan 3").
 - Dropdown Pilih Pertemuan tidak lagi dibalik: urutannya naik mengikuti
   `GET /meeting/:classId`, yang kini diurutkan menurut judul dengan angka
   dibaca sebagai angka (Pertemuan 9 sebelum Pertemuan 10). Kolom Rekap
   Presensi dan PDF-nya mengikuti urutan yang sama.
+- Setelah sebuah pertemuan dipilih, laboran dan asisten melihat tombol
+  **Ubah** dan **Hapus** di sebelah dropdown
+  (`components/praktikum/edit-meeting-button.tsx` dan
+  `delete-meeting-button.tsx`). Dosen tidak melihat keduanya.
+- Ubah membuka dialog berisi judul sekarang. Simpan baru aktif bila judulnya
+  berbeda setelah dirapikan dan huruf pertamanya dikapitalkan, jadi
+  "pertemuan 2" untuk "Pertemuan 2" tetap dianggap sama. Judul kosong
+  ditolak di browser, judul kembar ditolak server dan pesannya tampil di
+  dialog. Setelah berhasil, pesan hijau "Pertemuan 2 berhasil diubah menjadi
+  Responsi" tampil di bawah tombol.
+- Hapus membuka konfirmasi. Bila sesi presensinya sedang dibuka atau sudah
+  ada presensi (dihitung dari `submitted_at` di data pertemuan), dialog
+  menjelaskan alasannya dan hanya ada tombol Tutup; penolakan dari server
+  tetap tampil bila data di browser belum terbaru. Setelah dihapus, pilihan
+  kembali ke "Pilih Pertemuan" dengan pesan hijau "Responsi berhasil
+  dihapus".
+- Dropdown kini mengikuti pilihan dari `class-meetings-content.tsx`.
+  Pertemuan yang dipilih dicari ulang di data terbaru, jadi bila laboran lain
+  menghapusnya, halaman ikut kembali ke "Pilih Pertemuan", dan judul yang
+  diubah dari tempat lain langsung tampil, keduanya lewat event `meeting`.
 
 ## Pekerjaan yang masih tersisa
 
@@ -467,9 +488,12 @@ Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
 
 | NIM / NIY | Password | Role |
 |---|---|---|
-| 60010002 | laboran002 | LABORAN |
-| 60020001 | dosen001 | DOSEN |
+| 60010002 | laboran002 | LABORAN (nama tampilan kini "akun test") |
+| 60010001 | laboran001 | LABORAN |
+| 60020001 | dosen001 | DOSEN (mengampu keempat mata kuliah) |
 | 2000016099 | mahasiswa001 | MAHASISWA |
-| 2000016101 | asisten001 | MAHASISWA, asisten Alpro D |
+| 2000016100 | mahasiswa002 | MAHASISWA (peserta Alpro D) |
+| 2000016104 | mahasiswa004 | MAHASISWA (peserta Alpro C dan Data Mining A) |
+| 2000016105 | mahasiswa005 | MAHASISWA (asisten Alpro C) |
 
-Pola password: fullname dalam huruf kecil.
+Pola password: nama awal akun dalam huruf kecil.

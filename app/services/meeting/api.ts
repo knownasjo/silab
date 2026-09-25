@@ -3,6 +3,7 @@ import {
   IGetAllClassMeetingResponseBody,
   IGetMeetingQrTokenResponseBody,
   IUpdateAttendanceRequestBody,
+  IUpdateMeetingRequestBody,
   IUpdateMeetingStatusRequestBody,
 } from "@/app/interfaces/meeting/meeting.interface";
 import satellite from "../satellite";
@@ -12,6 +13,23 @@ export const postMeeting = async (
   body: IAddClassMeetingRequestBody,
 ): Promise<IBaseResponse> => {
   const res = await satellite.post("/meeting", body);
+
+  return res.data;
+};
+
+export const putMeeting = async (
+  meetingId: string,
+  body: IUpdateMeetingRequestBody,
+): Promise<IBaseResponse> => {
+  const res = await satellite.put(`/meeting/${meetingId}`, body);
+
+  return res.data;
+};
+
+export const deleteMeeting = async (
+  meetingId: string,
+): Promise<IBaseResponse> => {
+  const res = await satellite.delete(`/meeting/${meetingId}`);
 
   return res.data;
 };

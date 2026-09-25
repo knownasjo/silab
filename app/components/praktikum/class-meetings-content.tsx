@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import AddMeetingButton from "./add-meeting-button";
+import EditMeetingButton from "./edit-meeting-button";
+import DeleteMeetingButton from "./delete-meeting-button";
+import FeedbackBox, { Feedback } from "../feedback-box";
 import MeetingsDropDown from "../meetings-dropdown";
 import OpenAttendancesButton from "../open-attendance-button";
 import ShowQrCodeButton from "./show-qr-code-button";
@@ -21,13 +24,20 @@ export default function ClassMeetingsContent({
   classId,
   meetingData,
 }: ClassMeetingsContentProps) {
-  const [selectedMeeting, setSelectedMeeting] = useState<string>("");
+  const [pickedMeeting, setPickedMeeting] = useState<string>("");
+  const [notice, setNotice] = useState<Feedback>(null);
   const { userData } = useAuthStore();
   const canManage = !!userData && userData.role !== "DOSEN";
 
   const currentMeeting = meetingData?.find(
-    (meeting) => meeting.id === selectedMeeting,
+    (meeting) => meeting.id === pickedMeeting,
   );
+  const selectedMeeting = currentMeeting ? pickedMeeting : "";
+
+  const pickMeeting = (meetingId: string) => {
+    setPickedMeeting(meetingId);
+    setNotice(null);
+  };
 
   const students = currentMeeting?.students ?? [];
 
@@ -40,7 +50,27 @@ export default function ClassMeetingsContent({
       <div className="flex w-full flex-row justify-between">
         <div className="flex h-1/6 flex-row space-x-4">
           {canManage && <AddMeetingButton classId={classId} />}
-          <MeetingsDropDown onMeetingSelected={setSelectedMeeting} />
+          <MeetingsDropDown
+            selectedMeeting={selectedMeeting}
+            onMeetingSelected={pickMeeting}
+          />
+          {canManage && classId && currentMeeting && (
+            <>
+              <EditMeetingButton
+                meeting={currentMeeting}
+                classId={classId}
+                onSaved={(message) => setNotice({ ok: true, message })}
+              />
+              <DeleteMeetingButton
+                meeting={currentMeeting}
+                classId={classId}
+                onDeleted={(message) => {
+                  setPickedMeeting("");
+                  setNotice({ ok: true, message });
+                }}
+              />
+            </>
+          )}
         </div>
         <div className="flex h-1/6 flex-row space-x-4">
           {canManage && (
@@ -63,6 +93,7 @@ export default function ClassMeetingsContent({
           </Link>
         </div>
       </div>
+      <FeedbackBox feedback={notice} />
       {!selectedMeeting && (
         <div className="flex w-full flex-1 items-center justify-center">
           <p>Pilih Pertemuan untuk Melihat Daftar Presensi! </p>
