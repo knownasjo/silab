@@ -76,7 +76,11 @@ satellite.interceptors.response.use(
     if (error.response) {
       const errorMessage =
         error.response.data.message || "An unknown error occurred";
-      return Promise.reject({ status: false, message: errorMessage });
+      return Promise.reject({
+        status: false,
+        code: error.response.status,
+        message: errorMessage,
+      });
     }
     return Promise.reject({
       status: false,

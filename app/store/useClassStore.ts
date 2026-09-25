@@ -90,10 +90,15 @@ const useClassStore = create<ClassState & ClassActions>((set, get) => ({
   }),
 
   refreshClassById: coalesce(async (id: string) => {
-    const res = await getClassById(id);
+    try {
+      const res = await getClassById(id);
 
-    if (get().classData?.id === id && res.status && res.data) {
-      set({ classData: res.data });
+      if (get().classData?.id === id && res.status && res.data) {
+        set({ classData: res.data });
+      }
+    } catch (error: any) {
+      if (get().classData?.id === id && [403, 404].includes(error?.code))
+        set({ classData: null, error: error.message });
     }
   }),
 

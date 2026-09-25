@@ -7,18 +7,24 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const semesters: string[] = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
 interface SemestersListBoxProps {
+  value?: string;
   onSemesterChange: (value: string) => void;
 }
 
 export default function SemestersListBox({
+  value,
   onSemesterChange,
 }: SemestersListBoxProps) {
   const [selectedSemester, setSelectedSemester] = useState<string>("");
+
+  useEffect(() => {
+    if (value !== undefined) setSelectedSemester(value);
+  }, [value]);
 
   return (
     <fieldset className="flex h-fit w-1/3 flex-col space-y-3">

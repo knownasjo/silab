@@ -2,9 +2,14 @@ import { error } from "console";
 import {
   IAddSubjectRequestBody,
   IGetSubjectResponseBody,
+  IUpdateSubjectRequestBody,
 } from "../interfaces/subject/subject.interface";
 import { create } from "zustand";
-import { addSubject, getAllSubjects } from "../services/subject/api";
+import {
+  addSubject,
+  getAllSubjects,
+  putSubject,
+} from "../services/subject/api";
 import { coalesce } from "../utils/coalesce";
 
 type SubjectState = GlobalState & {
@@ -15,6 +20,10 @@ type SubjectActions = {
   getAllSubjects: () => Promise<void>;
   refreshAllSubjects: () => Promise<void>;
   addSubject: (body: IAddSubjectRequestBody) => Promise<void>;
+  updateSubject: (
+    id: string,
+    body: IUpdateSubjectRequestBody,
+  ) => Promise<{ ok: boolean; message: string }>;
 };
 
 const initialState = {
@@ -63,6 +72,17 @@ const useSubjectStore = create<SubjectState & SubjectActions>((set, get) => ({
       console.log(get().error);
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  updateSubject: async (id, body) => {
+    try {
+      const res = await putSubject(id, body);
+
+      await get().refreshAllSubjects();
+      return { ok: true, message: res.message };
+    } catch (error: any) {
+      return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
     }
   },
 }));

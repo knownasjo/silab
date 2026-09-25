@@ -5,9 +5,11 @@ import {
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
-import SubjectDisclosureDetails from "../subject-disclosure-details";
 import SubjectClassesCard from "../subject-classes";
+import EditSubjectButton from "./edit-subject-button";
+import FeedbackBox from "../feedback-box";
 import useSubjectStore from "@/app/store/useSubjectStore";
+import useAuthStore from "@/app/store/useAuthStore";
 import { useEffect, useState } from "react";
 
 interface SubjectsListProps {
@@ -16,7 +18,13 @@ interface SubjectsListProps {
 
 const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
   const { subjectsData, getAllSubjects } = useSubjectStore();
+  const { userData } = useAuthStore();
   const [isReady, setIsReady] = useState(false);
+  const [notice, setNotice] = useState<{
+    subjectId: string;
+    message: string;
+  } | null>(null);
+  const canEdit = userData?.role === "LABORAN";
 
   useEffect(() => {
     getAllSubjects().finally(() => setIsReady(true));
@@ -34,16 +42,34 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
             as={`div`}
             className={`w-full rounded-2xl bg-white p-4`}
           >
-            <DisclosureButton
-              className={`flex h-fit w-full flex-row items-start`}
-            >
-              <p className="text-xl font-bold text-[#1d1d1d]">
-                {subject.subject_name}
-              </p>
-            </DisclosureButton>
+            <div className="flex w-full flex-row items-start justify-between space-x-4">
+              <DisclosureButton
+                className={`flex h-fit w-full flex-row items-start`}
+              >
+                <p className="text-xl font-bold text-[#1d1d1d]">
+                  {subject.subject_name}
+                </p>
+              </DisclosureButton>
+              {canEdit && (
+                <EditSubjectButton
+                  subject={subject}
+                  onSaved={(message) =>
+                    setNotice({ subjectId: subject.id, message })
+                  }
+                />
+              )}
+            </div>
+            {notice?.subjectId === subject.id && (
+              <div className="mt-3">
+                <FeedbackBox feedback={{ ok: true, message: notice.message }} />
+              </div>
+            )}
             <DisclosurePanel className={`w-full bg-white`}>
-              <SubjectDisclosureDetails subjectId={subject.id} />
-              <SubjectClassesCard subject_name={subject.subject_name} />
+              <p className="text-base text-[#1d1d1d]/70">
+                Dosen pengampu: {subject.lecturer} · Kode {subject.subject_code}{" "}
+                · Semester {subject.semester}
+              </p>
+              <SubjectClassesCard subjectId={subject.id} />
             </DisclosurePanel>
           </Disclosure>
         ))}

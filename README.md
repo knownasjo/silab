@@ -107,7 +107,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 |---|---|
 | `/auth` | Login NIM/NIY + password (mahasiswa memakai NIM, dosen dan laboran NIY 8 angka) |
 | `/dashboard` | Kartu statistik. LABORAN: mata kuliah dan pembayaran. Asisten: kelas yang ia pegang. DOSEN: kelas, mahasiswa, pertemuan, dan rata-rata kehadiran mata kuliah yang ia ampu |
-| `/dashboard/praktikum` | LABORAN: accordion semua mata kuliah. DOSEN: accordion mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
+| `/dashboard/praktikum` | LABORAN: accordion semua mata kuliah dengan tombol Ubah, lihat "Ubah Mata Kuliah". DOSEN: accordion mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
 | `/dashboard/praktikum/[classId]` | Detail kelas (hari, jam, ruangan, dosen, asisten, kuota) + panel pertemuan & presensi. LABORAN: tombol Ubah Kelas dan Hapus Kelas, lihat "Ubah dan Hapus Kelas". DOSEN hanya melihat |
 | `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
@@ -375,6 +375,34 @@ Kelas C"), dan kotak detail menampilkan ruangan.
   `attendance`, supaya jumlah pertemuan dan presensi di dialog Hapus Kelas
   selalu terbaru.
 
+### Ubah Mata Kuliah
+
+Di halaman Praktikum, setiap mata kuliah punya tombol **Ubah** (hanya
+laboran) yang membuka dialog berisi kode, semester, nama, dan dosen pengampu,
+sudah terisi data sekarang.
+
+- Tombol Simpan baru aktif setelah ada yang diubah. Kode atau nama kosong
+  ditolak di browser; penolakan server (kode atau nama sudah dipakai mata
+  kuliah lain) tampil merah di dialog tanpa menutupnya.
+- Bila dosen pengampu diganti, dialog menjelaskan bahwa dosen baru langsung
+  bisa melihat semua kelas, pertemuan, dan presensi mata kuliah ini termasuk
+  yang sudah berjalan, sedangkan dosen lama tidak lagi.
+- Setelah berhasil, dialog tertutup dan pesan hijau tampil di dalam kartu mata
+  kuliah itu. Urutan kartu tetap, karena `GET /subject` kini diurutkan menurut
+  waktu dibuat.
+- Dosen baru yang membuka halaman Praktikum melihat mata kuliah itu muncul
+  tanpa refresh. Dosen lama yang sedang membuka salah satu kelasnya langsung
+  melihat "Kelas ini bukan mata kuliah yang Anda ampu.": `refreshClassById`
+  kini mengosongkan halaman bila server membalas 403 atau 404, sedangkan
+  gangguan jaringan tetap diabaikan. Untuk itu `satellite` menyertakan kode
+  status HTTP (`code`) pada error yang ditolaknya.
+- Isi kartu yang dibuka kini menampilkan "Dosen pengampu: ... · Kode ... ·
+  Semester ..." dari `GET /subject`. Sebelumnya nama dosen tidak pernah tampil
+  karena `subject-disclosure-details.tsx` memanggil endpoint `/subjects/:id`
+  yang tidak ada; komponen itu sudah dihapus. Kelas di dalam kartu kini
+  dicocokkan dengan id mata kuliah, bukan namanya, jadi tetap tampil setelah
+  mata kuliah diganti nama.
+
 ## Pekerjaan yang masih tersisa
 
 - [ ] Tambah Mata Kuliah punya bug yang sama dengan Tambah Praktikum dulu:
@@ -384,9 +412,6 @@ Kelas C"), dan kotak detail menampilkan ruangan.
       tanpa mengubah apa pun tetap mengirim permintaan dan menampilkan
       "Status pembayaran diubah ...". Pemeriksaan "Tidak ada perubahan" baru
       berlaku untuk aktivasi yang sudah punya kelas
-- [ ] `subject-disclosure-details.tsx` memanggil `/subjects/:id` lewat
-      `app/actions/`, endpoint yang tidak ada di backend, sehingga nama dosen
-      di bawah judul mata kuliah (halaman Praktikum) tidak pernah tampil
 - [ ] Dependensi `html2canvas` tidak dipakai lagi dan bisa dihapus
 - [ ] Pindahkan tujuh file terakhir dari `app/actions/` ke `app/services/`,
       lalu hapus folder `actions/` dan `app/types/`

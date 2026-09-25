@@ -3,12 +3,10 @@ import useClassStore from "../store/useClassStore";
 import ClassCard from "./praktikum/class-card";
 
 interface ISubjectClassesCardProps {
-  subject_name: string;
+  subjectId: string;
 }
 
-const SubjectClasses: React.FC<ISubjectClassesCardProps> = ({
-  subject_name,
-}) => {
+const SubjectClasses: React.FC<ISubjectClassesCardProps> = ({ subjectId }) => {
   const { getAllClass, classesData } = useClassStore();
 
   useEffect(() => {
@@ -16,7 +14,7 @@ const SubjectClasses: React.FC<ISubjectClassesCardProps> = ({
   }, [getAllClass]);
 
   const filteredSubjectClasses = classesData.filter(
-    (value) => value.subject_name === subject_name,
+    (value) => value.subjectId === subjectId,
   );
 
   return (
