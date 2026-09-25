@@ -432,6 +432,22 @@ Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
   mata kuliah bekerja seperti sebelumnya: klik nama untuk melihat dosen, kode,
   dan kelasnya.
 
+### Tambah Pertemuan
+
+- Dialog Tambah Pertemuan langsung terisi judul berikutnya: nomor terbesar
+  dari judul berpola "Pertemuan <angka>" ditambah satu ("Pertemuan 1" bila
+  belum ada), dan masih bisa diubah. Judul lain seperti "UTS" diabaikan saat
+  menghitung nomor. Input dibatasi 50 karakter.
+- Judul kosong ditolak di browser. Judul yang sudah ada di kelas itu ditolak
+  server (huruf besar-kecil dan spasi tidak dibedakan), dan pesannya
+  ("Pertemuan 1 sudah ada di kelas ini!") tampil merah di dialog tanpa
+  menutupnya. Pesan sukses kini menyebut judulnya ("Pertemuan 3 berhasil
+  ditambahkan").
+- Dropdown Pilih Pertemuan tidak lagi dibalik: urutannya naik mengikuti
+  `GET /meeting/:classId`, yang kini diurutkan menurut judul dengan angka
+  dibaca sebagai angka (Pertemuan 9 sebelum Pertemuan 10). Kolom Rekap
+  Presensi dan PDF-nya mengikuti urutan yang sama.
+
 ## Pekerjaan yang masih tersisa
 
 - [ ] Pembayaran: untuk aktivasi yang belum punya kelas, "Simpan Perubahan"

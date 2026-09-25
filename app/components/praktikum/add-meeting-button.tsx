@@ -9,10 +9,20 @@ import {
 import { useState } from "react";
 import SuccessDialog from "../success-dialog";
 import useMeetingStore from "@/app/store/useMeetingStore";
+import { IGetAllClassMeetingResponseBody } from "@/app/interfaces/meeting/meeting.interface";
 
 interface AddMeetingButtonProps {
   classId?: string;
 }
+
+const nextMeetingName = (meetings: IGetAllClassMeetingResponseBody[]) => {
+  const numbers = meetings
+    .map((meeting) => /^pertemuan\s+(\d+)$/i.exec(meeting.meeting_name.trim()))
+    .filter((match) => match !== null)
+    .map((match) => Number(match[1]));
+
+  return `Pertemuan ${Math.max(0, ...numbers) + 1}`;
+};
 
 export default function AddMeetingButton({ classId }: AddMeetingButtonProps) {
   const [isAddMeetingOpen, setIsAddMeetingOpen] = useState<boolean>(false);
@@ -25,7 +35,7 @@ export default function AddMeetingButton({ classId }: AddMeetingButtonProps) {
   const { addMeeting, isLoading } = useMeetingStore();
 
   const openDialog = () => {
-    setMeetingName("");
+    setMeetingName(nextMeetingName(useMeetingStore.getState().meetingsData));
     setDialogError("");
     setIsAddMeetingOpen(true);
   };
@@ -85,6 +95,7 @@ export default function AddMeetingButton({ classId }: AddMeetingButtonProps) {
                 </label>
                 <input
                   required
+                  maxLength={50}
                   className="h-[46px] w-full rounded-2xl bg-[#F5F5F5] px-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]"
                   placeholder="Judul pertemuan"
                   onChange={(e) => {

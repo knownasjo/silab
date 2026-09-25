@@ -50,19 +50,17 @@ export default function MeetingsDropDown({
         className={`mt-1 w-[var(--button-width)] rounded-2xl bg-[#D2E3F1] text-sm font-semibold text-[#3272CA]`}
       >
         {meetingsData &&
-          meetingsData
-            .map((meeting) => (
-              <ListboxOption
-                as="button"
-                onClick={() => handleSelectedMeeting(meeting.id)}
-                key={meeting.id}
-                value={meeting.id}
-                className={`w-full p-3 hover:bg-[#3272CA] hover:text-white`}
-              >
-                <p className="w-full items-center">{meeting.meeting_name}</p>
-              </ListboxOption>
-            ))
-            .reverse()}
+          meetingsData.map((meeting) => (
+            <ListboxOption
+              as="button"
+              onClick={() => handleSelectedMeeting(meeting.id)}
+              key={meeting.id}
+              value={meeting.id}
+              className={`w-full p-3 hover:bg-[#3272CA] hover:text-white`}
+            >
+              <p className="w-full items-center">{meeting.meeting_name}</p>
+            </ListboxOption>
+          ))}
       </ListboxOptions>
     </Listbox>
   );
