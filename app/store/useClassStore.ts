@@ -49,7 +49,7 @@ const useClassStore = create<ClassState & ClassActions>((set, get) => ({
   },
 
   getClassById: async (id: string) => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null, classData: null });
 
     try {
       const res = await getClassById(id);
@@ -59,8 +59,8 @@ const useClassStore = create<ClassState & ClassActions>((set, get) => ({
       } else {
         set({ error: res.message });
       }
-    } catch {
-      console.log(get().error);
+    } catch (error: any) {
+      set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }

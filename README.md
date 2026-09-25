@@ -106,9 +106,9 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | Route | Isi |
 |---|---|
 | `/auth` | Login NIM/NIY + password (mahasiswa memakai NIM, dosen dan laboran NIY 8 angka) |
-| `/dashboard` | Kartu statistik |
-| `/dashboard/praktikum` | LABORAN: accordion mata kuliah. Asisten (MAHASISWA): kartu kelas yang ia pegang |
-| `/dashboard/praktikum/[classId]` | Detail kelas + panel pertemuan & presensi |
+| `/dashboard` | Kartu statistik. LABORAN: mata kuliah dan pembayaran. Asisten: kelas yang ia pegang. DOSEN: kelas, mahasiswa, pertemuan, dan rata-rata kehadiran mata kuliah yang ia ampu |
+| `/dashboard/praktikum` | LABORAN: accordion semua mata kuliah. DOSEN: accordion mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
+| `/dashboard/praktikum/[classId]` | Detail kelas + panel pertemuan & presensi (DOSEN hanya melihat) |
 | `.../tambah-praktikum` | Buat kelas baru |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah |
@@ -274,11 +274,40 @@ README backend). Di web:
 - Menambah/menghapus asisten memicu event `class`, jadi daftar kelas asisten
   ikut berubah tanpa refresh.
 
+### Dosen
+
+Dosen hanya memantau mata kuliah yang ia ampu dan tidak mengubah data apa pun.
+Pembatasan datanya ada di backend (lihat "Akses dosen" di README backend), jadi
+membuka URL kelas dosen lain pun ditolak.
+
+- Menu: Dashboard, Praktikum, dan Profil. Master Data dan Pengumuman tidak
+  tampil.
+- **Dashboard**: empat kartu dari `GET /dashboard/dosen`, yaitu Jumlah Kelas,
+  Jumlah Mahasiswa, Jumlah Pertemuan, dan Rata-rata Kehadiran (misal "63%" dengan
+  keterangan "5 dari 8 kesempatan hadir"; "-" dan "Belum ada data presensi" bila
+  belum ada pertemuan). Kartu ikut berubah saat ada event `class`, `subject`,
+  `meeting`, atau `attendance`. Dashboard dosen tidak memanggil `/activation`.
+  `useDashboardStore` memilih data laboran atau dosen setelah peran diketahui
+  dari `GET /auth/me`.
+- **Praktikum**: accordion mata kuliah yang sama dengan laboran, tetapi hanya
+  berisi mata kuliah yang ia ampu dan tanpa tombol Tambah Praktikum. Dosen yang
+  belum mengampu mata kuliah apa pun melihat pesan "Anda belum tercatat sebagai
+  dosen pengampu mata kuliah praktikum mana pun."
+- **Detail kelas**: info kelas, asisten, pilihan pertemuan beserta tabel
+  presensinya, Rekap All, dan rekap per pertemuan. Tombol Tambah Pertemuan,
+  Buka/Tutup Presensi, QR, ubah presensi, dan kelola asisten disembunyikan
+  (`canManage` di `class-meetings-content.tsx`). Rekap presensi dan Unduh PDF
+  tetap tersedia.
+- Kelas dosen lain yang dibuka lewat URL menampilkan pesan backend "Kelas ini
+  bukan mata kuliah yang Anda ampu." `getClassById` di `useClassStore` kini
+  mengosongkan data kelas sebelumnya dan menyimpan pesan error, sehingga tidak
+  ada data kelas lama yang tertinggal di layar.
+
 ## Pekerjaan yang masih tersisa
 
-- [ ] `app/components/subjects-disclosure.tsx` baris 41 gagal `tsc`
-      (`subjects` tidak ada di tipe `SubjectBySemester`), sehingga
-      `next build` akan gagal
+- [ ] `subject-disclosure-details.tsx` memanggil `/subjects/:id` lewat
+      `app/actions/`, endpoint yang tidak ada di backend, sehingga nama dosen
+      di bawah judul mata kuliah (halaman Praktikum) tidak pernah tampil
 - [ ] Dependensi `html2canvas` tidak dipakai lagi dan bisa dihapus
 - [ ] Pindahkan enam file terakhir dari `app/actions/` ke `app/services/`,
       lalu hapus folder `actions/` dan `app/types/`

@@ -65,7 +65,7 @@ export default function RecapAttendancesContent({
       return "Kelas ini belum punya pertemuan. Tambahkan pertemuan dulu sebelum membuat rekap.";
     if (meetings.length === 0) return "Pertemuan tidak ditemukan.";
     if (meetings[0].students === undefined)
-      return "Rekap presensi hanya bisa dilihat asisten dan laboran.";
+      return "Rekap presensi hanya bisa dilihat asisten, dosen pengampu, dan laboran.";
     if (recap.rows.length === 0) return "Belum ada mahasiswa di kelas ini.";
     return null;
   })();

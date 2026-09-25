@@ -10,6 +10,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { IGetAllClassMeetingResponseBody } from "@/app/interfaces/meeting/meeting.interface";
 import { getAttendanceStatus, statusStyle } from "@/app/utils/attendance";
+import useAuthStore from "@/app/store/useAuthStore";
 
 interface ClassMeetingsContentProps {
   classId?: string;
@@ -21,6 +22,8 @@ export default function ClassMeetingsContent({
   meetingData,
 }: ClassMeetingsContentProps) {
   const [selectedMeeting, setSelectedMeeting] = useState<string>("");
+  const { userData } = useAuthStore();
+  const canManage = !!userData && userData.role !== "DOSEN";
 
   const currentMeeting = meetingData?.find(
     (meeting) => meeting.id === selectedMeeting,
@@ -36,15 +39,17 @@ export default function ClassMeetingsContent({
     <>
       <div className="flex w-full flex-row justify-between">
         <div className="flex h-1/6 flex-row space-x-4">
-          <AddMeetingButton classId={classId} />
+          {canManage && <AddMeetingButton classId={classId} />}
           <MeetingsDropDown onMeetingSelected={setSelectedMeeting} />
         </div>
         <div className="flex h-1/6 flex-row space-x-4">
-          <OpenAttendancesButton
-            classId={classId}
-            meeting={meetingData}
-            selectedMeeting={selectedMeeting}
-          />
+          {canManage && (
+            <OpenAttendancesButton
+              classId={classId}
+              meeting={meetingData}
+              selectedMeeting={selectedMeeting}
+            />
+          )}
           <Link
             href={{
               pathname: "recap-attendances",
@@ -67,10 +72,12 @@ export default function ClassMeetingsContent({
         <div className="w-full flex-1 space-y-10 rounded-[20px] bg-white p-5">
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center space-x-4">
-              <ShowQrCodeButton
-                meetingId={selectedMeeting}
-                meetingName={currentMeeting?.meeting_name}
-              />
+              {canManage && (
+                <ShowQrCodeButton
+                  meetingId={selectedMeeting}
+                  meetingName={currentMeeting?.meeting_name}
+                />
+              )}
               <Link
                 href={{
                   pathname: "recap-attendances",
@@ -142,7 +149,7 @@ export default function ClassMeetingsContent({
                       {status}
                     </p>
                   </div>
-                  {classId && (
+                  {classId && canManage && (
                     <StudentAttendanceEditButton
                       student={student}
                       meetingId={selectedMeeting}

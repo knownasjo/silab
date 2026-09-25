@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { getActivations, getAllSubjects } from "../services/subject/api";
 import { getAllClass } from "../services/class/api";
+import { getLecturerDashboard } from "../services/dashboard/api";
+import { ILecturerDashboardResponseBody } from "../interfaces/dashboard/dashboard.interface";
 import { coalesce } from "../utils/coalesce";
 
 type DashboardState = GlobalState & {
@@ -9,11 +11,14 @@ type DashboardState = GlobalState & {
   totalActivation: number | null;
   totalPaidStudent: number | null;
   totalUnpaidStudent: number | null;
+  lecturerSummary: ILecturerDashboardResponseBody | null;
 };
 
 type DashboardActions = {
   getDashboardData: () => Promise<void>;
   refreshDashboardData: () => Promise<void>;
+  getLecturerSummary: () => Promise<void>;
+  refreshLecturerSummary: () => Promise<void>;
 };
 
 const initialState = {
@@ -24,6 +29,7 @@ const initialState = {
   totalActivation: null,
   totalPaidStudent: null,
   totalUnpaidStudent: null,
+  lecturerSummary: null,
 };
 
 const loadDashboardData = async () => {
@@ -60,6 +66,26 @@ const useDashboardStore = create<DashboardState & DashboardActions>((set) => ({
   },
 
   refreshDashboardData: coalesce(async () => set(await loadDashboardData())),
+
+  getLecturerSummary: async () => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const res = await getLecturerDashboard();
+
+      set({ lecturerSummary: res.data ?? null });
+    } catch (error: any) {
+      set({ error: error?.message ?? "Terjadi kesalahan" });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  refreshLecturerSummary: coalesce(async () => {
+    const res = await getLecturerDashboard();
+
+    if (res.data) set({ lecturerSummary: res.data });
+  }),
 }));
 
 export default useDashboardStore;

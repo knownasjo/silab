@@ -13,7 +13,7 @@ import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 const ClassDetails: React.FC = () => {
   const params = useParams<{ classId: string }>();
 
-  const { getClassById, refreshClassById, classData, isLoading } =
+  const { getClassById, refreshClassById, classData, isLoading, error } =
     useClassStore();
   const { getMeetings, refreshMeetings, meetingsData } = useMeetingStore();
   const {
@@ -50,6 +50,11 @@ const ClassDetails: React.FC = () => {
           <ClassDetailsBox data={classData} assistant={collaboratorsData} />
           <ClassMeetingsContent classId={classData.id} meetingData={meetingsData} />
         </>
+      )}
+      {!isLoading && !classData && error && (
+        <div className="flex w-full flex-1 items-center justify-center">
+          <p className="text-base font-semibold text-[#5E6278]">{error}</p>
+        </div>
       )}
     </div>
   );

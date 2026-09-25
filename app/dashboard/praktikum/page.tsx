@@ -29,6 +29,9 @@ export default function Praktikum() {
     <div className="h-full w-full space-y-10 overflow-auto overscroll-contain">
       <AddPracticumBanner />
       {userData?.role === "LABORAN" && <SubjectsList />}
+      {userData?.role === "DOSEN" && (
+        <SubjectsList emptyMessage="Anda belum tercatat sebagai dosen pengampu mata kuliah praktikum mana pun." />
+      )}
       {userData?.role === "MAHASISWA" && classesData && (
         <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
           {classesData.map((subjectClass) => (

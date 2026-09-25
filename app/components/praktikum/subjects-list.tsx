@@ -8,17 +8,25 @@ import {
 import SubjectDisclosureDetails from "../subject-disclosure-details";
 import SubjectClassesCard from "../subject-classes";
 import useSubjectStore from "@/app/store/useSubjectStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-const SubjectsList = () => {
+interface SubjectsListProps {
+  emptyMessage?: string;
+}
+
+const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
   const { subjectsData, getAllSubjects } = useSubjectStore();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    getAllSubjects();
+    getAllSubjects().finally(() => setIsReady(true));
   }, [getAllSubjects]);
 
   return (
     <div className="flex h-full w-full flex-col items-start space-y-4">
+      {emptyMessage && isReady && subjectsData.length === 0 && (
+        <p className="text-sm font-semibold text-[#5E6278]">{emptyMessage}</p>
+      )}
       {subjectsData &&
         subjectsData.map((subject) => (
           <Disclosure
