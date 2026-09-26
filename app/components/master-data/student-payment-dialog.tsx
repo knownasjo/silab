@@ -74,6 +74,11 @@ export default function StudentPaymentDialog({
     const statusChanged = paymentStatus !== editing.status;
 
     if (!currentClass) {
+      if (!statusChanged && !selectedClass) {
+        fail("Tidak ada perubahan yang perlu disimpan.");
+        return;
+      }
+
       if (paymentStatus && !selectedClass) {
         fail(
           "Geser tombol ke Sudah Bayar dan pilih kelas praktikum terlebih dahulu!",

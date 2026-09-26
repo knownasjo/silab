@@ -74,8 +74,7 @@ satellite.interceptors.response.use(
     }
 
     if (error.response) {
-      const errorMessage =
-        error.response.data.message || "An unknown error occurred";
+      const errorMessage = error.response.data.message || "Terjadi kesalahan";
       return Promise.reject({
         status: false,
         code: error.response.status,
@@ -84,7 +83,7 @@ satellite.interceptors.response.use(
     }
     return Promise.reject({
       status: false,
-      message: "Network error, please try again!",
+      message: "Tidak dapat terhubung ke server, coba lagi!",
     });
   },
 );

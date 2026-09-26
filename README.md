@@ -184,6 +184,9 @@ catch (error: any) {
   sama. Filter "Belum Bayar" = masih ada mata kuliah belum lunas, "Sudah
   Bayar" = semua lunas; filter dihitung di browser, jadi `GET /activation`
   hanya dikirim dengan `?name=`. Kartu angka tetap menghitung per aktivasi
+- Form ubah pembayaran menolak "Simpan Perubahan" tanpa perubahan dengan pesan
+  "Tidak ada perubahan yang perlu disimpan.", baik aktivasi yang sudah punya
+  kelas maupun yang belum, jadi tidak ada permintaan yang dikirim ke server
 - Kartu dashboard: fungsi store yang tertukar diperbaiki, endpoint kembar
   dipisah dengan `?status=true/false`
 - Pengumuman: validasi judul/deskripsi, Lihat Detail, Edit, dan Hapus
@@ -471,10 +474,6 @@ Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
 
 ## Pekerjaan yang masih tersisa
 
-- [ ] Pembayaran: untuk aktivasi yang belum punya kelas, "Simpan Perubahan"
-      tanpa mengubah apa pun tetap mengirim permintaan dan menampilkan
-      "Status pembayaran diubah ...". Pemeriksaan "Tidak ada perubahan" baru
-      berlaku untuk aktivasi yang sudah punya kelas
 - [ ] Dependensi `html2canvas` tidak dipakai lagi dan bisa dihapus
 - [ ] Pindahkan tujuh file terakhir dari `app/actions/` ke `app/services/`,
       lalu hapus folder `actions/` dan `app/types/`
