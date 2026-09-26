@@ -415,6 +415,12 @@ sudah terisi data sekarang.
 - Tombol Simpan baru aktif setelah ada yang diubah. Kode atau nama kosong
   ditolak di browser; penolakan server (kode atau nama sudah dipakai mata
   kuliah lain) tampil merah di dialog tanpa menutupnya.
+- Kode mata kuliah harus tepat 9 angka ("Kode mata kuliah harus 9 angka.").
+  Kolomnya hanya menerima angka: huruf, spasi, dan tanda baca langsung
+  dibuang, lalu dipotong menjadi 9 angka. Karena pembuangan terjadi sebelum
+  pemotongan, kode yang ditempel dengan spasi ("553 310 001") tetap utuh. Aturan yang sama diperiksa
+  server, jadi mata kuliah lama yang kodenya belum 9 angka harus diganti
+  kodenya dulu sebelum bisa disimpan.
 - Bila dosen pengampu diganti, dialog menjelaskan bahwa dosen baru langsung
   bisa melihat semua kelas, pertemuan, dan presensi mata kuliah ini termasuk
   yang sudah berjalan, sedangkan dosen lama tidak lagi.
@@ -428,8 +434,13 @@ sudah terisi data sekarang.
   kini mengosongkan halaman bila server membalas 403 atau 404, sedangkan
   gangguan jaringan tetap diabaikan. Untuk itu `satellite` menyertakan kode
   status HTTP (`code`) pada error yang ditolaknya.
-- Isi kartu yang dibuka kini menampilkan "Dosen pengampu: ... · Kode ..." dari
-  `GET /subject` (semester sudah menjadi judul kelompoknya). Sebelumnya nama dosen tidak pernah tampil
+- Kode mata kuliah tampil kecil berwarna abu-abu di sebelah nama pada setiap
+  kartu, jadi terlihat tanpa membuka kartu. Isi kartu yang dibuka menampilkan
+  "Dosen pengampu: ..." dari `GET /subject` (semester sudah menjadi judul
+  kelompoknya).
+- Judul rekap PDF memuat kode mata kuliah, misalnya "Praktikum Algoritma dan
+  Pemrograman (553310001) · Kelas C · Semester 1", dari `subject_code` di
+  `GET /class/:id`. Sebelumnya nama dosen tidak pernah tampil
   karena `subject-disclosure-details.tsx` memanggil endpoint `/subjects/:id`
   yang tidak ada; komponen itu sudah dihapus. Kelas di dalam kartu kini
   dicocokkan dengan id mata kuliah, bukan namanya, jadi tetap tampil setelah

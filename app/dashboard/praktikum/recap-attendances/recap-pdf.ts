@@ -3,6 +3,7 @@ import { AttendanceStatus } from "@/app/utils/attendance";
 import { Recap, statusCode, statusLegend } from "./recap";
 
 export interface RecapPdfInfo {
+  subjectCode: string;
   subjectName: string;
   className: string;
   semester: string;
@@ -128,7 +129,7 @@ export const downloadRecapPdf = async (recap: Recap, info: RecapPdfInfo) => {
   };
 
   const subtitle = [
-    `Praktikum ${info.subjectName}`,
+    `Praktikum ${info.subjectName} (${info.subjectCode})`,
     `Kelas ${info.className}`,
     `Semester ${info.semester}`,
     info.meetingName,

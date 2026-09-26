@@ -105,10 +105,13 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
                   >
                     <div className="flex w-full flex-row items-start justify-between space-x-4">
                       <DisclosureButton
-                        className={`flex h-fit w-full flex-row items-start`}
+                        className={`flex h-fit w-full flex-row flex-wrap items-baseline gap-x-3 text-left`}
                       >
                         <p className="text-lg font-bold text-[#1d1d1d]">
                           {subject.subject_name}
+                        </p>
+                        <p className="text-sm font-semibold text-[#5E6278]">
+                          {subject.subject_code}
                         </p>
                       </DisclosureButton>
                       {canEdit && (
@@ -133,8 +136,7 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
                     )}
                     <DisclosurePanel className={`w-full`}>
                       <p className="text-base text-[#1d1d1d]/70">
-                        Dosen pengampu: {subject.lecturer} · Kode{" "}
-                        {subject.subject_code}
+                        Dosen pengampu: {subject.lecturer}
                       </p>
                       <SubjectClassesCard subjectId={subject.id} />
                     </DisclosurePanel>

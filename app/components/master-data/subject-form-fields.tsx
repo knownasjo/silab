@@ -30,6 +30,8 @@ export const validateSubjectForm = (form: SubjectForm) => {
   const body = tidySubjectForm(form);
 
   if (!body.subject_code) return "Kode mata kuliah wajib diisi.";
+  if (!/^\d{9}$/.test(body.subject_code))
+    return "Kode mata kuliah harus 9 angka.";
   if (!body.subject_name) return "Nama mata kuliah wajib diisi.";
   if (!body.semester) return "Pilih semester.";
   if (!body.lecturer_id) return "Pilih dosen pengampu.";
@@ -62,10 +64,16 @@ export default function SubjectFormFields({
             id="subject-code"
             className={inputClassName}
             type="text"
+            inputMode="numeric"
             autoComplete="off"
-            maxLength={20}
+            placeholder="9 angka"
             value={form.subject_code}
-            onChange={(event) => onChange("subject_code", event.target.value)}
+            onChange={(event) =>
+              onChange(
+                "subject_code",
+                event.target.value.replace(/\D/g, "").slice(0, 9),
+              )
+            }
           />
         </div>
         <SemestersListBox

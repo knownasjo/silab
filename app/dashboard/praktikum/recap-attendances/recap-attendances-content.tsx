@@ -76,6 +76,7 @@ export default function RecapAttendancesContent({
     setIsDownloading(true);
     try {
       await downloadRecapPdf(recap, {
+        subjectCode: classInfo.subject_code,
         subjectName: classInfo.subject_name,
         className: classInfo.name,
         semester: classInfo.semester,
