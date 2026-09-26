@@ -79,13 +79,6 @@ export default function StudentPaymentDialog({
         return;
       }
 
-      if (paymentStatus && !selectedClass) {
-        fail(
-          "Geser tombol ke Sudah Bayar dan pilih kelas praktikum terlebih dahulu!",
-        );
-        return;
-      }
-
       await updatePaymentStatus(editing.id, paymentStatus, selectedClass?.id);
 
       const { error, message: storeMessage } = useActivationStore.getState();
@@ -327,6 +320,15 @@ export default function StudentPaymentDialog({
                             Belum ada kelas untuk mata kuliah ini.
                           </p>
                         )}
+                        {!editing.registered_class &&
+                          editing.available_classes.length > 0 && (
+                            <ListboxOption
+                              value={null}
+                              className="cursor-pointer rounded-xl p-2 text-sm font-semibold text-[#5E6278] data-[focus]:bg-[#D2E3F1]"
+                            >
+                              Kosongkan (mahasiswa memilih sendiri)
+                            </ListboxOption>
+                          )}
                         {editing.available_classes.map((availableClass) => {
                           const isCurrent =
                             editing.registered_class?.id === availableClass.id;
@@ -352,6 +354,12 @@ export default function StudentPaymentDialog({
                         })}
                       </ListboxOptions>
                     </Listbox>
+                    {!editing.registered_class && (
+                      <p className="mt-2 text-xs text-[#5E6278]">
+                        Kosongkan bila mahasiswa memilih kelas sendiri di
+                        aplikasi.
+                      </p>
+                    )}
                   </div>
                   {dialogError && (
                     <p className="text-sm font-semibold text-[#F1416C]">

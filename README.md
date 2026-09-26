@@ -194,7 +194,7 @@ catch (error: any) {
   dihapus; `next.config.mjs` dihapus
 - Tombol Buka/Tutup Presensi tersambung ke `PUT /meeting/:id/status`
 - Edit presensi manual dan "Kembalikan ke Belum Presensi" berfungsi
-- Halaman Pembayaran: pilih kelas saat konfirmasi lunas, dan pindah kelas
+- Halaman Pembayaran: pilih kelas saat konfirmasi lunas (boleh dikosongkan), dan pindah kelas
 - Halaman Pembayaran dikelompokkan per mahasiswa (`app/utils/payment.ts`):
   tabel berisi satu baris per mahasiswa dengan ringkasan ("Lunas semua",
   "2 dari 3 lunas", "Belum Bayar"). Klik baris membuka pop-up
@@ -206,6 +206,17 @@ catch (error: any) {
 - Form ubah pembayaran menolak "Simpan Perubahan" tanpa perubahan dengan pesan
   "Tidak ada perubahan yang perlu disimpan.", baik aktivasi yang sudah punya
   kelas maupun yang belum, jadi tidak ada permintaan yang dikirim ke server
+- Konfirmasi bayar tidak lagi mewajibkan memilih kelas (dulu ditolak dengan
+  "Geser tombol ke Sudah Bayar dan pilih kelas praktikum terlebih dahulu!").
+  Untuk aktivasi yang belum punya kelas, form menampilkan petunjuk "Kosongkan
+  bila mahasiswa memilih kelas sendiri di aplikasi." dan pilihan kelas diawali
+  "Kosongkan (mahasiswa memilih sendiri)" untuk membatalkan kelas yang sudah
+  terpilih. Tanpa kelas, server membalas "Pembayaran dikonfirmasi. Mahasiswa
+  memilih kelas sendiri di aplikasi." lalu mahasiswa memilih kelasnya di HP.
+  Mata kuliah yang belum punya kelas sama sekali kini juga bisa dikonfirmasi.
+  Aturan wajib pilih kelas itu dulu membuat fitur Pilih Kelas di aplikasi
+  hampir tidak pernah tercapai. Penolakan server (kuota penuh, jadwal bentrok,
+  sudah punya kelas lain) tampil merah di form seperti sebelumnya
 - Kartu dashboard: fungsi store yang tertukar diperbaiki, endpoint kembar
   dipisah dengan `?status=true/false`
 - Pengumuman: validasi judul/deskripsi, Lihat Detail, Edit, dan Hapus
