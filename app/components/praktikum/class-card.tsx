@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  IGetClassByIdResponseBody,
-  IGetClassResponseBody,
-} from "@/app/interfaces/class/class.interface";
+import { IGetClassResponseBody } from "@/app/interfaces/class/class.interface";
 import Link from "next/link";
 import { formatDay } from "@/app/utils/day";
 

@@ -7,7 +7,7 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import Image from "next/image";
-import { day } from "../../types/day";
+import { day } from "@/app/interfaces/class/class.interface";
 import { DAY_LABELS, formatDay } from "@/app/utils/day";
 import { useEffect, useState } from "react";
 

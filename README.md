@@ -12,14 +12,21 @@ berjalan.
 - Next.js 15 (App Router, Turbopack), React 19, TypeScript
 - TailwindCSS 3 + DaisyUI, @headlessui/react
 - Zustand untuk state, Axios untuk HTTP
-- react-hook-form + Zod, react-qr-code, jsPDF + html2canvas
+- react-hook-form + Zod, react-qr-code, jsPDF
 
 ## Menjalankan
 
 ```bash
 npm install
 npm run dev -- -p 3001      # backend memakai port 3000
+npm run lint                # periksa kode dengan ESLint
 ```
+
+ESLint memakai aturan standar Next.js (`next/core-web-vitals` di
+`.eslintrc.json`). `next build` juga menjalankan lint, jadi build gagal bila
+ada temuan berstatus error. Aturan TypeScript yang lebih ketat
+(`next/typescript`) belum dipakai karena menandai 37 `catch (error: any)` di
+store sebagai error.
 
 ### Environment
 
@@ -27,11 +34,12 @@ File `.env.local` di root (tidak di-commit; salin dari `.env.example`):
 
 ```
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
-BASE_URL=http://localhost:3000
 ```
 
-**Dua-duanya wajib.** `NEXT_PUBLIC_BASE_URL` dipakai axios (`app/services/`),
-`BASE_URL` dipakai server actions lama (`app/actions/`).
+`NEXT_PUBLIC_BASE_URL` adalah alamat backend, dipakai semua permintaan ke
+server: axios (`app/services/`), refresh token (`app/utils/cookie.ts`), dan
+aliran realtime. `BASE_URL` dulu dipakai server actions lama dan sekarang tidak
+diperlukan lagi, jadi boleh dihapus dari `.env.local`.
 
 ## Struktur
 
@@ -40,19 +48,32 @@ app/
 ├── services/      ← layer API (axios "satellite") — INI yang dipakai
 ├── store/         ← Zustand, jembatan services ↔ komponen
 ├── interfaces/    ← kontrak request/response
-├── actions/       ← server actions generasi LAMA, sedang dipensiunkan
 ├── components/
 ├── dashboard/     ← halaman
 ```
 
-### Dua generasi kode
+### Kode generasi lama sudah dibersihkan
 
-Folder `app/actions/` adalah sisa generasi lama yang menembak backend di IP
-kampus (`10.4.52.201:3001`) yang **sudah mati**. Sebagian besar sudah
-digantikan `app/services/`, tapi **enam file masih mengimpor dari `actions/`**,
-jadi folder itu belum boleh dihapus.
+Dulu ada dua generasi kode. Generasi lama (`app/actions/`) menembak backend di
+IP kampus (`10.4.52.201:3001`) yang sudah mati, dan sudah digantikan
+`app/services/`. Sisa-sisanya sudah dihapus:
 
-Membereskan sisa ini adalah utang teknis terbesar yang tersisa.
+- Folder `app/actions/`. Dua komponen terakhir yang masih mengimpornya
+  (`lecturer-listbox.tsx`, `subject-dropdown-menu.tsx`) ternyata tidak pernah
+  memanggil fungsinya, jadi tidak ada yang perlu dipindah.
+- Folder `app/types/`. Lima type yang masih dipakai pindah ke `app/interfaces/`:
+  `SubjectBySemester` (subject), `Lecturer` (user), `day` (class),
+  `AnnouncementType` (announcement), dan `UserDetails` (auth).
+- Tujuh komponen yang tidak dipakai halaman mana pun (`appbar-component`,
+  `class-room-dropdown` di luar folder praktikum, `classes-dropdown-menu`,
+  `date-picker`, `semester-dropdown-menu`, `subject-container`, `time-field`),
+  `app/helpers/helpers.ts`, dan `app/lib/sessions.ts` yang kosong.
+- Dependensi `html2canvas`, `cookie`, `jose`, `jwt-decode`, dan
+  `@types/jsonwebtoken`. `html2canvas` tetap terpasang sebagai bagian opsional
+  jsPDF, tetapi rekap PDF tidak memakainya.
+
+`app/store/global.state.ts` memang tidak diimpor di mana pun, tetapi tetap
+dibutuhkan karena mendeklarasikan type global `GlobalState` untuk semua store.
 
 ## Autentikasi
 
@@ -81,8 +102,7 @@ Access token berlaku 15 menit dan diperbarui sendiri (`app/utils/cookie.ts`):
 
 - Cookie `accessToken` hilang saat tokennya kedaluwarsa. `getToken()` lalu
   memanggil `refreshAccessToken()`, yang menukar refresh token di
-  `POST /auth/refresh` dan menyimpan cookie baru. Ini juga berlaku untuk
-  server action lama di `app/actions/`, karena semuanya memakai `getToken()`.
+  `POST /auth/refresh` dan menyimpan cookie baru.
 - Bila jam browser tertinggal dari jam server, backend bisa membalas
   `jwt expired` walau cookie masih ada. Interceptor lalu memperbarui token
   dan mengulang permintaan itu sekali.
@@ -136,9 +156,8 @@ mahasiswa (termasuk asisten) mengelola akunnya di aplikasi mobile.
   browser ini tetap masuk, sedangkan browser/HP lain dengan akun yang sama
   kembali ke `/auth` sekitar 1,5 detik kemudian.
 - `GET /auth/me` membalas `name`, bukan `fullname`; `IMeResponseBody` sudah
-  disesuaikan. `app/appbar.tsx` dan `components/appbar-component.tsx` (nama di
-  bagian atas) tidak tampil karena cookie `fullname`/`nim`/`email` yang
-  dibacanya tidak pernah diisi.
+  disesuaikan. `app/appbar.tsx` (nama di bagian atas) tidak tampil karena
+  cookie `fullname`/`nim`/`email` yang dibacanya tidak pernah diisi.
 
 ## Logika status presensi
 
@@ -474,9 +493,6 @@ Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
 
 ## Pekerjaan yang masih tersisa
 
-- [ ] Dependensi `html2canvas` tidak dipakai lagi dan bisa dihapus
-- [ ] Pindahkan tujuh file terakhir dari `app/actions/` ke `app/services/`,
-      lalu hapus folder `actions/` dan `app/types/`
 - [ ] Cookie `accessToken` diset tanpa `httpOnly`, `secure`, `sameSite`
       (sengaja terbaca JavaScript, lihat Autentikasi). `refreshToken` sudah
       `httpOnly` tetapi belum `secure` karena lab masih memakai HTTP

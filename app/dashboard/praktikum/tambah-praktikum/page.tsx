@@ -9,7 +9,7 @@ import ClassFormFields, {
 } from "@/app/components/praktikum/class-form-fields";
 import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
 import ClassesPreview from "./components/classes-preview";
-import { SubjectBySemester } from "@/app/types/subject-by-semester";
+import { SubjectBySemester } from "@/app/interfaces/subject/subject.interface";
 import useClassStore from "@/app/store/useClassStore";
 import useSessionStore from "@/app/store/useSessionStore";
 import useAuthStore from "@/app/store/useAuthStore";

@@ -36,7 +36,7 @@ const initialAuthState = {
   userData: null,
 };
 
-const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
+const useAuthStore = create<AuthState & AuthActions>((set) => ({
   ...initialAuthState,
 
   login: async (body) => {

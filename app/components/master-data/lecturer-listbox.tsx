@@ -7,9 +7,8 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import Image from "next/image";
-import { Lecturer } from "../../types/lecturer";
+import { Lecturer } from "@/app/interfaces/user/user.interface";
 import { useEffect, useState } from "react";
-import { getLecturers } from "../../actions/dashboard/master-data/add-subject/action";
 import useDosenStore from "@/app/store/useDosenStore";
 
 interface LecturerListBoxProps {

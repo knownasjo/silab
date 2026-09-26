@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Description,
   Dialog,
   DialogBackdrop,
   DialogPanel,
@@ -19,7 +18,7 @@ export default function SignOutButton({
 }) {
   const router = useRouter();
 
-  let [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { logout, userData, isLoading, error } = useAuthStore();
 

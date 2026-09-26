@@ -19,3 +19,8 @@ export interface IGetAllAnnouncementsResponseBody {
   type: AnnouncementTypeEnum;
   author: string;
 }
+
+export type AnnouncementType = {
+  title: string;
+  value: string;
+};

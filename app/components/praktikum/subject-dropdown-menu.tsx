@@ -6,8 +6,7 @@ import {
 } from "@headlessui/react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { fetchSubjectData } from "../../actions/dashboard/praktikum/actions";
-import { SubjectBySemester } from "../../types/subject-by-semester";
+import { SubjectBySemester } from "@/app/interfaces/subject/subject.interface";
 import useSubjectStore from "@/app/store/useSubjectStore";
 
 interface SubjectDropdownMenuProps {
@@ -21,7 +20,7 @@ export default function SubjectDropdownMenu({
 }: SubjectDropdownMenuProps) {
   const [selectedSubject, setSelectedSubject] = useState<string>("");
 
-  const { getAllSubjects, isLoading, error, subjectsData } = useSubjectStore();
+  const { getAllSubjects, subjectsData } = useSubjectStore();
 
   useEffect(() => {
     getAllSubjects();

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { UserDetails } from "./types/user-details";
+import { UserDetails } from "@/app/interfaces/auth/auth.interface";
 
 interface AppbarProps {
   role: string;

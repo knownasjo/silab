@@ -1,8 +1,10 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import Image from "next/image";
-import { AnnouncementType } from "../../types/announcement-type";
 import { useState } from "react";
-import { AnnouncementTypeEnum } from "@/app/interfaces/announcement/announcement.interface";
+import {
+  AnnouncementType,
+  AnnouncementTypeEnum,
+} from "@/app/interfaces/announcement/announcement.interface";
 
 const announcementTypeList: AnnouncementType[] = [
   { title: "Pengumuman", value: AnnouncementTypeEnum.BASIC },

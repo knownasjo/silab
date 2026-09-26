@@ -7,7 +7,6 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import Image from "next/image";
-import { day } from "../../types/day";
 import { useEffect, useState } from "react";
 
 interface ClassRoomDropdownProps {
