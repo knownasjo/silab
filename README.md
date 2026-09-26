@@ -217,6 +217,12 @@ catch (error: any) {
   Aturan wajib pilih kelas itu dulu membuat fitur Pilih Kelas di aplikasi
   hampir tidak pernah tercapai. Penolakan server (kuota penuh, jadwal bentrok,
   sudah punya kelas lain) tampil merah di form seperti sebelumnya
+- Menggeser status ke Belum Bayar untuk mahasiswa yang sudah punya kelas
+  memunculkan peringatan merah "Mahasiswa akan dikeluarkan dari kelas A bila
+  belum punya presensi.". Server lalu mengeluarkannya dari kelas, atau menolak
+  dengan jumlah presensinya bila sudah ada presensi. Memilih atau mengganti
+  kelas sambil Belum Bayar ditolak di browser ("Geser tombol ke Sudah Bayar
+  untuk memilih kelas.") tanpa mengirim permintaan
 - Kartu dashboard: fungsi store yang tertukar diperbaiki, endpoint kembar
   dipisah dengan `?status=true/false`
 - Pengumuman: validasi judul/deskripsi, Lihat Detail, Edit, dan Hapus

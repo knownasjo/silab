@@ -20,6 +20,8 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 
+const NEED_PAID_FOR_CLASS = "Geser tombol ke Sudah Bayar untuk memilih kelas.";
+
 interface StudentPaymentDialogProps {
   student?: IStudentActivations;
   onClose: () => void;
@@ -79,6 +81,11 @@ export default function StudentPaymentDialog({
         return;
       }
 
+      if (!paymentStatus && selectedClass) {
+        fail(NEED_PAID_FOR_CLASS);
+        return;
+      }
+
       await updatePaymentStatus(editing.id, paymentStatus, selectedClass?.id);
 
       const { error, message: storeMessage } = useActivationStore.getState();
@@ -93,6 +100,11 @@ export default function StudentPaymentDialog({
 
     if (!classChanged && !statusChanged) {
       fail("Tidak ada perubahan yang perlu disimpan.");
+      return;
+    }
+
+    if (classChanged && !paymentStatus) {
+      fail(NEED_PAID_FOR_CLASS);
       return;
     }
 
@@ -287,6 +299,15 @@ export default function StudentPaymentDialog({
                         Sudah Bayar
                       </p>
                     </div>
+                    {editing.registered_class &&
+                      editing.status &&
+                      !paymentStatus && (
+                        <p className="mt-2 text-xs font-semibold text-[#F1416C]">
+                          Mahasiswa akan dikeluarkan dari kelas{" "}
+                          {editing.registered_class.name} bila belum punya
+                          presensi.
+                        </p>
+                      )}
                   </div>
                   <div className="flex flex-col">
                     <p className="text-xs font-semibold text-[#5E6278]">
