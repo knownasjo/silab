@@ -20,6 +20,7 @@ berjalan.
 npm install
 npm run dev -- -p 3001      # backend memakai port 3000
 npm run lint                # periksa kode dengan ESLint
+npm test                    # tes di browser, lihat Pengujian otomatis
 ```
 
 ESLint memakai aturan standar Next.js (`next/core-web-vitals` di
@@ -553,7 +554,53 @@ Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
 - [ ] `next.config.js` masih menunjuk hostname Supabase lama bila project ref
       berubah
 
+## Pengujian otomatis
+
+Tes di folder `tests/` membuka dashboard di Google Chrome tanpa layar
+(headless), login, lalu mengklik dan mengetik seperti laboran sungguhan.
+Chrome dikendalikan langsung lewat DevTools Protocol, jadi tidak ada dependensi
+tambahan. Untuk meniru server mati atau sibuk, tes mencegat permintaan ke
+backend di dalam Chrome, jadi backend asli tidak perlu dimatikan.
+
+Syarat sebelum menjalankan:
+
+- Backend jalan (`npm run dev` di `silab-backend`) dan web jalan
+  (`npm run dev -- -p 3001`).
+- Repo `silab-backend` ada di sebelah folder ini. Tes memakai alat bantu data
+  uji di `silab-backend/tests/bantuan/` beserta `.env` backend untuk membuat
+  dan menghapus data uji. Aturan data ujinya sama dengan tes backend: akun,
+  mata kuliah, dan kelas uji dibuat sendiri lalu dihapus lagi, dan akun uji di
+  bawah tidak dipakai (lihat Pengujian otomatis di README backend).
+- Google Chrome terpasang.
+
+```bash
+npm test                    # semua tes browser, sekitar 6–7 menit
+npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
+node tests/login.mjs        # satu tes saja
+```
+
+| Tes | Yang diperiksa | Cek |
+|---|---|---|
+| `halaman` | semua halaman laboran tampil tanpa error JavaScript; pilihan dosen, mata kuliah, hari, ruangan, dan jenis pengumuman terisi | 30 |
+| `login` | pesan saat server tidak terjangkau, balasan error tanpa pesan, password salah, dan login benar | 9 |
+| `sesi-pulih` | token kedaluwarsa diperbarui diam-diam, server mati memunculkan pemberitahuan tanpa melempar ke login, halaman pulih sendiri saat server hidup, tombol Coba lagi, token rusak kembali ke login dan cookie dihapus | 15 |
+| `server-mati` | 12 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 27 |
+| `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi | 50 |
+| `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
+
+| Variabel | Bawaan | Kegunaan |
+|---|---|---|
+| `SILAB_WEB` | `http://localhost:3001` | alamat web yang diuji |
+| `SILAB_API` | `NEXT_PUBLIC_BASE_URL` di `.env.local` | alamat backend |
+| `SILAB_BACKEND` | `../silab-backend` | lokasi repo backend |
+| `CHROME` | lokasi Chrome bawaan macOS, atau `google-chrome` | lokasi Chrome |
+
+Next.js dalam mode dev menyusun halaman saat pertama dibuka, jadi tes pertama
+setelah `npm run dev` bisa lebih lambat.
+
 ## Akun uji
+
+Akun berikut untuk uji manual. Tes otomatis tidak memakainya.
 
 | NIM / NIY | Password | Role |
 |---|---|---|
