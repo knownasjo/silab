@@ -10,6 +10,7 @@ import Image from "next/image";
 import { Lecturer } from "@/app/interfaces/user/user.interface";
 import { useEffect, useState } from "react";
 import useDosenStore from "@/app/store/useDosenStore";
+import FeedbackBox from "../feedback-box";
 
 interface LecturerListBoxProps {
   value: string | null;
@@ -24,7 +25,7 @@ export default function LecturerListBox({
     null,
   );
 
-  const { getDosen, dosenData } = useDosenStore();
+  const { getDosen, dosenData, error } = useDosenStore();
 
   useEffect(() => {
     getDosen();
@@ -81,6 +82,13 @@ export default function LecturerListBox({
           ))}
         </ListboxOptions>
       </Listbox>
+      <FeedbackBox
+        feedback={
+          error
+            ? { ok: false, message: `Daftar dosen gagal dimuat. ${error}` }
+            : null
+        }
+      />
     </fieldset>
   );
 }

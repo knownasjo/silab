@@ -109,7 +109,9 @@ Access token berlaku 15 menit dan diperbarui sendiri (`app/utils/cookie.ts`):
 - Backend menolak refresh token setelah 1 hari, setelah password akun itu
   diganti (lihat "Lupa password" di README backend), atau setelah akunnya
   dihapus. `refreshAccessToken()` lalu menghapus semua cookie sesi. Saat
-  halaman dimuat, `SignOutButton` mengalihkan ke `/auth`; di halaman yang
+  halaman dimuat, `GET /auth/me` ditolak 400/401, `useAuthStore.me()`
+  menghapus cookie dan menandai `sessionEnded`, lalu `SignOutButton`
+  mengalihkan ke `/auth`; di halaman yang
   sedang terbuka, `refreshOnce()` (`app/services/satellite/index.ts`)
   mengalihkan ke `/auth` bila cookie `refreshToken` memang sudah tidak ada
   (`hasRefreshToken()`), jadi gangguan jaringan sesaat tidak mengeluarkan
@@ -187,6 +189,30 @@ catch (error: any) {
 **Bukan** `error?.response?.data?.message` — objek error di sini tidak punya
 `response`, sehingga pesan asli backend hilang dan selalu muncul
 "Terjadi kesalahan".
+
+Error saat **memuat data halaman** selalu ditampilkan dengan `FeedbackBox`,
+misalnya "Tidak dapat terhubung ke server, coba lagi!" atau "Server sedang
+sibuk, silakan coba lagi sebentar lagi." dari backend:
+
+- Store yang `error`-nya hanya dipakai pemuatan (mata kuliah, dosen, jam sesi,
+  dashboard) menampilkan `error`. Store yang `error`-nya juga dibaca dialog
+  atau tombol aksi (kelas, pembayaran, pengumuman) punya `loadError` terpisah,
+  supaya error aksi tidak ikut muncul di atas halaman.
+- Selama gagal, keterangan kosong seperti "Belum ada pengumuman" atau "Tidak
+  ada data" tidak ditampilkan, dan kartu jumlah di Pembayaran menampilkan "–"
+  alih-alih 0, supaya laboran tidak mengira datanya hilang.
+- Refresh yang dipicu event real-time, termasuk `ready` saat stream SSE
+  tersambung kembali setelah server hidup, menghapus pesan itu bila berhasil.
+- Sebelumnya `getAllSubjects`, `getAllClass`, dan `getDosen` menelan error
+  (hanya `console.log`), dan 9 dari 12 halaman diam saja saat server mati.
+
+Bila `GET /auth/me` gagal karena server, bukan karena sesi,
+`AccountLoadNotice` (`app/components/account-load-notice.tsx`, dipasang di
+layout dashboard) menampilkan "Data akun gagal dimuat. …" dengan tombol
+**Coba lagi**, dan memuat ulang sendiri saat SSE tersambung kembali. Dulu
+`SignOutButton` mengalihkan ke `/auth` pada error apa pun, lalu `middleware.ts`
+memantulkannya kembali ke `/dashboard` karena cookie masih ada; akibatnya saat
+server mati atau sibuk semua halaman terlempar ke Dashboard tanpa pesan.
 
 ## Yang sudah dikerjakan
 

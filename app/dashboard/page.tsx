@@ -6,6 +6,7 @@ import DashboardDataCards from "../components/dashboard-data-cards";
 import useDashboardStore from "../store/useDashboardStore";
 import useAuthStore from "../store/useAuthStore";
 import useRealtimeEvents from "../hooks/useRealtimeEvents";
+import FeedbackBox from "../components/feedback-box";
 
 export default function Dashboard() {
   const {
@@ -19,6 +20,7 @@ export default function Dashboard() {
     totalPaidStudent,
     totalUnpaidStudent,
     lecturerSummary,
+    error,
   } = useDashboardStore();
   const { userData } = useAuthStore();
   const role = userData?.role;
@@ -47,6 +49,7 @@ export default function Dashboard() {
   return (
     <div className="flex h-full w-full flex-col space-y-6 overflow-auto overscroll-contain">
       <BannerDashboard />
+      <FeedbackBox feedback={error ? { ok: false, message: error } : null} />
       <DashboardDataCards
         totalSubject={totalSubject}
         totalClass={totalClass}

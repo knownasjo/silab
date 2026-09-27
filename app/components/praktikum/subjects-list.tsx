@@ -34,7 +34,7 @@ const groupBySemester = (subjects: IGetSubjectResponseBody[]) => {
 };
 
 const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
-  const { subjectsData, getAllSubjects } = useSubjectStore();
+  const { subjectsData, getAllSubjects, error } = useSubjectStore();
   const { userData } = useAuthStore();
   const [isReady, setIsReady] = useState(false);
   const [notice, setNotice] = useState<{
@@ -65,7 +65,8 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
 
   return (
     <div className="flex h-full w-full flex-col items-start space-y-4">
-      {emptyMessage && isReady && subjectsData.length === 0 && (
+      <FeedbackBox feedback={error ? { ok: false, message: error } : null} />
+      {emptyMessage && isReady && !error && subjectsData.length === 0 && (
         <p className="text-sm font-semibold text-[#5E6278]">{emptyMessage}</p>
       )}
       {semesters.map(({ semester, subjects }) => {

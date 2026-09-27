@@ -15,6 +15,7 @@ import { deleteToken, setRefreshToken, setToken } from "../utils/cookie";
 
 type AuthState = GlobalState & {
   userData: IMeResponseBody | null;
+  sessionEnded: boolean;
 };
 
 type AccountFeedback = { ok: boolean; message: string };
@@ -34,13 +35,17 @@ const initialAuthState = {
   isLoading: false,
   error: null,
   userData: null,
+  sessionEnded: false,
 };
+
+const isSessionRejected = (error: { code?: number }) =>
+  error?.code === 400 || error?.code === 401;
 
 const useAuthStore = create<AuthState & AuthActions>((set) => ({
   ...initialAuthState,
 
   login: async (body) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, sessionEnded: false });
 
     try {
       const res = await postLogin(body);
@@ -90,6 +95,12 @@ const useAuthStore = create<AuthState & AuthActions>((set) => ({
         set({ error: res.message });
       }
     } catch (error: any) {
+      if (isSessionRejected(error)) {
+        await deleteToken();
+        set({ ...initialAuthState, sessionEnded: true });
+        return;
+      }
+
       set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });

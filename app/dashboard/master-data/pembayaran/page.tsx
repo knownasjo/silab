@@ -12,6 +12,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
+import FeedbackBox from "@/app/components/feedback-box";
 
 export default function Pembayaran() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -21,6 +22,7 @@ export default function Pembayaran() {
     getAllActivations,
     refreshActivations,
     isLoading,
+    loadError,
     status,
     setStatusQuery,
     setNameQuery,
@@ -57,19 +59,24 @@ export default function Pembayaran() {
     return true;
   });
 
+  const countByStatus = (paid: boolean) =>
+    loadError && activationData.length === 0
+      ? "–"
+      : activationData.filter((student) => student.status === paid).length;
+
   const selectedStudent = students.find(
     (student) => student.user_id === selectedUserId,
   );
 
   return (
     <div className="flex h-full w-full flex-col space-y-[38px] overflow-auto overscroll-contain">
+      <FeedbackBox
+        feedback={loadError ? { ok: false, message: loadError } : null}
+      />
       <div className="flex h-fit w-full flex-row space-x-9">
         <div className="flex h-[200px] w-[300px] flex-col justify-between rounded-3xl bg-[#3272CA] p-5">
           <h1 className="text-6xl font-bold text-[#FFBF01]">
-            {
-              activationData.filter((student) => student.status === false)
-                .length
-            }
+            {countByStatus(false)}
           </h1>
           <p className="text-base font-semibold text-white">
             Jumlah aktivasi mahasiswa yang{" "}
@@ -78,7 +85,7 @@ export default function Pembayaran() {
         </div>
         <div className="flex h-[200px] w-[300px] flex-col justify-between rounded-3xl bg-[#3272CA] p-5">
           <h1 className="text-6xl font-bold text-[#FFBF01]">
-            {activationData.filter((student) => student.status === true).length}
+            {countByStatus(true)}
           </h1>
           <p className="text-base font-semibold text-white">
             Jumlah aktivasi mahasiswa yang{" "}
@@ -137,7 +144,7 @@ export default function Pembayaran() {
           {isLoading && activationData.length === 0 && (
             <p className="text-sm text-[#5E6278]">Memuat data...</p>
           )}
-          {!isLoading && visibleStudents.length === 0 && (
+          {!isLoading && !loadError && visibleStudents.length === 0 && (
             <p className="text-sm text-[#5E6278]">Tidak ada data.</p>
           )}
           {visibleStudents.map((student) => {

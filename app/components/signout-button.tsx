@@ -20,13 +20,11 @@ export default function SignOutButton({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const { logout, userData, isLoading, error } = useAuthStore();
+  const { logout, sessionEnded } = useAuthStore();
 
   useEffect(() => {
-    if (!userData && !isLoading && error) {
-      router.replace("/auth");
-    }
-  }, [router, userData, isLoading, error]);
+    if (sessionEnded) router.replace("/auth");
+  }, [router, sessionEnded]);
 
   return (
     <div className="group/sidebaritem">

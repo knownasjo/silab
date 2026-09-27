@@ -4,13 +4,18 @@ import useAnnouncementStore from "@/app/store/useAnnouncementStore";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
+import FeedbackBox from "@/app/components/feedback-box";
 
 export default function AnnouncementDetails() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
 
-  const { getAnnouncementById, refreshAnnouncementById, announcementData } =
-    useAnnouncementStore();
+  const {
+    getAnnouncementById,
+    refreshAnnouncementById,
+    announcementData,
+    loadError,
+  } = useAnnouncementStore();
 
   useEffect(() => {
     getAnnouncementById(params.id);
@@ -26,6 +31,14 @@ export default function AnnouncementDetails() {
       refreshAnnouncementById(params.id);
     }
   });
+
+  if (!announcementData && loadError) {
+    return (
+      <div className="w-full">
+        <FeedbackBox feedback={{ ok: false, message: loadError }} />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full overflow-auto overscroll-contain">

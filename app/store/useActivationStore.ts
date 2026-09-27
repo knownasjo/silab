@@ -12,6 +12,7 @@ type ActivationState = GlobalState & {
   status: string;
   name: string;
   message: string | null;
+  loadError: string | null;
 };
 
 type ActivationActions = {
@@ -35,6 +36,7 @@ const initialState = {
   status: "",
   name: "",
   message: null,
+  loadError: null,
 };
 
 const useActivationStore = create<ActivationState & ActivationActions>(
@@ -53,7 +55,7 @@ const useActivationStore = create<ActivationState & ActivationActions>(
     getAllActivations: async () => {
       const { name } = get();
 
-      set({ isLoading: true, error: null });
+      set({ isLoading: true, loadError: null });
 
       try {
         const res = await getAllActivation(name);
@@ -61,10 +63,10 @@ const useActivationStore = create<ActivationState & ActivationActions>(
         if (res.data && res.status) {
           set({ activationData: res.data });
         } else {
-          set({ error: res.message });
+          set({ loadError: res.message });
         }
       } catch (error: any) {
-        set({ error: error?.message ?? "Terjadi kesalahan" });
+        set({ loadError: error?.message ?? "Terjadi kesalahan" });
       } finally {
         set({ isLoading: false });
       }
@@ -75,7 +77,7 @@ const useActivationStore = create<ActivationState & ActivationActions>(
       const res = await getAllActivation(name);
 
       if (get().name === name && res.status && res.data) {
-        set({ activationData: res.data });
+        set({ activationData: res.data, loadError: null });
       }
     }),
 

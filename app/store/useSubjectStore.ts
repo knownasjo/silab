@@ -37,7 +37,7 @@ const useSubjectStore = create<SubjectState & SubjectActions>((set, get) => ({
   ...initialState,
 
   getAllSubjects: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
 
     try {
       const res = await getAllSubjects();
@@ -47,8 +47,8 @@ const useSubjectStore = create<SubjectState & SubjectActions>((set, get) => ({
       } else {
         set({ error: res.message });
       }
-    } catch {
-      console.log(get().error);
+    } catch (error: any) {
+      set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }
@@ -57,7 +57,7 @@ const useSubjectStore = create<SubjectState & SubjectActions>((set, get) => ({
   refreshAllSubjects: coalesce(async () => {
     const res = await getAllSubjects();
 
-    if (res.data && res.status) set({ subjectsData: res.data });
+    if (res.data && res.status) set({ subjectsData: res.data, error: null });
   }),
 
   addSubject: async (body) => {

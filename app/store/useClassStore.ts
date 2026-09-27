@@ -18,6 +18,7 @@ type ClassState = GlobalState & {
   classesData: IGetClassResponseBody[];
   classData?: IGetClassByIdResponseBody | null;
   classNotice: string | null;
+  loadError: string | null;
 };
 
 type ClassResult = { ok: boolean; message: string };
@@ -42,13 +43,14 @@ const initialState = {
   classesData: [],
   classData: null,
   classNotice: null,
+  loadError: null,
 };
 
 const useClassStore = create<ClassState & ClassActions>((set, get) => ({
   ...initialState,
 
   getAllClass: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, loadError: null });
 
     try {
       const res = await getAllClass();
@@ -56,10 +58,10 @@ const useClassStore = create<ClassState & ClassActions>((set, get) => ({
       if (res.status && res.data) {
         set({ classesData: res.data });
       } else {
-        set({ error: res.message });
+        set({ loadError: res.message });
       }
-    } catch {
-      console.log(get().error);
+    } catch (error: any) {
+      set({ loadError: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }
@@ -86,7 +88,7 @@ const useClassStore = create<ClassState & ClassActions>((set, get) => ({
   refreshAllClass: coalesce(async () => {
     const res = await getAllClass();
 
-    if (res.status && res.data) set({ classesData: res.data });
+    if (res.status && res.data) set({ classesData: res.data, loadError: null });
   }),
 
   refreshClassById: coalesce(async (id: string) => {

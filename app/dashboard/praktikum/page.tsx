@@ -17,6 +17,7 @@ export default function Praktikum() {
     getAllClass,
     refreshAllClass,
     isLoading,
+    loadError,
     clearClassNotice,
   } = useClassStore();
   const [notice] = useState(() => useClassStore.getState().classNotice);
@@ -51,8 +52,14 @@ export default function Praktikum() {
           ))}
         </div>
       )}
+      {userData?.role === "MAHASISWA" && (
+        <FeedbackBox
+          feedback={loadError ? { ok: false, message: loadError } : null}
+        />
+      )}
       {userData?.role === "MAHASISWA" &&
         !isLoading &&
+        !loadError &&
         classesData.length === 0 && (
           <p className="text-sm font-semibold text-[#5E6278]">
             Anda belum memegang kelas praktikum mana pun.

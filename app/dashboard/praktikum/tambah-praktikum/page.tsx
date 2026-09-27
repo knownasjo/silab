@@ -12,6 +12,7 @@ import ClassesPreview from "./components/classes-preview";
 import { SubjectBySemester } from "@/app/interfaces/subject/subject.interface";
 import useClassStore from "@/app/store/useClassStore";
 import useSessionStore from "@/app/store/useSessionStore";
+import useSubjectStore from "@/app/store/useSubjectStore";
 import useAuthStore from "@/app/store/useAuthStore";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 
@@ -21,10 +22,17 @@ export default function TambahPraktikum() {
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { getAllClass, refreshAllClass, classesData, addClass } =
+  const { getAllClass, refreshAllClass, classesData, addClass, loadError } =
     useClassStore();
-  const { sessionsData, isLoaded, getSessions, refreshSessions } =
-    useSessionStore();
+  const {
+    sessionsData,
+    isLoaded,
+    getSessions,
+    refreshSessions,
+    error: sessionError,
+  } = useSessionStore();
+  const { error: subjectError } = useSubjectStore();
+  const loadProblem = subjectError ?? loadError ?? sessionError;
   const { userData } = useAuthStore();
 
   useEffect(() => {
@@ -92,6 +100,11 @@ export default function TambahPraktikum() {
 
   return (
     <div className="flex h-full w-full flex-col overflow-x-auto overflow-y-auto overscroll-contain">
+      {loadProblem && (
+        <div className="mb-6">
+          <FeedbackBox feedback={{ ok: false, message: loadProblem }} />
+        </div>
+      )}
       <div className="flex h-[82px] w-full flex-row space-x-4">
         <div className="flex h-full flex-col space-y-3">
           <p>Mata Kuliah</p>

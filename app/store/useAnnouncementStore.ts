@@ -16,6 +16,7 @@ type AnnouncementState = GlobalState & {
   announcementsData: IGetAllAnnouncementsResponseBody[];
   announcementData: IGetAllAnnouncementsResponseBody | null;
   message: string | null;
+  loadError: string | null;
 };
 
 type AnnouncementActions = {
@@ -37,6 +38,7 @@ const initialState = {
   announcementsData: [],
   announcementData: null,
   message: null,
+  loadError: null,
 };
 
 const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
@@ -109,7 +111,7 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
     },
 
     getAllAnnouncements: async () => {
-      set({ isLoading: true, error: null });
+      set({ isLoading: true, loadError: null });
 
       try {
         const res = await getAllAnnouncements();
@@ -117,10 +119,10 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
         if (res.status && res.data) {
           set({ announcementsData: res.data });
         } else {
-          set({ error: res.message });
+          set({ loadError: res.message });
         }
       } catch (error: any) {
-        set({ error: error?.message ?? "Terjadi kesalahan" });
+        set({ loadError: error?.message ?? "Terjadi kesalahan" });
       } finally {
         set({ isLoading: false });
       }
@@ -129,19 +131,21 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
     refreshAllAnnouncements: coalesce(async () => {
       const res = await getAllAnnouncements();
 
-      if (res.status && res.data) set({ announcementsData: res.data });
+      if (res.status && res.data)
+        set({ announcementsData: res.data, loadError: null });
     }),
 
     refreshAnnouncementById: coalesce(async (id: string) => {
       const res = await getAnnouncementById(id);
+      const current = get().announcementData;
 
-      if (get().announcementData?.id === id && res.status && res.data) {
-        set({ announcementData: res.data });
+      if ((!current || current.id === id) && res.status && res.data) {
+        set({ announcementData: res.data, loadError: null });
       }
     }),
 
     getAnnouncementById: async (id) => {
-      set({ isLoading: true, error: null });
+      set({ isLoading: true, loadError: null, announcementData: null });
 
       try {
         const res = await getAnnouncementById(id);
@@ -149,10 +153,10 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
         if (res.status && res.data) {
           set({ announcementData: res.data });
         } else {
-          set({ error: res.message });
+          set({ loadError: res.message });
         }
       } catch (error: any) {
-        set({ error: error?.message ?? "Terjadi kesalahan" });
+        set({ loadError: error?.message ?? "Terjadi kesalahan" });
       } finally {
         set({ isLoading: false });
       }

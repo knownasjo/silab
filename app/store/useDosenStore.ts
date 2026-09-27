@@ -16,7 +16,7 @@ const initialState = {
   dosenData: [],
 };
 
-const useDosenStore = create<DosenState & DosenActions>((set, get) => ({
+const useDosenStore = create<DosenState & DosenActions>((set) => ({
   ...initialState,
 
   getDosen: async () => {
@@ -30,8 +30,8 @@ const useDosenStore = create<DosenState & DosenActions>((set, get) => ({
       } else {
         set({ error: res.message });
       }
-    } catch {
-      console.log(get().error);
+    } catch (error: any) {
+      set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }

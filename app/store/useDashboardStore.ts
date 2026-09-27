@@ -65,7 +65,9 @@ const useDashboardStore = create<DashboardState & DashboardActions>((set) => ({
     }
   },
 
-  refreshDashboardData: coalesce(async () => set(await loadDashboardData())),
+  refreshDashboardData: coalesce(async () =>
+    set({ ...(await loadDashboardData()), error: null }),
+  ),
 
   getLecturerSummary: async () => {
     set({ isLoading: true, error: null });
@@ -84,7 +86,7 @@ const useDashboardStore = create<DashboardState & DashboardActions>((set) => ({
   refreshLecturerSummary: coalesce(async () => {
     const res = await getLecturerDashboard();
 
-    if (res.data) set({ lecturerSummary: res.data });
+    if (res.data) set({ lecturerSummary: res.data, error: null });
   }),
 }));
 
