@@ -36,6 +36,11 @@ const masterDataLinks: SidebarGroupLink[] = [
     title: "Jam Sesi",
     icon: "/clock.svg",
   },
+  {
+    href: "/dashboard/master-data/periode",
+    title: "Periode Akademik",
+    icon: "/calendar.svg",
+  },
 ];
 
 const pengumumanLinks: SidebarGroupLink[] = [

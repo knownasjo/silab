@@ -9,6 +9,9 @@ import { useEffect, useState } from "react";
 import FeedbackBox from "@/app/components/feedback-box";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 import useSubjectStore from "@/app/store/useSubjectStore";
+import PeriodSelector from "@/app/components/period/period-selector";
+import ArchiveNotice from "@/app/components/period/archive-notice";
+import { usePeriodView } from "@/app/store/usePeriodStore";
 
 export default function Praktikum() {
   const { userData, me } = useAuthStore();
@@ -22,25 +25,35 @@ export default function Praktikum() {
   } = useClassStore();
   const [notice] = useState(() => useClassStore.getState().classNotice);
   const { refreshAllSubjects } = useSubjectStore();
+  const { viewedPeriod, viewedPeriodId, isArchive } = usePeriodView();
+  const isStaff = userData?.role === "LABORAN" || userData?.role === "DOSEN";
 
   useEffect(() => {
-    getAllClass();
     me();
-  }, [getAllClass, me]);
+  }, [me]);
+
+  useEffect(() => {
+    getAllClass(viewedPeriodId);
+  }, [getAllClass, viewedPeriodId]);
 
   useEffect(() => {
     clearClassNotice();
   }, [clearClassNotice]);
 
   useRealtimeEvents(({ type }) => {
-    if (["ready", "class", "subject"].includes(type)) refreshAllClass();
+    if (["ready", "class", "subject", "period"].includes(type))
+      refreshAllClass();
     if (["ready", "subject"].includes(type)) refreshAllSubjects();
   });
 
   return (
     <div className="h-full w-full space-y-10 overflow-auto overscroll-contain">
       <FeedbackBox feedback={notice ? { ok: true, message: notice } : null} />
-      <AddPracticumBanner />
+      {isStaff && <PeriodSelector />}
+      {isStaff && isArchive && viewedPeriod && (
+        <ArchiveNotice name={viewedPeriod.name} />
+      )}
+      {!(isStaff && isArchive) && <AddPracticumBanner />}
       {userData?.role === "LABORAN" && <SubjectsList />}
       {userData?.role === "DOSEN" && (
         <SubjectsList emptyMessage="Anda belum tercatat sebagai dosen pengampu mata kuliah praktikum mana pun." />

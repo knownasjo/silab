@@ -13,6 +13,7 @@ type ActivationState = GlobalState & {
   name: string;
   message: string | null;
   loadError: string | null;
+  periodId?: string;
 };
 
 type ActivationActions = {
@@ -26,6 +27,7 @@ type ActivationActions = {
   updateStudentClass: (id: string, classId: string) => Promise<void>;
   setStatusQuery: (query: string | undefined) => void;
   setNameQuery: (query: string) => void;
+  setPeriodQuery: (periodId?: string) => void;
   reset: () => void;
 };
 
@@ -52,13 +54,19 @@ const useActivationStore = create<ActivationState & ActivationActions>(
       get().getAllActivations();
     },
 
+    setPeriodQuery: (periodId) => {
+      if (periodId !== get().periodId) set({ periodId, activationData: [] });
+    },
+
     getAllActivations: async () => {
-      const { name } = get();
+      const { name, periodId } = get();
 
       set({ isLoading: true, loadError: null });
 
       try {
-        const res = await getAllActivation(name);
+        const res = await getAllActivation(name, periodId);
+
+        if (get().periodId !== periodId) return;
 
         if (res.data && res.status) {
           set({ activationData: res.data });
@@ -73,10 +81,15 @@ const useActivationStore = create<ActivationState & ActivationActions>(
     },
 
     refreshActivations: coalesce(async () => {
-      const { name } = get();
-      const res = await getAllActivation(name);
+      const { name, periodId } = get();
+      const res = await getAllActivation(name, periodId);
 
-      if (get().name === name && res.status && res.data) {
+      if (
+        get().name === name &&
+        get().periodId === periodId &&
+        res.status &&
+        res.data
+      ) {
         set({ activationData: res.data, loadError: null });
       }
     }),

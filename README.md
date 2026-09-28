@@ -137,7 +137,8 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah (hanya LABORAN), lihat "Ubah Mata Kuliah" |
 | `/dashboard/segera-hadir` | Pengganti fitur yang belum ada (`?fitur=Modul`), dituju tombol Modul "Click to Open" di detail kelas |
 | `/dashboard/master-data/jam-sesi` | Jam sesi Senin–Kamis dan Jumat: tambah, ubah jam, nonaktifkan, hapus, dan daftar kelas di tiap sesi (hanya LABORAN) |
-| `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up |
+| `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up. Ada pilihan periode; periode lama hanya bisa dilihat |
+| `/dashboard/master-data/periode` | Periode akademik: periode aktif, Mulai Semester Baru, dan daftar periode (hanya LABORAN), lihat "Periode Akademik" |
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman |
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman |
 | `/dashboard/profil` | LABORAN/DOSEN: data akun, ubah nama, ganti password. Asisten: data akun saja + arahan memakai aplikasi mobile |
@@ -509,6 +510,48 @@ Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
   mata kuliah bekerja seperti sebelumnya: klik nama untuk melihat dosen, kode,
   dan kelasnya.
 
+### Periode Akademik
+
+Kelas dan pendaftaran mata kuliah (termasuk pembayaran) dikelompokkan per
+periode, misalnya "2026/2027 Ganjil". Aturannya ada di README backend bagian
+"Periode akademik"; web mengikuti balasan backend.
+
+- **Master Data → Periode Akademik** (hanya LABORAN): periode aktif, tombol
+  "Mulai Semester 2026/2027 Genap" (nama semester berikutnya dihitung
+  otomatis), dan tabel semua periode dengan status Aktif/Selesai, jumlah
+  kelas, jumlah pendaftaran, serta tombol Lihat yang membuka Praktikum dengan
+  periode itu terpilih.
+- **Mulai semester baru** membuka dialog yang menjelaskan akibatnya: semua
+  data semester lama menjadi arsip, sesi presensi yang masih terbuka ditutup,
+  mahasiswa mendaftar ulang, dan tidak bisa dibatalkan dari aplikasi. Tombol
+  baru bisa ditekan setelah laboran mengetik `MULAI` (huruf besar). Bila belum
+  ada periode sama sekali, dialog meminta tahun ajaran dan Ganjil/Genap untuk
+  periode pertama.
+- **Pilihan periode** ada di Praktikum, Pembayaran, dan dashboard dosen,
+  hanya untuk LABORAN dan DOSEN. Asisten mahasiswa selalu melihat periode
+  aktif. Pilihan disimpan di `usePeriodStore` selama tab terbuka dan kembali
+  ke periode aktif setelah halaman dimuat ulang, supaya tidak ada yang lupa
+  sedang melihat arsip.
+- **Periode lama hanya bisa dilihat.** Halaman menampilkan keterangan
+  "Periode … sudah selesai, data hanya bisa dilihat." dan menyembunyikan
+  tombol yang mengubah data:
+  - Praktikum: banner Tambah Praktikum dan tombol ubah mata kuliah; hanya
+    mata kuliah yang punya kelas di periode itu yang ditampilkan.
+  - Pembayaran: tombol Ubah di pop-up mahasiswa.
+  - Detail kelas (dibaca dari `period.is_active` di `GET /class/:id`, jadi
+    berlaku juga bila dibuka lewat tautan langsung): Ubah Kelas, Hapus Kelas,
+    kelola asisten, tambah/ubah/hapus pertemuan, buka sesi, QR, dan ubah
+    presensi. Rekap dan unduh PDF tetap bisa.
+- **Dashboard laboran** menampilkan nama periode aktif; angkanya selalu untuk
+  periode aktif. **Tambah Praktikum** menampilkan "Kelas baru masuk periode …".
+- Saat semester baru dimulai dari mana pun, event real-time `period` membuat
+  semua halaman yang sedang terbuka memuat ulang data dan daftar periodenya.
+  Halaman yang sedang menampilkan periode aktif otomatis berpindah ke periode
+  baru.
+- Halaman Jam Sesi dan Tambah Praktikum selalu memakai kelas periode aktif,
+  karena `getAllClass()` di `useClassStore` tanpa `periodId` berarti periode
+  aktif.
+
 ### Tambah, Ubah, dan Hapus Pertemuan
 
 - Dialog Tambah Pertemuan langsung terisi judul berikutnya: nomor terbesar
@@ -572,21 +615,26 @@ Syarat sebelum menjalankan:
   mata kuliah, dan kelas uji dibuat sendiri lalu dihapus lagi, dan akun uji di
   bawah tidak dipakai (lihat Pengujian otomatis di README backend).
 - Google Chrome terpasang.
+- Tes `periode` sungguh-sungguh memulai semester berikutnya dari web selama
+  sekitar satu menit, lalu menghapusnya sehingga periode sebelumnya aktif
+  kembali. Tes ini menolak jalan bila ada sesi presensi asli yang sedang
+  terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 6–7 menit
+npm test                    # semua tes browser, sekitar 8 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
 
 | Tes | Yang diperiksa | Cek |
 |---|---|---|
-| `halaman` | semua halaman laboran tampil tanpa error JavaScript; pilihan dosen, mata kuliah, hari, ruangan, dan jenis pengumuman terisi | 30 |
+| `halaman` | semua halaman laboran tampil tanpa error JavaScript; pilihan dosen, mata kuliah, hari, ruangan, dan jenis pengumuman terisi | 32 |
 | `login` | pesan saat server tidak terjangkau, balasan error tanpa pesan, password salah, dan login benar | 9 |
 | `sesi-pulih` | token kedaluwarsa diperbarui diam-diam, server mati memunculkan pemberitahuan tanpa melempar ke login, halaman pulih sendiri saat server hidup, tombol Coba lagi, token rusak kembali ke login dan cookie dihapus | 15 |
-| `server-mati` | 12 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 27 |
+| `server-mati` | 13 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 29 |
 | `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi | 50 |
 | `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
+| `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang | 29 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|

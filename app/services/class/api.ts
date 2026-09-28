@@ -8,9 +8,12 @@ import {
   IUpdateClassRequestBody,
 } from "@/app/interfaces/class/class.interface";
 
-export const getAllClass = async (accessToken?: string) => {
+export const getAllClass = async ({
+  accessToken,
+  periodId,
+}: { accessToken?: string; periodId?: string } = {}) => {
   const res = await satellite.get<IBaseResponse<IGetClassResponseBody[]>>(
-    "/class",
+    periodId ? `/class?periodId=${periodId}` : "/class",
     accessToken
       ? { headers: { Authorization: `Bearer ${accessToken}` } }
       : undefined,

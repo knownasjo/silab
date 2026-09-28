@@ -4,8 +4,11 @@ import { IGetActivationResponseBody } from "@/app/interfaces/activation/activati
 
 export const getAllActivation = async (
   name?: string,
+  periodId?: string,
 ): Promise<IBaseResponse<IGetActivationResponseBody[]>> => {
-  const res = await satellite.get(`/activation/?name=${name ?? ""}`);
+  const res = await satellite.get(
+    `/activation/?name=${name ?? ""}${periodId ? `&periodId=${periodId}` : ""}`,
+  );
 
   return res.data;
 };

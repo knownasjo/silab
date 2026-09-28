@@ -48,7 +48,7 @@ await runWebTest("Halaman Pembayaran", data, async (browser) => {
         body: JSON.parse(request.postData ?? "{}"),
       });
   });
-  const classButton = `[...document.querySelectorAll('button[aria-haspopup="listbox"]')].find((b) => b.getBoundingClientRect().width > 0)`;
+  const classButton = `[...document.querySelectorAll('[role="dialog"] button[aria-haspopup="listbox"]')].find((b) => b.getBoundingClientRect().width > 0)`;
   const openStudent = async (name) => {
     await realClick(
       `document.querySelector('[aria-label="Lihat pembayaran ${name}"]')`,

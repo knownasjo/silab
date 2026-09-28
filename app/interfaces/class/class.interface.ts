@@ -1,3 +1,5 @@
+import { IClassPeriod } from "../period/period.interface";
+
 export interface IGetClassResponseBody {
   id: string;
   subjectId: string;
@@ -29,6 +31,7 @@ export interface IGetClassByIdResponseBody {
   participants: number;
   meetings: number;
   recorded_meetings: number;
+  period: IClassPeriod | null;
 }
 
 export interface IAddClassRequestBody {

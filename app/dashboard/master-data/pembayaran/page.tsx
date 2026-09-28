@@ -13,6 +13,9 @@ import { useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 import FeedbackBox from "@/app/components/feedback-box";
+import PeriodSelector from "@/app/components/period/period-selector";
+import ArchiveNotice from "@/app/components/period/archive-notice";
+import { usePeriodView } from "@/app/store/usePeriodStore";
 
 export default function Pembayaran() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -26,14 +29,18 @@ export default function Pembayaran() {
     status,
     setStatusQuery,
     setNameQuery,
+    setPeriodQuery,
   } = useActivationStore();
+  const { viewedPeriod, viewedPeriodId, isArchive } = usePeriodView();
 
   useEffect(() => {
+    setPeriodQuery(viewedPeriodId);
     getAllActivations();
-  }, [getAllActivations]);
+  }, [getAllActivations, setPeriodQuery, viewedPeriodId]);
 
   useRealtimeEvents(({ type }) => {
-    if (["ready", "activation", "class"].includes(type)) refreshActivations();
+    if (["ready", "activation", "class", "period"].includes(type))
+      refreshActivations();
   });
 
   const debouncedSetQuery = useMemo(() => {
@@ -70,6 +77,8 @@ export default function Pembayaran() {
 
   return (
     <div className="flex h-full w-full flex-col space-y-[38px] overflow-auto overscroll-contain">
+      <PeriodSelector />
+      {isArchive && viewedPeriod && <ArchiveNotice name={viewedPeriod.name} />}
       <FeedbackBox
         feedback={loadError ? { ok: false, message: loadError } : null}
       />
@@ -182,6 +191,7 @@ export default function Pembayaran() {
       <StudentPaymentDialog
         key={selectedUserId ?? ""}
         student={selectedStudent}
+        readOnly={isArchive}
         onClose={() => setSelectedUserId(null)}
       />
     </div>

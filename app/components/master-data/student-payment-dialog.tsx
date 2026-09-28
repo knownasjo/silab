@@ -24,11 +24,13 @@ const NEED_PAID_FOR_CLASS = "Geser tombol ke Sudah Bayar untuk memilih kelas.";
 
 interface StudentPaymentDialogProps {
   student?: IStudentActivations;
+  readOnly?: boolean;
   onClose: () => void;
 }
 
 export default function StudentPaymentDialog({
   student,
+  readOnly = false,
   onClose,
 }: StudentPaymentDialogProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -215,13 +217,15 @@ export default function StudentPaymentDialog({
                         {activation.status ? "Sudah Bayar" : "Belum Bayar"}
                       </p>
                       <div className="flex w-2/12 justify-end">
-                        <button
-                          onClick={() => openEdit(activation)}
-                          aria-label={`Ubah ${activationSubjectName(activation)}`}
-                          className="h-fit w-fit rounded-full border-2 border-[#BFD9EF] px-4 py-2 text-xs font-semibold text-[#3272CA]"
-                        >
-                          Ubah
-                        </button>
+                        {!readOnly && (
+                          <button
+                            onClick={() => openEdit(activation)}
+                            aria-label={`Ubah ${activationSubjectName(activation)}`}
+                            className="h-fit w-fit rounded-full border-2 border-[#BFD9EF] px-4 py-2 text-xs font-semibold text-[#3272CA]"
+                          >
+                            Ubah
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}

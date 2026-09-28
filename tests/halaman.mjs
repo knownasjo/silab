@@ -128,6 +128,7 @@ await runWebTest(
 
     for (const [label, path, readyText] of [
       ["Jam sesi", "/dashboard/master-data/jam-sesi", "Sesi"],
+      ["Periode akademik", "/dashboard/master-data/periode", "Periode aktif"],
       [
         "Pembayaran",
         "/dashboard/master-data/pembayaran",

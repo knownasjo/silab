@@ -11,6 +11,8 @@ import EditSubjectButton from "./edit-subject-button";
 import FeedbackBox from "../feedback-box";
 import useSubjectStore from "@/app/store/useSubjectStore";
 import useAuthStore from "@/app/store/useAuthStore";
+import useClassStore from "@/app/store/useClassStore";
+import { usePeriodView } from "@/app/store/usePeriodStore";
 import { IGetSubjectResponseBody } from "@/app/interfaces/subject/subject.interface";
 import { useEffect, useState } from "react";
 
@@ -36,6 +38,8 @@ const groupBySemester = (subjects: IGetSubjectResponseBody[]) => {
 const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
   const { subjectsData, getAllSubjects, error } = useSubjectStore();
   const { userData } = useAuthStore();
+  const { classesData, isLoading: isLoadingClasses } = useClassStore();
+  const { isArchive } = usePeriodView();
   const [isReady, setIsReady] = useState(false);
   const [notice, setNotice] = useState<{
     subjectId: string;
@@ -44,8 +48,13 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
   const [openSemesters, setOpenSemesters] = useState<Record<string, boolean>>(
     {},
   );
-  const canEdit = userData?.role === "LABORAN";
-  const semesters = groupBySemester(subjectsData);
+  const canEdit = userData?.role === "LABORAN" && !isArchive;
+  const shownSubjects = isArchive
+    ? subjectsData.filter((subject) =>
+        classesData.some((item) => item.subjectId === subject.id),
+      )
+    : subjectsData;
+  const semesters = groupBySemester(shownSubjects);
   const onlySemester = semesters.length === 1 ? semesters[0].semester : null;
 
   useEffect(() => {
@@ -69,6 +78,15 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
       {emptyMessage && isReady && !error && subjectsData.length === 0 && (
         <p className="text-sm font-semibold text-[#5E6278]">{emptyMessage}</p>
       )}
+      {isArchive &&
+        isReady &&
+        !isLoadingClasses &&
+        subjectsData.length > 0 &&
+        shownSubjects.length === 0 && (
+          <p className="text-sm font-semibold text-[#5E6278]">
+            Tidak ada kelas praktikum di periode ini.
+          </p>
+        )}
       {semesters.map(({ semester, subjects }) => {
         const isOpen = !!openSemesters[semester];
         const panelId = `semester-${semester}`;

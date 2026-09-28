@@ -55,7 +55,7 @@ const useAuthStore = create<AuthState & AuthActions>((set) => ({
         const me = await getMe(accessToken);
 
         if (me.data?.role === "MAHASISWA") {
-          const assisted = await getAllClass(accessToken);
+          const assisted = await getAllClass({ accessToken });
 
           if (!assisted.data?.length) {
             set({ error: "Web hanya untuk laboran, dosen, dan asisten." });

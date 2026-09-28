@@ -7,6 +7,9 @@ import useDashboardStore from "../store/useDashboardStore";
 import useAuthStore from "../store/useAuthStore";
 import useRealtimeEvents from "../hooks/useRealtimeEvents";
 import FeedbackBox from "../components/feedback-box";
+import PeriodSelector from "../components/period/period-selector";
+import ArchiveNotice from "../components/period/archive-notice";
+import usePeriodStore, { usePeriodView } from "../store/usePeriodStore";
 
 export default function Dashboard() {
   const {
@@ -24,24 +27,43 @@ export default function Dashboard() {
   } = useDashboardStore();
   const { userData } = useAuthStore();
   const role = userData?.role;
+  const { isLoaded, getPeriods, refreshPeriods } = usePeriodStore();
+  const { activePeriod, viewedPeriod, viewedPeriodId, isArchive } =
+    usePeriodView();
+
+  useEffect(() => {
+    if (role === "LABORAN" && !isLoaded) getPeriods();
+  }, [role, isLoaded, getPeriods]);
 
   useEffect(() => {
     if (!role) return;
 
-    if (role === "DOSEN") getLecturerSummary();
+    if (role === "DOSEN") getLecturerSummary(viewedPeriodId);
     else getDashboardData();
-  }, [role, getDashboardData, getLecturerSummary]);
+  }, [role, getDashboardData, getLecturerSummary, viewedPeriodId]);
 
   useRealtimeEvents(({ type }) => {
     if (!role) return;
 
     if (role === "DOSEN") {
-      if (["ready", "class", "subject", "meeting", "attendance"].includes(type))
+      if (
+        [
+          "ready",
+          "class",
+          "subject",
+          "meeting",
+          "attendance",
+          "period",
+        ].includes(type)
+      )
         refreshLecturerSummary();
       return;
     }
 
-    if (["ready", "activation", "class", "subject"].includes(type)) {
+    if (role === "LABORAN" && (type === "ready" || type === "period"))
+      refreshPeriods();
+
+    if (["ready", "activation", "class", "subject", "period"].includes(type)) {
       refreshDashboardData();
     }
   });
@@ -49,6 +71,15 @@ export default function Dashboard() {
   return (
     <div className="flex h-full w-full flex-col space-y-6 overflow-auto overscroll-contain">
       <BannerDashboard />
+      {role === "DOSEN" && <PeriodSelector />}
+      {role === "DOSEN" && isArchive && viewedPeriod && (
+        <ArchiveNotice name={viewedPeriod.name} />
+      )}
+      {role === "LABORAN" && activePeriod && (
+        <p className="text-sm font-semibold text-[#5E6278]">
+          Periode aktif: {activePeriod.name}
+        </p>
+      )}
       <FeedbackBox feedback={error ? { ok: false, message: error } : null} />
       <DashboardDataCards
         totalSubject={totalSubject}

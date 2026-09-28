@@ -12,12 +12,13 @@ type DashboardState = GlobalState & {
   totalPaidStudent: number | null;
   totalUnpaidStudent: number | null;
   lecturerSummary: ILecturerDashboardResponseBody | null;
+  lecturerPeriodId?: string;
 };
 
 type DashboardActions = {
   getDashboardData: () => Promise<void>;
   refreshDashboardData: () => Promise<void>;
-  getLecturerSummary: () => Promise<void>;
+  getLecturerSummary: (periodId?: string) => Promise<void>;
   refreshLecturerSummary: () => Promise<void>;
 };
 
@@ -50,7 +51,9 @@ const loadDashboardData = async () => {
   };
 };
 
-const useDashboardStore = create<DashboardState & DashboardActions>((set) => ({
+type DashboardStore = DashboardState & DashboardActions;
+
+const useDashboardStore = create<DashboardStore>((set, get) => ({
   ...initialState,
 
   getDashboardData: async () => {
@@ -69,13 +72,19 @@ const useDashboardStore = create<DashboardState & DashboardActions>((set) => ({
     set({ ...(await loadDashboardData()), error: null }),
   ),
 
-  getLecturerSummary: async () => {
-    set({ isLoading: true, error: null });
+  getLecturerSummary: async (periodId) => {
+    set({
+      isLoading: true,
+      error: null,
+      lecturerPeriodId: periodId,
+      ...(periodId !== get().lecturerPeriodId && { lecturerSummary: null }),
+    });
 
     try {
-      const res = await getLecturerDashboard();
+      const res = await getLecturerDashboard(periodId);
 
-      set({ lecturerSummary: res.data ?? null });
+      if (get().lecturerPeriodId === periodId)
+        set({ lecturerSummary: res.data ?? null });
     } catch (error: any) {
       set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
@@ -84,9 +93,11 @@ const useDashboardStore = create<DashboardState & DashboardActions>((set) => ({
   },
 
   refreshLecturerSummary: coalesce(async () => {
-    const res = await getLecturerDashboard();
+    const periodId = get().lecturerPeriodId;
+    const res = await getLecturerDashboard(periodId);
 
-    if (res.data) set({ lecturerSummary: res.data, error: null });
+    if (get().lecturerPeriodId === periodId && res.data)
+      set({ lecturerSummary: res.data, error: null });
   }),
 }));
 

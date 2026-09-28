@@ -18,16 +18,18 @@ import useAuthStore from "@/app/store/useAuthStore";
 interface ClassMeetingsContentProps {
   classId?: string;
   meetingData: IGetAllClassMeetingResponseBody[];
+  readOnly?: boolean;
 }
 
 export default function ClassMeetingsContent({
   classId,
   meetingData,
+  readOnly = false,
 }: ClassMeetingsContentProps) {
   const [pickedMeeting, setPickedMeeting] = useState<string>("");
   const [notice, setNotice] = useState<Feedback>(null);
   const { userData } = useAuthStore();
-  const canManage = !!userData && userData.role !== "DOSEN";
+  const canManage = !!userData && userData.role !== "DOSEN" && !readOnly;
 
   const currentMeeting = meetingData?.find(
     (meeting) => meeting.id === pickedMeeting,

@@ -14,6 +14,7 @@ import { useParams } from "next/navigation";
 import useMeetingStore from "@/app/store/useMeetingStore";
 import useCollaboratorStore from "@/app/store/useCollaboratorStore";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
+import ArchiveNotice from "@/app/components/period/archive-notice";
 
 const ClassDetails: React.FC = () => {
   const params = useParams<{ classId: string }>();
@@ -36,7 +37,14 @@ const ClassDetails: React.FC = () => {
     getMeetings(params.classId);
   }, [getClassById, getMeetings, params.classId, getClassCollaborators]);
 
+  const readOnly = classData?.period?.is_active === false;
+
   useRealtimeEvents(({ type, data }) => {
+    if (type === "period") {
+      refreshClassById(params.classId);
+      return;
+    }
+
     const isReady = type === "ready";
     if (!isReady && data.class_id !== params.classId) return;
 
@@ -76,7 +84,7 @@ const ClassDetails: React.FC = () => {
       {!isLoading && classData && (
         <>
           <ClassTitleHeader data={classData}>
-            {userData?.role === "LABORAN" && (
+            {userData?.role === "LABORAN" && !readOnly && (
               <>
                 <EditClassButton
                   data={classData}
@@ -89,11 +97,19 @@ const ClassDetails: React.FC = () => {
               </>
             )}
           </ClassTitleHeader>
+          {readOnly && classData.period && (
+            <ArchiveNotice name={classData.period.name} />
+          )}
           <FeedbackBox feedback={notice} />
-          <ClassDetailsBox data={classData} assistant={collaboratorsData} />
+          <ClassDetailsBox
+            data={classData}
+            assistant={collaboratorsData}
+            readOnly={readOnly}
+          />
           <ClassMeetingsContent
             classId={classData.id}
             meetingData={meetingsData}
+            readOnly={readOnly}
           />
         </>
       )}

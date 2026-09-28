@@ -15,6 +15,7 @@ import useSessionStore from "@/app/store/useSessionStore";
 import useSubjectStore from "@/app/store/useSubjectStore";
 import useAuthStore from "@/app/store/useAuthStore";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
+import usePeriodStore, { usePeriodView } from "@/app/store/usePeriodStore";
 
 export default function TambahPraktikum() {
   const [selectedSubject, setSelectedSubject] = useState<SubjectBySemester>();
@@ -34,15 +35,20 @@ export default function TambahPraktikum() {
   const { error: subjectError } = useSubjectStore();
   const loadProblem = subjectError ?? loadError ?? sessionError;
   const { userData } = useAuthStore();
+  const { getPeriods, refreshPeriods } = usePeriodStore();
+  const { activePeriod } = usePeriodView();
 
   useEffect(() => {
     getAllClass();
     getSessions();
-  }, [getAllClass, getSessions]);
+    getPeriods();
+  }, [getAllClass, getSessions, getPeriods]);
 
   useRealtimeEvents(({ type }) => {
-    if (["ready", "class", "subject"].includes(type)) refreshAllClass();
+    if (["ready", "class", "subject", "period"].includes(type))
+      refreshAllClass();
     if (["ready", "session"].includes(type)) refreshSessions();
+    if (["ready", "period"].includes(type)) refreshPeriods();
   });
 
   const subjectClasses = useMemo(
@@ -104,6 +110,11 @@ export default function TambahPraktikum() {
         <div className="mb-6">
           <FeedbackBox feedback={{ ok: false, message: loadProblem }} />
         </div>
+      )}
+      {activePeriod && (
+        <p className="mb-6 text-sm font-semibold text-[#5E6278]">
+          Kelas baru masuk periode {activePeriod.name}.
+        </p>
       )}
       <div className="flex h-[82px] w-full flex-row space-x-4">
         <div className="flex h-full flex-col space-y-3">

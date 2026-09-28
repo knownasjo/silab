@@ -43,6 +43,7 @@ await runWebTest(
       "/dashboard/praktikum/tambah-praktikum",
       "/dashboard/master-data/pembayaran",
       "/dashboard/master-data/jam-sesi",
+      "/dashboard/master-data/periode",
       "/dashboard/master-data/add-subject",
       "/dashboard/pengumuman/list-pengumuman",
       `/dashboard/pengumuman/${announcement.id}`,

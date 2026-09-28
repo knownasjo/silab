@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import useClassStore from "../store/useClassStore";
 import ClassCard from "./praktikum/class-card";
 
@@ -7,11 +6,7 @@ interface ISubjectClassesCardProps {
 }
 
 const SubjectClasses: React.FC<ISubjectClassesCardProps> = ({ subjectId }) => {
-  const { getAllClass, classesData } = useClassStore();
-
-  useEffect(() => {
-    getAllClass();
-  }, [getAllClass]);
+  const { classesData } = useClassStore();
 
   const filteredSubjectClasses = classesData.filter(
     (value) => value.subjectId === subjectId,

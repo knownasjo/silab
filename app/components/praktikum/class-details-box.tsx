@@ -8,9 +8,14 @@ import { IGetCollaboratorsResponseBody } from "@/app/interfaces/collaborator/col
 interface IClassDetailBox {
   data: IGetClassByIdResponseBody;
   assistant: IGetCollaboratorsResponseBody[];
+  readOnly?: boolean;
 }
 
-const ClassDetailsBox: React.FC<IClassDetailBox> = ({ data, assistant }) => {
+const ClassDetailsBox: React.FC<IClassDetailBox> = ({
+  data,
+  assistant,
+  readOnly = false,
+}) => {
   const { userData } = useAuthStore();
 
   return (
@@ -37,7 +42,7 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({ data, assistant }) => {
           <p className="text-[16px] font-semibold text-[#5E6278]">
             Asisten Praktikum
           </p>
-          {userData?.role === "LABORAN" && (
+          {userData?.role === "LABORAN" && !readOnly && (
             <AddCollaboratorsButton
               classId={data.id}
               classLabel={`${data.subject_name} — Kelas ${data.name}`}

@@ -19,12 +19,13 @@ type ClassState = GlobalState & {
   classData?: IGetClassByIdResponseBody | null;
   classNotice: string | null;
   loadError: string | null;
+  classesPeriodId?: string;
 };
 
 type ClassResult = { ok: boolean; message: string };
 
 type ClassActions = {
-  getAllClass: () => Promise<void>;
+  getAllClass: (periodId?: string) => Promise<void>;
   getClassById: (id: string) => Promise<void>;
   refreshAllClass: () => Promise<void>;
   refreshClassById: (id: string) => Promise<void>;
@@ -49,13 +50,14 @@ const initialState = {
 const useClassStore = create<ClassState & ClassActions>((set, get) => ({
   ...initialState,
 
-  getAllClass: async () => {
-    set({ isLoading: true, loadError: null });
+  getAllClass: async (periodId) => {
+    if (periodId !== get().classesPeriodId) set({ classesData: [] });
+    set({ isLoading: true, loadError: null, classesPeriodId: periodId });
 
     try {
-      const res = await getAllClass();
+      const res = await getAllClass({ periodId });
 
-      if (res.status && res.data) {
+      if (res.status && res.data && get().classesPeriodId === periodId) {
         set({ classesData: res.data });
       } else {
         set({ loadError: res.message });
@@ -86,9 +88,11 @@ const useClassStore = create<ClassState & ClassActions>((set, get) => ({
   },
 
   refreshAllClass: coalesce(async () => {
-    const res = await getAllClass();
+    const periodId = get().classesPeriodId;
+    const res = await getAllClass({ periodId });
 
-    if (res.status && res.data) set({ classesData: res.data, loadError: null });
+    if (get().classesPeriodId === periodId && res.status && res.data)
+      set({ classesData: res.data, loadError: null });
   }),
 
   refreshClassById: coalesce(async (id: string) => {
