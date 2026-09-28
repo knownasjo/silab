@@ -596,6 +596,10 @@ periode, misalnya "2026/2027 Ganjil". Aturannya ada di README backend bagian
       `httpOnly` tetapi belum `secure` karena lab masih memakai HTTP
 - [ ] `next.config.js` masih menunjuk hostname Supabase lama bila project ref
       berubah
+- [ ] `npm audit` masih melaporkan 2 celah di postcss bawaan Next.js 15.5.
+      postcss itu hanya dipakai saat build untuk CSS milik sendiri, dan baru
+      diganti di Next.js 16. Pindah ke Next.js 16 juga perlu mengganti
+      `next lint` dengan ESLint CLI
 
 ## Pengujian otomatis
 
