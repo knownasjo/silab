@@ -69,7 +69,7 @@ await runWebTest(
 
     const inspect = async (page, current) => {
       mode = "normal";
-      await browser.navigate("/dashboard/segera-hadir");
+      await browser.navigate("/jeda-uji");
       await sleep(500);
       browser.resetErrors();
       mode = current;

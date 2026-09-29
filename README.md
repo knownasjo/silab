@@ -135,7 +135,6 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah (hanya LABORAN), lihat "Ubah Mata Kuliah" |
-| `/dashboard/segera-hadir` | Pengganti fitur yang belum ada (`?fitur=Modul`), dituju tombol Modul "Click to Open" di detail kelas |
 | `/dashboard/master-data/jam-sesi` | Jam sesi Senin–Kamis dan Jumat: tambah, ubah jam, nonaktifkan, hapus, dan daftar kelas di tiap sesi (hanya LABORAN) |
 | `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up. Ada pilihan periode; periode lama hanya bisa dilihat |
 | `/dashboard/master-data/periode` | Periode akademik: periode aktif, Mulai Semester Baru, dan daftar periode (hanya LABORAN), lihat "Periode Akademik" |
@@ -296,9 +295,8 @@ server mati atau sibuk semua halaman terlempar ke Dashboard tanpa pesan.
   yang datang beruntun digabung dan permintaan berjalan berurutan, sehingga
   respons lama tidak menimpa yang baru. Stream memakai `fetch` (bukan
   `EventSource`) agar token tetap dikirim di header
-- Tombol Modul "Click to Open" di detail kelas membuka halaman Segera Hadir;
-  sebelumnya tombol itu tidak melakukan apa-apa karena backend belum
-  menyimpan modul
+- Fitur modul praktikum tidak dikerjakan. Kotak Modul "Click to Open" di
+  detail kelas dan halaman Segera Hadir yang ditujunya sudah dihapus
 - Sidebar bisa diperkecil lewat tombol bulat di tepinya: hanya ikon yang
   tampil (tooltip saat disorot), dan submenu Master Data/Pengumuman muncul di
   samping ikon (`sidebar-group.tsx`, menggantikan dua komponen disclosure yang

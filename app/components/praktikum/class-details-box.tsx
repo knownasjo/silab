@@ -1,5 +1,3 @@
-import Image from "next/image";
-import Link from "next/link";
 import { formatDay } from "@/app/utils/day";
 import AddCollaboratorsButton from "@/app/components/praktikum/add-collaborators-button";
 import { IGetClassByIdResponseBody } from "@/app/interfaces/class/class.interface";
@@ -74,29 +72,6 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
         <p className="text-[18px] font-semibold text-black">
           {data.participants} / {data.quota}
         </p>
-      </div>
-      <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
-      <div className="flex h-full w-[100px] flex-col space-y-4">
-        <p className="text-[16px] font-semibold text-[#5E6278]">Modul</p>
-        <Link
-          href={{
-            pathname: "/dashboard/segera-hadir",
-            query: { fitur: "Modul" },
-          }}
-          className="flex w-full flex-row items-center justify-between"
-        >
-          <p className="w-[53px] text-start text-[14px] font-semibold leading-none text-[#3272CA]">
-            Click to Open
-          </p>
-          <div className="relative h-[24px] w-[24px]">
-            <Image
-              src={"/open.png"}
-              fill
-              alt="open module"
-              style={{ objectFit: "contain" }}
-            />
-          </div>
-        </Link>
       </div>
     </div>
   );
