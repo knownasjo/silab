@@ -253,6 +253,16 @@ server mati atau sibuk semua halaman terlempar ke Dashboard tanpa pesan.
 - Kartu dashboard: fungsi store yang tertukar diperbaiki, endpoint kembar
   dipisah dengan `?status=true/false`
 - Pengumuman: validasi judul/deskripsi, Lihat Detail, Edit, dan Hapus
+- Buat Pengumuman (30 September 2026):
+  - Pilihan **Jenis Pengumuman** kini selalu menampilkan nama jenis yang
+    tersimpan di form. Sebelumnya tombol menampilkan kode (`PRACTICUM`), dan
+    setelah Hapus atau Simpan tetap menampilkan jenis lama padahal form sudah
+    kembali ke "Pengumuman". Akibatnya, pengumuman berikutnya terkirim sebagai
+    pengumuman biasa, sehingga di HP tidak membuka pendaftaran praktikum.
+  - Selain laboran, yang membuka alamatnya langsung melihat "Hanya laboran
+    yang dapat membuat pengumuman." (menu Pengumuman memang hanya ada untuk
+    laboran).
+  - Kotak form kini setinggi isinya, tidak lagi setinggi layar.
 - Scrollbar disembunyikan di seluruh aplikasi lewat `globals.css`
 - Daftar pertemuan langsung muncul setelah ditambah (store memanggil
   `getMeetings` ulang)
@@ -670,6 +680,7 @@ node tests/login.mjs        # satu tes saja
 | `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
 | `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang | 29 |
 | `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |
+| `pengumuman` | Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Hapus, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 200 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, dosen melihat pesan hanya laboran. Permintaan simpan dicegat, jadi tidak ada pengumuman asli yang terkirim | 24 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|

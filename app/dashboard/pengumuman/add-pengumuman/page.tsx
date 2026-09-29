@@ -10,6 +10,7 @@ import {
   IAddAnnouncementRequestBody,
 } from "@/app/interfaces/announcement/announcement.interface";
 import useAnnouncementStore from "@/app/store/useAnnouncementStore";
+import useAuthStore from "@/app/store/useAuthStore";
 
 const MAX_BODY_LENGTH = 200;
 const MAX_TITLE_LENGTH = 150;
@@ -29,10 +30,11 @@ export default function Pengumuman() {
     useState<IAddAnnouncementRequestBody>(emptyAnnouncement);
 
   const { isLoading, addAnnouncement } = useAnnouncementStore();
+  const { userData } = useAuthStore();
 
-  const handleValueChange = (
-    field: keyof IAddAnnouncementRequestBody,
-    value: any,
+  const handleValueChange = <K extends keyof IAddAnnouncementRequestBody>(
+    field: K,
+    value: IAddAnnouncementRequestBody[K],
   ) => {
     setAnnouncement((prev) => ({
       ...prev,
@@ -84,10 +86,20 @@ export default function Pengumuman() {
     setSuccessDialogOpen(true);
   };
 
+  if (userData && userData.role !== "LABORAN") {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <p className="text-base font-semibold text-[#5E6278]">
+          Hanya laboran yang dapat membuat pengumuman.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full w-full flex-col space-y-10">
       <AddPengumumanTitle />
-      <div className="flex h-screen w-full flex-col space-y-10 overflow-auto overscroll-contain rounded-[20px] bg-white p-5">
+      <div className="flex w-full flex-col space-y-10 rounded-[20px] bg-white p-5">
         <p className="text-[22px] font-bold text-[#1D1D1D]">Buat Pengumuman</p>
         <div className="w-full space-y-3">
           <label className="text-base font-semibold text-[#5E6278]">
