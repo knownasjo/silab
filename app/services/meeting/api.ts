@@ -1,5 +1,6 @@
 import {
   IAddClassMeetingRequestBody,
+  ICheckStudentDeviceRequestBody,
   IGetAllClassMeetingResponseBody,
   IGetMeetingQrTokenResponseBody,
   IUpdateAttendanceRequestBody,
@@ -66,6 +67,19 @@ export const putStudentAttendance = async (
 ): Promise<IBaseResponse> => {
   const res = await satellite.put(
     `/meeting/${meetingId}/attendances/${userId}`,
+    body,
+  );
+
+  return res.data;
+};
+
+export const putStudentDevice = async (
+  meetingId: string,
+  userId: string,
+  body: ICheckStudentDeviceRequestBody,
+): Promise<IBaseResponse> => {
+  const res = await satellite.put(
+    `/meeting/${meetingId}/attendances/${userId}/device`,
     body,
   );
 

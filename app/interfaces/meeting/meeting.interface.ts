@@ -20,12 +20,15 @@ export interface IGetMeetingQrTokenResponseBody {
   expires_in_ms: number;
 }
 
+export type DeviceCheck = "BIASA" | "TIDAK_BIASA" | "SUDAH_DICEK";
+
 export interface IMeetingParticipants {
   student_id: string;
   student_name: string;
   nim: string;
   submitted_at: string | null;
   is_attended: boolean;
+  device_check?: DeviceCheck | null;
 }
 
 export interface IUpdateMeetingStatusRequestBody {
@@ -34,4 +37,8 @@ export interface IUpdateMeetingStatusRequestBody {
 
 export interface IUpdateAttendanceRequestBody {
   status: boolean;
+}
+
+export interface ICheckStudentDeviceRequestBody {
+  present: boolean;
 }

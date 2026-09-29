@@ -587,6 +587,37 @@ periode, misalnya "2026/2027 Ganjil". Aturannya ada di README backend bagian
   menghapusnya, halaman ikut kembali ke "Pilih Pertemuan", dan judul yang
   diubah dari tempat lain langsung tampil, keduanya lewat event `meeting`.
 
+### Tanda HP tidak biasa
+
+Backend mencatat HP yang dipakai scan, dan presensi dari HP yang bukan HP
+biasa mahasiswa itu bertanda `device_check: "TIDAK_BIASA"` di
+`GET /meeting/:classId` (lihat "Satu HP satu akun per pertemuan" di README
+backend). Web memakainya untuk membantu asisten mencegah titip akun:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ ⚠ 2 mahasiswa presensi dari HP yang tidak biasa.             │
+│   Panggil namanya, lalu pilih Ada atau Tidak ada.            │
+│ ┌──────────────────────────────────────────────────────────┐ │
+│ │ 2000016104 · Budi                     [Ada] [Tidak ada]  │ │
+│ └──────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+```
+
+- Kotak kuning di atas daftar presensi pertemuan yang dipilih
+  (`components/praktikum/device-check-box.tsx`) berisi mahasiswa bertanda
+  `TIDAK_BIASA`, dan barisnya di daftar diberi ⚠. Kotak tidak tampil bila
+  tidak ada yang perlu dicek.
+- **Ada**: mahasiswa tetap hadir, dan HP itu menjadi HP biasanya yang baru.
+  **Tidak ada**: presensinya diubah menjadi Tidak Hadir. Keduanya memanggil
+  `PUT /meeting/:id/attendances/:userId/device`, lalu pesan dari server
+  tampil hijau di bawah tombol atas dan tanda ⚠ hilang.
+- Tombol hanya untuk laboran dan asisten di periode aktif. Dosen dan periode
+  arsip melihat kotak yang sama dengan tulisan "Menunggu dicek asisten."
+- Bila staf lain sudah menjawab lebih dulu, pesan merah "Presensi ini sudah
+  dicek." tampil dan daftar dimuat ulang. Halaman lain yang sedang terbuka
+  ikut berubah lewat event `attendance`.
+
 ## Pekerjaan yang masih tersisa
 
 - [ ] Cookie `accessToken` diset tanpa `httpOnly`, `secure`, `sameSite`
@@ -637,6 +668,7 @@ node tests/login.mjs        # satu tes saja
 | `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi | 50 |
 | `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
 | `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang | 29 |
+| `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|

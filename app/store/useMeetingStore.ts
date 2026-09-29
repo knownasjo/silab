@@ -12,6 +12,7 @@ import {
   putMeeting,
   putMeetingStatus,
   putStudentAttendance,
+  putStudentDevice,
 } from "../services/meeting/api";
 import { coalesce } from "../utils/coalesce";
 
@@ -61,6 +62,12 @@ type MeetingActions = {
     userId: string,
     classId: string,
   ) => Promise<void>;
+  checkStudentDevice: (
+    meetingId: string,
+    userId: string,
+    present: boolean,
+    classId: string,
+  ) => Promise<{ ok: boolean; message: string }>;
 };
 
 const initialState = {
@@ -223,6 +230,18 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
       set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  checkStudentDevice: async (meetingId, userId, present, classId) => {
+    try {
+      const res = await putStudentDevice(meetingId, userId, { present });
+
+      return { ok: true, message: res.message };
+    } catch (error: any) {
+      return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
+    } finally {
+      await get().refreshMeetings(classId);
     }
   },
 }));

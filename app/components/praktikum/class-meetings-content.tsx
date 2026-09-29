@@ -8,6 +8,7 @@ import FeedbackBox, { Feedback } from "../feedback-box";
 import MeetingsDropDown from "../meetings-dropdown";
 import OpenAttendancesButton from "../open-attendance-button";
 import ShowQrCodeButton from "./show-qr-code-button";
+import DeviceCheckBox from "./device-check-box";
 import StudentAttendanceEditButton from "../student-attendance-edit-button";
 import Link from "next/link";
 import Image from "next/image";
@@ -152,6 +153,13 @@ export default function ClassMeetingsContent({
               Jumlah hadir {attendedCount}/{students.length}
             </p>
           </div>
+          <DeviceCheckBox
+            students={students}
+            meetingId={selectedMeeting}
+            classId={classId}
+            canManage={canManage}
+            onAnswered={setNotice}
+          />
           <div id="recap-attendances">
             <div className="flex w-full flex-row border-b border-[#F1F1F2] pb-3 text-base font-bold text-[#5E6278]">
               <p className="flex w-2/12 items-center justify-center">NIM</p>
@@ -175,12 +183,21 @@ export default function ClassMeetingsContent({
                   <p className="flex w-5/12 items-center justify-center">
                     {student.student_name}
                   </p>
-                  <div className="flex w-3/12 items-center justify-center">
+                  <div className="flex w-3/12 items-center justify-center space-x-2">
                     <p
                       className={`rounded-md p-2 text-sm font-semibold ${statusStyle[status]}`}
                     >
                       {status}
                     </p>
+                    {student.device_check === "TIDAK_BIASA" && (
+                      <span
+                        title="HP tidak biasa, belum dicek"
+                        aria-label="HP tidak biasa"
+                        className="text-[#B58100]"
+                      >
+                        ⚠
+                      </span>
+                    )}
                   </div>
                   {classId && canManage && (
                     <StudentAttendanceEditButton
