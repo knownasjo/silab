@@ -12,7 +12,7 @@ import {
 import useAnnouncementStore from "@/app/store/useAnnouncementStore";
 import useAuthStore from "@/app/store/useAuthStore";
 
-const MAX_BODY_LENGTH = 200;
+const MAX_BODY_LENGTH = 1000;
 const MAX_TITLE_LENGTH = 150;
 
 const emptyAnnouncement: IAddAnnouncementRequestBody = {
@@ -134,7 +134,7 @@ export default function Pengumuman() {
           </label>
           <textarea
             required
-            className="h-[140px] w-full resize-none rounded-2xl bg-[#F5F5F5] pl-5 pt-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]"
+            className="h-[220px] w-full resize-none rounded-2xl bg-[#F5F5F5] px-5 pt-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]"
             placeholder="Deskripsi pengumuman"
             maxLength={MAX_BODY_LENGTH}
             inputMode="text"

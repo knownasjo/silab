@@ -1,6 +1,7 @@
 import {
   bodyHas,
   check,
+  db,
   json,
   openBrowser,
   runWebTest,
@@ -24,16 +25,31 @@ const TYPES = {
 const menuItem = (title) =>
   `[...document.querySelectorAll('[role="menuitem"]')].find((item) => item.innerText.trim() === ${JSON.stringify(title)})`;
 
-await runWebTest("Buat pengumuman", data, async (browser) => {
+await runWebTest("Pengumuman di web", data, async (browser) => {
   const { evaluate, waitFor, realClick, clickText, typeInto } = browser;
   const sent = [];
+  const edits = [];
   let reply = json(201, { status: true, message: SAVED });
   await browser.intercept((request) => {
+    if (request.method === "PUT" && request.url.includes("/announcement/")) {
+      edits.push(JSON.parse(request.postData ?? "{}"));
+      return json(200, {
+        status: true,
+        message: "Pengumuman berhasil diperbarui",
+      });
+    }
     if (request.method !== "POST" || !request.url.endsWith("/announcement"))
       return null;
     sent.push(JSON.parse(request.postData ?? "{}"));
     return reply;
   });
+  const slow = (latency) =>
+    browser.send("Network.emulateNetworkConditions", {
+      offline: false,
+      latency,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    });
 
   const typeShown = () => evaluate(`${TYPE_BUTTON}?.innerText.trim()`);
   const pickType = async (title) => {
@@ -141,19 +157,23 @@ await runWebTest("Buat pengumuman", data, async (browser) => {
     (await waitFor(bodyHas("Deskripsi pengumuman wajib diisi!"), 3000)) &&
       sent.length === 3,
   );
-  await typeInto(BODY, "x".repeat(250));
+  await typeInto(BODY, "x".repeat(1050));
   check(
-    "deskripsi berhenti di 200 karakter",
-    (await evaluate(`document.querySelector('${BODY}').value.length`)) === 200,
+    "deskripsi berhenti di 1000 karakter",
+    (await evaluate(`document.querySelector('${BODY}').value.length`)) ===
+      1000 && (await evaluate(bodyHas("1000/1000"))),
   );
   reply = json(400, {
     status: false,
-    message: "Deskripsi pengumuman maksimal 200 karakter!",
+    message: "Deskripsi pengumuman maksimal 1000 karakter!",
   });
   await clickText("Simpan");
   check(
     "penolakan server tampil",
-    await waitFor(bodyHas("Deskripsi pengumuman maksimal 200 karakter!"), 5000),
+    await waitFor(
+      bodyHas("Deskripsi pengumuman maksimal 1000 karakter!"),
+      5000,
+    ),
   );
   await clickText("Tutup");
   await sleep(300);
@@ -177,6 +197,155 @@ await runWebTest("Buat pengumuman", data, async (browser) => {
     JSON.stringify(fit),
   );
 
+  section("Pengumuman panjang di daftar dan detail");
+  const long = await db.mst_announcement.create({
+    data: {
+      type: "BASIC",
+      title: "Uji Pengumuman Panjang",
+      body: [
+        `Paragraf pertama ${"a".repeat(300)}`,
+        `Paragraf kedua ${"kata ".repeat(80)}`,
+        "Paragraf ketiga.",
+      ].join("\n\n"),
+      author: data.laboran.id,
+    },
+  });
+  const bodyText = `[...document.querySelectorAll("p")].find((p) => p.textContent.startsWith("Paragraf pertama"))`;
+  await browser.navigate("/dashboard/pengumuman/list-pengumuman");
+  await waitFor(`!!(${bodyText})`, 20000);
+  const card = await evaluate(`(() => {
+    const text = ${bodyText};
+    const box = text.closest(".bg-white").getBoundingClientRect();
+    const r = text.getBoundingClientRect();
+    return {
+      height: Math.round(r.height),
+      hidden: text.scrollHeight - text.clientHeight,
+      inside: r.bottom <= box.bottom && r.right <= box.right,
+      wide: text.scrollWidth - text.clientWidth,
+    };
+  })()`);
+  check(
+    "daftar: isi panjang dipotong 3 baris dan tetap di dalam kartu",
+    card.height < 120 && card.hidden > 0 && card.inside && card.wide <= 1,
+    JSON.stringify(card),
+  );
+  await browser.navigate(`/dashboard/pengumuman/${long.id}`);
+  await waitFor(`!!(${bodyText})`, 20000);
+  const detail = await evaluate(`(() => {
+    const text = ${bodyText};
+    return {
+      paragraphs: text.innerText.split("\\n\\n").length,
+      wide: text.scrollWidth - text.clientWidth,
+      full: text.innerText.includes("Paragraf ketiga."),
+    };
+  })()`);
+  check(
+    "detail: isi lengkap tampil dengan paragraf terpisah",
+    detail.paragraphs === 3 && detail.full && detail.wide <= 1,
+    JSON.stringify(detail),
+  );
+
+  section("List Pengumuman");
+  const practicum = await db.mst_announcement.create({
+    data: {
+      type: "PRACTICUM",
+      title: "Uji Jenis Pengumuman",
+      body: "Pendaftaran dibuka.",
+      author: data.laboran.id,
+    },
+  });
+  const day = practicum.createdAt.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const time = [
+    practicum.createdAt.getHours(),
+    practicum.createdAt.getMinutes(),
+  ]
+    .map((n) => String(n).padStart(2, "0"))
+    .join(".");
+  const cardOf = `[...document.querySelectorAll("p")].find((p) => p.innerText === "Uji Jenis Pengumuman")?.closest(".space-x-3")`;
+  const openMenu = async (page) => {
+    await page.waitFor(`!!(${cardOf})`, 20000);
+    await page.realClick(`(${cardOf}).querySelector("button")`);
+    await page.waitFor(`!!document.querySelector('[role="menuitem"]')`, 3000);
+  };
+
+  await slow(1500);
+  await browser.navigate("/dashboard/pengumuman/list-pengumuman");
+  const listLoading = await waitFor(
+    `${bodyHas("Loading...")} && !${bodyHas("Belum ada pengumuman.")}`,
+    3000,
+  );
+  await slow(0);
+  check(
+    "saat memuat tampil Loading..., bukan 'Belum ada pengumuman.'",
+    listLoading,
+  );
+  await waitFor(`!!(${cardOf})`, 20000);
+  const cardText = await evaluate(`(${cardOf}).innerText`);
+  check(
+    "kartu menampilkan jenis Pendaftaran Praktikum",
+    cardText.includes("Pendaftaran Praktikum"),
+    cardText,
+  );
+  check(
+    "  tanggal lengkap dalam jam lokal beserta penulis",
+    cardText.includes(day) &&
+      cardText.includes(time) &&
+      cardText.includes("oleh Laboran Uji"),
+    `${cardText} | ${day} ${time}`,
+  );
+
+  await openMenu(browser);
+  await clickText("Edit");
+  await waitFor(bodyHas("Edit Pengumuman"), 3000);
+  await clickText("Simpan Perubahan");
+  check(
+    "Edit: simpan tanpa perubahan memberi pesan dan tidak mengirim apa pun",
+    (await waitFor(
+      bodyHas("Tidak ada perubahan yang perlu disimpan."),
+      3000,
+    )) && edits.length === 0,
+    JSON.stringify(edits),
+  );
+  await typeInto('input[maxlength="150"]', "Uji Jenis Pengumuman Diubah");
+  await clickText("Simpan Perubahan");
+  check(
+    "  setelah judul diubah, perubahan dikirim dan dialog tertutup",
+    (await waitFor(`!${bodyHas("Edit Pengumuman")}`, 5000)) &&
+      edits.length === 1 &&
+      edits[0].title === "Uji Jenis Pengumuman Diubah" &&
+      edits[0].type === "PRACTICUM",
+    JSON.stringify(edits),
+  );
+
+  section("Detail Pengumuman");
+  await slow(1500);
+  await browser.navigate(`/dashboard/pengumuman/${practicum.id}`);
+  const detailLoading = await waitFor(
+    `${bodyHas("Loading...")} && !${bodyHas("Tanggal / Waktu Posting")}`,
+    3000,
+  );
+  await slow(0);
+  check("saat memuat tampil Loading...", detailLoading);
+  await waitFor(bodyHas("Uji Jenis Pengumuman"), 20000);
+  const detailText = await evaluate(`document.querySelector("main").innerText`);
+  check(
+    "detail menampilkan jenis, penulis, dan tanggal dalam jam lokal",
+    [
+      "Jenis Pengumuman",
+      "Pendaftaran Praktikum",
+      "Dibuat oleh",
+      "Laboran Uji",
+    ].every((text) => detailText.includes(text)) &&
+      detailText.includes(day) &&
+      detailText.includes(time) &&
+      !/\d{4}-\d{2}-\d{2}T/.test(detailText),
+    detailText,
+  );
+
   const lecturer = await openBrowser();
   try {
     section("Dosen");
@@ -188,6 +357,16 @@ await runWebTest("Buat pengumuman", data, async (browser) => {
         bodyHas("Hanya laboran yang dapat membuat pengumuman."),
         20000,
       )) && !(await lecturer.evaluate(`!!document.querySelector('${BODY}')`)),
+    );
+    await lecturer.navigate("/dashboard/pengumuman/list-pengumuman");
+    await openMenu(lecturer);
+    const lecturerMenu = await lecturer.evaluate(
+      `[...document.querySelectorAll('[role="menuitem"]')].map((item) => item.innerText.trim())`,
+    );
+    check(
+      "List: menu dosen hanya Lihat Detail, tanpa Edit dan Hapus",
+      JSON.stringify(lecturerMenu) === JSON.stringify(["Lihat Detail"]),
+      JSON.stringify(lecturerMenu),
     );
     check(
       "halaman tanpa error JavaScript",

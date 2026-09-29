@@ -14,6 +14,7 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import AnnouncementSettingsDropdownItem from "./announcement-settings-dropdown-item";
+import AnnouncementTypeBadge from "./announcement-type-badge";
 import Image from "next/image";
 import { useState } from "react";
 import {
@@ -21,29 +22,23 @@ import {
   IGetAllAnnouncementsResponseBody,
 } from "@/app/interfaces/announcement/announcement.interface";
 import useAnnouncementStore from "@/app/store/useAnnouncementStore";
+import useAuthStore from "@/app/store/useAuthStore";
+import { ANNOUNCEMENT_TYPES, formatPostedAt } from "@/app/utils/announcement";
 
 interface AnnouncementCardProps {
   announcement: IGetAllAnnouncementsResponseBody;
 }
 
-const MAX_BODY_LENGTH = 200;
+const MAX_BODY_LENGTH = 1000;
 const MAX_TITLE_LENGTH = 150;
-
-const typeOptions: { title: string; value: AnnouncementTypeEnum }[] = [
-  { title: "Pengumuman", value: AnnouncementTypeEnum.BASIC },
-  { title: "Pendaftaran Praktikum", value: AnnouncementTypeEnum.PRACTICUM },
-  { title: "Pendaftaran Inhal", value: AnnouncementTypeEnum.INHALL },
-  {
-    title: "Pendaftaran Asisten Praktikum",
-    value: AnnouncementTypeEnum.ASSISTANT,
-  },
-];
 
 export default function AnnouncementCard({
   announcement,
 }: AnnouncementCardProps) {
   const { updateAnnouncement, removeAnnouncement, isLoading } =
     useAnnouncementStore();
+  const { userData } = useAuthStore();
+  const canManage = userData?.role === "LABORAN";
 
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
@@ -71,6 +66,15 @@ export default function AnnouncementCard({
 
     if (body.trim() === "") {
       setFormError("Deskripsi pengumuman wajib diisi!");
+      return;
+    }
+
+    if (
+      title.trim() === announcement.title &&
+      body.trim() === announcement.body &&
+      type === (announcement.type ?? AnnouncementTypeEnum.BASIC)
+    ) {
+      setFormError("Tidak ada perubahan yang perlu disimpan.");
       return;
     }
 
@@ -105,15 +109,21 @@ export default function AnnouncementCard({
 
   return (
     <div className="flex w-full flex-row space-x-3">
-      <div className="flex h-[210px] w-full flex-col space-y-8 rounded-2xl bg-white p-8 text-[#1d1d1d]">
+      <div className="flex min-h-[210px] w-full min-w-0 flex-col space-y-8 rounded-2xl bg-white p-8 text-[#1d1d1d]">
         <div className="flex flex-col">
-          <p className="text-[22px] font-bold">{announcement.title}</p>
+          <div className="flex flex-row flex-wrap items-center gap-x-3 gap-y-1">
+            <p className="break-words text-[22px] font-bold">
+              {announcement.title}
+            </p>
+            <AnnouncementTypeBadge type={announcement.type} />
+          </div>
           <p className="text-[16px] font-light">
-            {new Date(announcement.created_at).toLocaleString("id-ID")} oleh{" "}
-            {announcement.author}
+            {formatPostedAt(announcement.created_at)} oleh {announcement.author}
           </p>
         </div>
-        <p className="text-[18px] font-semibold">{announcement.body}</p>
+        <p className="line-clamp-3 whitespace-pre-line break-words text-[18px] font-semibold">
+          {announcement.body}
+        </p>
       </div>
       <Menu>
         <MenuButton className="relative h-[24px] w-[24px]">
@@ -137,24 +147,28 @@ export default function AnnouncementCard({
             title="Lihat Detail"
             href={`/dashboard/pengumuman/${announcement.id}`}
           />
-          <div className="h-[1px] w-full bg-[#1D1D1D]/10" />
-          <AnnouncementSettingsDropdownItem
-            hoverIcon="/edit-hovered.png"
-            icon="/edit.png"
-            title="Edit"
-            onClick={openEdit}
-          />
-          <div className="h-[1px] w-full bg-[#1D1D1D]/10" />
-          <AnnouncementSettingsDropdownItem
-            hoverIcon="/delete-hovered.png"
-            icon="/delete.png"
-            title="Hapus"
-            danger
-            onClick={() => {
-              setFormError("");
-              setIsDeleteOpen(true);
-            }}
-          />
+          {canManage && (
+            <>
+              <div className="h-[1px] w-full bg-[#1D1D1D]/10" />
+              <AnnouncementSettingsDropdownItem
+                hoverIcon="/edit-hovered.png"
+                icon="/edit.png"
+                title="Edit"
+                onClick={openEdit}
+              />
+              <div className="h-[1px] w-full bg-[#1D1D1D]/10" />
+              <AnnouncementSettingsDropdownItem
+                hoverIcon="/delete-hovered.png"
+                icon="/delete.png"
+                title="Hapus"
+                danger
+                onClick={() => {
+                  setFormError("");
+                  setIsDeleteOpen(true);
+                }}
+              />
+            </>
+          )}
         </MenuItems>
       </Menu>
 
@@ -191,8 +205,8 @@ export default function AnnouncementCard({
               </label>
               <Listbox value={type} onChange={setType}>
                 <ListboxButton className="flex h-[46px] w-full flex-row items-center justify-between rounded-2xl bg-[#F5F5F5] px-5 text-left font-semibold text-[#1D1D1D]">
-                  {typeOptions.find((option) => option.value === type)?.title ??
-                    "Pengumuman"}
+                  {ANNOUNCEMENT_TYPES.find((option) => option.value === type)
+                    ?.title ?? "Pengumuman"}
                   <Image
                     src={"/down.png"}
                     alt="chevron down"
@@ -201,7 +215,7 @@ export default function AnnouncementCard({
                   />
                 </ListboxButton>
                 <ListboxOptions className="mt-1 w-[var(--button-width)] rounded-2xl bg-[#F5F5F5] p-2">
-                  {typeOptions.map((option) => (
+                  {ANNOUNCEMENT_TYPES.map((option) => (
                     <ListboxOption
                       key={option.value}
                       value={option.value}
@@ -222,7 +236,7 @@ export default function AnnouncementCard({
                 </span>
               </label>
               <textarea
-                className="h-[140px] w-full resize-none rounded-2xl bg-[#F5F5F5] p-5 focus:outline-[#3272CA]"
+                className="h-[220px] w-full resize-none rounded-2xl bg-[#F5F5F5] p-5 focus:outline-[#3272CA]"
                 maxLength={MAX_BODY_LENGTH}
                 value={body}
                 onChange={(e) => {

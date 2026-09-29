@@ -3,7 +3,7 @@
 import AnnouncementCard from "@/app/components/pengumuman/announcement-card";
 import { IGetAllAnnouncementsResponseBody } from "@/app/interfaces/announcement/announcement.interface";
 import useAnnouncementStore from "@/app/store/useAnnouncementStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 import FeedbackBox from "@/app/components/feedback-box";
 
@@ -12,12 +12,12 @@ const ListPengumuman = () => {
     announcementsData,
     getAllAnnouncements,
     refreshAllAnnouncements,
-    isLoading,
     loadError,
   } = useAnnouncementStore();
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    getAllAnnouncements();
+    getAllAnnouncements().then(() => setIsLoaded(true));
   }, [getAllAnnouncements]);
 
   useRealtimeEvents(({ type }) => {
@@ -35,7 +35,10 @@ const ListPengumuman = () => {
         <FeedbackBox
           feedback={loadError ? { ok: false, message: loadError } : null}
         />
-        {!isLoading && !loadError && announcementsData?.length === 0 && (
+        {!isLoaded && !loadError && announcementsData.length === 0 && (
+          <p>Loading...</p>
+        )}
+        {isLoaded && !loadError && announcementsData.length === 0 && (
           <div className="rounded-2xl bg-white p-8 text-center text-base font-semibold text-[#5E6278]">
             Belum ada pengumuman.
           </div>

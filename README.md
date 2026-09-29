@@ -263,6 +263,30 @@ server mati atau sibuk semua halaman terlempar ke Dashboard tanpa pesan.
     yang dapat membuat pengumuman." (menu Pengumuman memang hanya ada untuk
     laboran).
   - Kotak form kini setinggi isinya, tidak lagi setinggi layar.
+- Deskripsi pengumuman kini maksimal **1000 karakter** (dulu 200), sama
+  dengan server, di Buat Pengumuman maupun dialog Edit. Kartu di List
+  Pengumuman hanya menampilkan 3 baris pertama diakhiri "…" dan tingginya
+  mengikuti isi. Isi lengkap ada di Lihat Detail. Baris baru yang diketik
+  laboran kini tetap tampil sebagai paragraf terpisah di daftar dan detail
+  (dulu semua teks menyatu).
+- List dan Detail Pengumuman (30 September 2026):
+  - Setiap pengumuman menampilkan label jenisnya (Pendaftaran Praktikum
+    berwarna biru), jadi laboran bisa memastikan pengumuman mana yang membuka
+    pendaftaran di HP. Nama jenis dan format tanggal ada di
+    `app/utils/announcement.ts`, dipakai bersama form Buat, dialog Edit,
+    kartu, dan Detail.
+  - Tanggal ditulis "30 September 2026 pukul 06.07" dalam jam lokal. Detail
+    dulu menampilkan teks mentah UTC (`2026-09-29T23:07:08.387Z`), sehingga
+    pengumuman yang dibuat sebelum pukul 07.00 WIB tampak sehari lebih awal.
+  - Detail kini juga menampilkan jenis dan penulis ("Dibuat oleh").
+  - Edit dan Hapus di menu ⋮ hanya untuk laboran; peran lain yang membuka
+    alamatnya langsung hanya melihat Lihat Detail.
+  - Simpan Perubahan tanpa perubahan dijawab "Tidak ada perubahan yang perlu
+    disimpan." tanpa mengirim apa pun. Dulu tetap dikirim dan semua HP
+    menerima kabar "pengumuman diubah".
+  - Saat memuat, List dan Detail menampilkan "Loading...". Dulu List sempat
+    kosong dan Detail menampilkan label tanpa isi, atau sesaat menampilkan
+    pengumuman yang dibuka sebelumnya.
 - Scrollbar disembunyikan di seluruh aplikasi lewat `globals.css`
 - Daftar pertemuan langsung muncul setelah ditambah (store memanggil
   `getMeetings` ulang)
@@ -680,7 +704,7 @@ node tests/login.mjs        # satu tes saja
 | `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
 | `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang | 29 |
 | `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |
-| `pengumuman` | Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Hapus, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 200 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, dosen melihat pesan hanya laboran. Permintaan simpan dicegat, jadi tidak ada pengumuman asli yang terkirim | 24 |
+| `pengumuman` | List dan Detail: Loading... saat memuat, label jenis, tanggal jam lokal beserta penulis, Edit tanpa perubahan tidak mengirim apa pun, dosen tanpa menu Edit/Hapus. Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Hapus, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 1000 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, pengumuman panjang dipotong 3 baris di daftar dan tampil utuh dengan paragraf terpisah di detail, dosen melihat pesan hanya laboran. Permintaan simpan dan ubah dicegat, jadi tidak ada pengumuman asli yang terkirim | 34 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|

@@ -1,19 +1,7 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import Image from "next/image";
-import {
-  AnnouncementType,
-  AnnouncementTypeEnum,
-} from "@/app/interfaces/announcement/announcement.interface";
-
-const announcementTypeList: AnnouncementType[] = [
-  { title: "Pengumuman", value: AnnouncementTypeEnum.BASIC },
-  { title: "Pendaftaran Praktikum", value: AnnouncementTypeEnum.PRACTICUM },
-  { title: "Pendaftaran Inhal", value: AnnouncementTypeEnum.INHALL },
-  {
-    title: "Pendaftaran Asisten Praktikum",
-    value: AnnouncementTypeEnum.ASSISTANT,
-  },
-];
+import { AnnouncementTypeEnum } from "@/app/interfaces/announcement/announcement.interface";
+import { ANNOUNCEMENT_TYPES } from "@/app/utils/announcement";
 
 interface AnnouncementTypeDropdownProps {
   value: AnnouncementTypeEnum;
@@ -24,7 +12,7 @@ export default function AnnouncementTypeDropdown({
   value,
   onAnnouncementTypeChange,
 }: AnnouncementTypeDropdownProps) {
-  const selected = announcementTypeList.find((type) => type.value === value);
+  const selected = ANNOUNCEMENT_TYPES.find((type) => type.value === value);
 
   return (
     <div className="flex h-full w-full flex-col justify-between space-y-3">
@@ -43,7 +31,7 @@ export default function AnnouncementTypeDropdown({
           anchor="bottom"
           className={`w-[var(--button-width)] space-y-3 rounded-lg bg-[#f5f5f5]`}
         >
-          {announcementTypeList.map((announcement) => (
+          {ANNOUNCEMENT_TYPES.map((announcement) => (
             <MenuItem key={announcement.value}>
               <button
                 onClick={() => onAnnouncementTypeChange(announcement.value)}
