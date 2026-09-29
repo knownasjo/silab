@@ -606,8 +606,9 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
 
 - Kotak kuning di atas daftar presensi pertemuan yang dipilih
   (`components/praktikum/device-check-box.tsx`) berisi mahasiswa bertanda
-  `TIDAK_BIASA`, dan barisnya di daftar diberi ⚠. Kotak tidak tampil bila
-  tidak ada yang perlu dicek.
+  `TIDAK_BIASA`, dan barisnya di daftar diberi ikon peringatan kuning
+  (`public/warning-yellow.png`, di mockup di atas ditulis ⚠). Kotak tidak
+  tampil bila tidak ada yang perlu dicek.
 - **Ada**: mahasiswa tetap hadir, dan HP itu menjadi HP biasanya yang baru.
   **Tidak ada**: presensinya diubah menjadi Tidak Hadir. Keduanya memanggil
   `PUT /meeting/:id/attendances/:userId/device`, lalu pesan dari server

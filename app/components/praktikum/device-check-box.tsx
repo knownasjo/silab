@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { Feedback } from "../feedback-box";
 import { IMeetingParticipants } from "@/app/interfaces/meeting/meeting.interface";
@@ -44,12 +45,15 @@ export default function DeviceCheckBox({
       aria-label="HP tidak biasa"
       className="space-y-3 rounded-xl bg-[#FFF8DD] p-4"
     >
-      <p className="text-sm font-semibold text-[#B58100]">
-        ⚠ {flagged.length} mahasiswa presensi dari HP yang tidak biasa.{" "}
-        {canManage
-          ? "Panggil namanya, lalu pilih Ada atau Tidak ada."
-          : "Menunggu dicek asisten."}
-      </p>
+      <div className="flex flex-row items-center space-x-2">
+        <Image src={"/warning-yellow.png"} alt="" width={20} height={20} />
+        <p className="text-sm font-semibold text-[#B58100]">
+          {flagged.length} mahasiswa presensi dari HP yang tidak biasa.{" "}
+          {canManage
+            ? "Panggil namanya, lalu pilih Ada atau Tidak ada."
+            : "Menunggu dicek asisten."}
+        </p>
+      </div>
       {flagged.map((student) => (
         <div
           key={student.student_id}

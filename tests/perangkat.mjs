@@ -13,7 +13,7 @@ const data = new TestData("58");
 const BOX = `document.querySelector('section[aria-label="HP tidak biasa"]')`;
 const boxHas = (text) =>
   `!!${BOX}?.innerText.includes(${JSON.stringify(text)})`;
-const marks = `document.querySelectorAll('span[aria-label="HP tidak biasa"]').length`;
+const marks = `document.querySelectorAll('img[alt="HP tidak biasa"]').length`;
 const button = (label) =>
   `document.querySelector('button[aria-label=${JSON.stringify(label)}]')`;
 const newDeviceId = () => randomBytes(32).toString("hex");

@@ -183,21 +183,24 @@ export default function ClassMeetingsContent({
                   <p className="flex w-5/12 items-center justify-center">
                     {student.student_name}
                   </p>
-                  <div className="flex w-3/12 items-center justify-center space-x-2">
-                    <p
-                      className={`rounded-md p-2 text-sm font-semibold ${statusStyle[status]}`}
-                    >
-                      {status}
-                    </p>
-                    {student.device_check === "TIDAK_BIASA" && (
-                      <span
-                        title="HP tidak biasa, belum dicek"
-                        aria-label="HP tidak biasa"
-                        className="text-[#B58100]"
+                  <div className="flex w-3/12 items-center justify-center">
+                    <div className="relative">
+                      <p
+                        className={`rounded-md p-2 text-sm font-semibold ${statusStyle[status]}`}
                       >
-                        ⚠
-                      </span>
-                    )}
+                        {status}
+                      </p>
+                      {student.device_check === "TIDAK_BIASA" && (
+                        <Image
+                          src={"/warning-yellow.png"}
+                          alt="HP tidak biasa"
+                          title="HP tidak biasa, belum dicek"
+                          width={20}
+                          height={20}
+                          className="absolute left-full top-1/2 ml-2 -translate-y-1/2"
+                        />
+                      )}
+                    </div>
                   </div>
                   {classId && canManage && (
                     <StudentAttendanceEditButton
