@@ -17,7 +17,7 @@ const TITLE = 'input[placeholder="Judul pengumuman"]';
 const BODY = 'textarea[placeholder="Deskripsi pengumuman"]';
 const TYPE_BUTTON = `document.querySelector("button[aria-haspopup]")`;
 const ALL = "Semua mahasiswa";
-const SOME = "Mahasiswa mata kuliah tertentu";
+const SOME = "Mata kuliah tertentu";
 const REGISTRATION_NOTE =
   "Semua mahasiswa. Pengumuman pendaftaran selalu untuk semua mahasiswa.";
 
@@ -63,6 +63,7 @@ await runWebTest(
         8000,
       );
       await clickText("Tutup");
+      await waitFor(`!${bodyHas("Pengumuman berhasil diterbitkan")}`, 3000);
       await sleep(300);
       return shown;
     };
@@ -88,7 +89,7 @@ await runWebTest(
     await pickType("Pengumuman");
 
     section("Untuk mata kuliah tertentu");
-    await realClick(radio(SOME));
+    await realClick(`(${radio(SOME)}).closest("label")`);
     check(
       "memilih mata kuliah tertentu memunculkan daftar mata kuliah",
       await waitFor(`!!(${checkbox(X_NAME)}) && !!(${checkbox(Y_NAME)})`, 5000),
@@ -112,7 +113,41 @@ await runWebTest(
       )) && writes.length === 0,
       JSON.stringify(writes),
     );
-    await realClick(checkbox(X_NAME));
+    await realClick(`(${checkbox(X_NAME)}).closest("label")`);
+    await waitFor(
+      `getComputedStyle((${checkbox(X_NAME)}).nextElementSibling).backgroundColor === "rgb(50, 114, 202)"`,
+      2000,
+    );
+    const look = await evaluate(`(() => {
+    const input = ${checkbox(X_NAME)};
+    const picked = ${radio(SOME)};
+    const all = (${radio(ALL)}).closest("label").getBoundingClientRect();
+    const some = picked.closest("label").getBoundingClientRect();
+    const option = getComputedStyle(picked.closest("label"));
+    return {
+      hidden: input.getBoundingClientRect().width <= 1 && picked.getBoundingClientRect().width <= 1,
+      box: getComputedStyle(input.nextElementSibling).backgroundColor,
+      ring: getComputedStyle(picked.nextElementSibling).borderColor,
+      text: option.color,
+      outline: option.borderTopWidth,
+      stacked: some.top >= all.bottom && Math.abs(some.left - all.left) < 2,
+    };
+  })()`);
+    const BLUE = "rgb(50, 114, 202)";
+    check(
+      "  kotak centang dan pilihan bergaya tema (input asli tersembunyi, biru #3272CA, pilihan tanpa garis luar)",
+      look.hidden &&
+        look.box === BLUE &&
+        look.ring === BLUE &&
+        look.text === BLUE &&
+        look.outline === "0px",
+      JSON.stringify(look),
+    );
+    check(
+      "  Semua mahasiswa dan Mata kuliah tertentu tersusun atas-bawah",
+      look.stacked,
+      JSON.stringify(look),
+    );
     check("  centang Algoritma lalu Simpan: berhasil", await save());
     check(
       "  terkirim dengan subjectIds Algoritma saja",
@@ -125,9 +160,9 @@ await runWebTest(
       (await checked(radio(ALL))) && !(await hasChecklist()),
     );
 
-    await realClick(radio(SOME));
+    await realClick(`(${radio(SOME)}).closest("label")`);
     await waitFor(`!!(${checkbox(Y_NAME)})`, 5000);
-    await realClick(checkbox(Y_NAME));
+    await realClick(`(${checkbox(Y_NAME)}).closest("label")`);
     await pickType("Pendaftaran Praktikum");
     await typeInto(TITLE, "Uji Tujuan Pendaftaran");
     await typeInto(BODY, "Pendaftaran praktikum dibuka.");
@@ -197,7 +232,7 @@ await runWebTest(
       )) && writes.length === 2,
       JSON.stringify(writes.slice(2)),
     );
-    await realClick(checkbox(X_NAME));
+    await realClick(`(${checkbox(X_NAME)}).closest("label")`);
     await saveEdit();
     check(
       "  semua centang dilepas: ditolak tanpa mengirim",
@@ -206,7 +241,7 @@ await runWebTest(
         3000,
       )) && writes.length === 2,
     );
-    await realClick(checkbox(Y_NAME));
+    await realClick(`(${checkbox(Y_NAME)}).closest("label")`);
     await saveEdit();
     check(
       "  ganti ke Basis Data: terkirim dan dialog tertutup",
@@ -227,7 +262,7 @@ await runWebTest(
 
     await openEdit("Uji Tujuan Hanya Algoritma");
     await waitFor(`!!(${radio(ALL)})`, 5000);
-    await realClick(radio(ALL));
+    await realClick(`(${radio(ALL)}).closest("label")`);
     await saveEdit();
     check(
       "  diubah ke Semua mahasiswa: terkirim dengan daftar kosong",
