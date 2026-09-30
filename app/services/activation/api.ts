@@ -34,3 +34,9 @@ export const putUpdateStudentClass = async (
 
   return res.data;
 };
+
+export const deleteActivation = async (id: string): Promise<IBaseResponse> => {
+  const res = await satellite.delete(`/activation/${id}`);
+
+  return res.data;
+};

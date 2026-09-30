@@ -12,13 +12,14 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
-import FeedbackBox from "@/app/components/feedback-box";
+import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
 import PeriodSelector from "@/app/components/period/period-selector";
 import ArchiveNotice from "@/app/components/period/archive-notice";
 import { usePeriodView } from "@/app/store/usePeriodStore";
 
 export default function Pembayaran() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Feedback>(null);
 
   const {
     activationData,
@@ -34,6 +35,7 @@ export default function Pembayaran() {
   const { viewedPeriod, viewedPeriodId, isArchive } = usePeriodView();
 
   useEffect(() => {
+    setFeedback(null);
     setPeriodQuery(viewedPeriodId);
     getAllActivations();
   }, [getAllActivations, setPeriodQuery, viewedPeriodId]);
@@ -80,7 +82,7 @@ export default function Pembayaran() {
       <PeriodSelector />
       {isArchive && viewedPeriod && <ArchiveNotice name={viewedPeriod.name} />}
       <FeedbackBox
-        feedback={loadError ? { ok: false, message: loadError } : null}
+        feedback={loadError ? { ok: false, message: loadError } : feedback}
       />
       <div className="flex h-fit w-full flex-row space-x-9">
         <div className="flex h-[200px] w-[300px] flex-col justify-between rounded-3xl bg-[#3272CA] p-5">
@@ -162,7 +164,10 @@ export default function Pembayaran() {
             return (
               <div
                 key={student.user_id}
-                onClick={() => setSelectedUserId(student.user_id)}
+                onClick={() => {
+                  setFeedback(null);
+                  setSelectedUserId(student.user_id);
+                }}
                 className="flex cursor-pointer flex-row items-center rounded-xl py-2 text-sm font-semibold text-[#5E6278] hover:bg-[#F5F8FA]"
               >
                 <p className="flex w-2/12 justify-center">{student.nim}</p>
@@ -193,6 +198,10 @@ export default function Pembayaran() {
         student={selectedStudent}
         readOnly={isArchive}
         onClose={() => setSelectedUserId(null)}
+        onDeletedLast={(message) => {
+          setSelectedUserId(null);
+          setFeedback({ ok: true, message });
+        }}
       />
     </div>
   );

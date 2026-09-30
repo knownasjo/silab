@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { IGetActivationResponseBody } from "../interfaces/activation/activation.interface";
 import {
+  deleteActivation,
   getAllActivation,
   putUpdatePaymentStatus,
   putUpdateStudentClass,
@@ -25,6 +26,7 @@ type ActivationActions = {
     classId?: string,
   ) => Promise<void>;
   updateStudentClass: (id: string, classId: string) => Promise<void>;
+  removeActivation: (id: string) => Promise<void>;
   setStatusQuery: (query: string | undefined) => void;
   setNameQuery: (query: string) => void;
   setPeriodQuery: (periodId?: string) => void;
@@ -118,6 +120,25 @@ const useActivationStore = create<ActivationState & ActivationActions>(
 
       try {
         const res = await putUpdateStudentClass(id, classId);
+
+        if (res.status) {
+          set({ message: res.message });
+          await get().getAllActivations();
+        } else {
+          set({ error: res.message });
+        }
+      } catch (error: any) {
+        set({ error: error?.message ?? "Terjadi kesalahan" });
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
+    removeActivation: async (id) => {
+      set({ isLoading: true, error: null, message: null });
+
+      try {
+        const res = await deleteActivation(id);
 
         if (res.status) {
           set({ message: res.message });

@@ -21,11 +21,12 @@ await runWebTest("Halaman Pembayaran", data, async (browser) => {
   const rpl = await data.subject("Uji Bayar RPL");
   const imk = await data.subject("Uji Bayar IMK");
   const alproA = await data.classOf(alpro, "A", "MONDAY", 1);
-  await data.classOf(alpro, "B", "MONDAY", 2);
+  const alproB = await data.classOf(alpro, "B", "MONDAY", 2);
   await data.classOf(rpl, "A", "TUESDAY", 1);
   const one = await data.student("Uji Bayar Satu");
   const two = await data.student("Uji Batal Satu");
   const three = await data.student("Uji Batal Dua");
+  const legacy = await data.student("Uji Hapus Lama");
   await data.activate(one, alpro, true);
   await data.enroll(one, alproA);
   const oneRpl = await data.activate(one, rpl, true);
@@ -36,15 +37,18 @@ await runWebTest("Halaman Pembayaran", data, async (browser) => {
   }
   const meeting = await data.meeting(alproA, "Pertemuan 1");
   await data.attend(meeting, three, true);
+  const legacyAlpro = await data.activate(legacy, alpro, false);
+  await data.enroll(legacy, alproB);
 
   const writes = [];
   await browser.intercept((request) => {
     if (
-      ["POST", "PUT"].includes(request.method) &&
+      ["POST", "PUT", "DELETE"].includes(request.method) &&
       request.url.includes("/activation/")
     )
       writes.push({
         url: request.url,
+        method: request.method,
         body: JSON.parse(request.postData ?? "{}"),
       });
   });
@@ -314,6 +318,142 @@ await runWebTest("Halaman Pembayaran", data, async (browser) => {
     (await db.trn_class_participants.count({
       where: { userId: three.id, classId: alproA.id },
     })) === 1,
+  );
+  await backToList();
+  await closeStudent();
+
+  section("Hapus pendaftaran yang belum bayar");
+  writes.length = 0;
+  const deleteButtons = () =>
+    evaluate(
+      `[...document.querySelectorAll('[role="dialog"] button[aria-label^="Hapus "]')].map((b) => b.getAttribute("aria-label"))`,
+    );
+  const exists = async (activation) =>
+    (await db.trn_activations.count({ where: { id: activation.id } })) === 1;
+  check("dialog Uji Bayar Satu terbuka", await openStudent("Uji Bayar Satu"));
+  const buttons = await deleteButtons();
+  check(
+    "  tombol Hapus hanya di mata kuliah yang belum bayar (RPL)",
+    JSON.stringify(buttons) === JSON.stringify(["Hapus Uji Bayar RPL"]),
+    JSON.stringify(buttons),
+  );
+  const layout =
+    await evaluate(`(() => [...document.querySelectorAll('[role="dialog"] button[aria-label^="Ubah "]')].map((ubah) => {
+    const row = ubah.closest(".rounded-2xl");
+    const box = row.getBoundingClientRect();
+    const status = [...row.querySelectorAll("p")].find((p) => ["Sudah Bayar", "Belum Bayar"].includes(p.innerText.trim())).getBoundingClientRect();
+    const buttons = [...row.querySelectorAll("button")].map((b) => b.getBoundingClientRect());
+    return {
+      ubahLeft: Math.round(buttons[0].left),
+      gapToStatus: Math.round(buttons[0].left - status.right),
+      inside: buttons.every((b) => b.left >= box.left && b.right <= box.right),
+      noOverlap: buttons.every((b, i) => i === 0 || b.left >= buttons[i - 1].right),
+    };
+  }))()`);
+  check(
+    "  tombol tidak menimpa kotak status maupun satu sama lain, dan muat di barisnya",
+    layout.length === 3 &&
+      layout.every((r) => r.gapToStatus >= 8 && r.inside && r.noOverlap),
+    JSON.stringify(layout),
+  );
+  check(
+    "  tombol Ubah sejajar di semua baris",
+    new Set(layout.map((r) => r.ubahLeft)).size === 1,
+    JSON.stringify(layout),
+  );
+  await realClick(
+    `document.querySelector('[aria-label="Hapus Uji Bayar RPL"]')`,
+  );
+  check(
+    "  konfirmasi hapus tampil",
+    await waitFor(bodyHas("Hapus pendaftaran Uji Bayar RPL?"), 5000),
+  );
+  await clickText("Batal");
+  check(
+    "  Batal kembali ke daftar tanpa menghapus",
+    (await waitFor(bodyHas("Status Pembayaran Mahasiswa"), 5000)) &&
+      writes.length === 0 &&
+      (await exists(oneRpl)),
+    JSON.stringify(writes),
+  );
+  await realClick(
+    `document.querySelector('[aria-label="Hapus Uji Bayar RPL"]')`,
+  );
+  await waitFor(bodyHas("Hapus pendaftaran Uji Bayar RPL?"), 5000);
+  await clickText("Ya, hapus");
+  check(
+    "  Ya, hapus: pesan berhasil di dialog",
+    await waitFor(
+      `${bodyHas("Pendaftaran Uji Bayar RPL milik Uji Bayar Satu dihapus.")} && ${bodyHas("Status Pembayaran Mahasiswa")}`,
+      8000,
+    ),
+  );
+  check(
+    "  satu permintaan DELETE untuk pendaftaran RPL",
+    writes.length === 1 &&
+      writes[0].method === "DELETE" &&
+      writes[0].url.endsWith(`/activation/${oneRpl.id}`),
+    JSON.stringify(writes),
+  );
+  check(
+    "  baris RPL hilang, mata kuliah lain tetap",
+    (await waitFor(`!${row("Uji Bayar RPL")}`, 5000)) &&
+      (await evaluate(
+        `!!${row("Uji Bayar Alpro")} && !!${row("Uji Bayar IMK")}`,
+      )),
+  );
+  check("  terhapus dari database", !(await exists(oneRpl)));
+  writes.length = 0;
+  await closeStudent();
+
+  check("dialog Uji Hapus Lama terbuka", await openStudent("Uji Hapus Lama"));
+  await realClick(
+    `document.querySelector('[aria-label="Hapus Uji Bayar Alpro"]')`,
+  );
+  await waitFor(bodyHas("Hapus pendaftaran Uji Bayar Alpro?"), 5000);
+  await clickText("Ya, hapus");
+  check(
+    "belum bayar tapi masih punya kelas: pesan server tampil di konfirmasi",
+    await waitFor(
+      bodyHas("Pendaftaran ini masih punya kelas B, jadi tidak bisa dihapus."),
+      8000,
+    ),
+  );
+  check(
+    "  konfirmasi tetap terbuka, pendaftaran tetap ada",
+    (await evaluate(bodyHas("Hapus pendaftaran Uji Bayar Alpro?"))) &&
+      (await exists(legacyAlpro)),
+  );
+  await clickText("Batal");
+  await closeStudent();
+  writes.length = 0;
+
+  check("dialog Uji Batal Satu terbuka", await openStudent("Uji Batal Satu"));
+  await realClick(
+    `document.querySelector('[aria-label="Hapus Uji Bayar Alpro"]')`,
+  );
+  await waitFor(bodyHas("Hapus pendaftaran Uji Bayar Alpro?"), 5000);
+  await clickText("Ya, hapus");
+  check(
+    "pendaftaran terakhir dihapus: dialog tertutup, pesan tampil di halaman",
+    await waitFor(
+      `!${bodyHas("Status Pembayaran Mahasiswa")} && !${bodyHas("Hapus pendaftaran")} && !!document.querySelector('[role="status"]')?.innerText.includes("Pendaftaran Uji Bayar Alpro milik Uji Batal Satu dihapus.")`,
+      8000,
+    ),
+  );
+  check(
+    "  mahasiswa itu hilang dari daftar pembayaran",
+    await waitFor(
+      `!document.querySelector('[aria-label="Lihat pembayaran Uji Batal Satu"]')`,
+      5000,
+    ),
+  );
+  check(
+    "  pesan hilang saat membuka mahasiswa lain",
+    (await openStudent("Uji Bayar Satu")) &&
+      !(await evaluate(
+        `!!document.querySelector('[role="status"]')?.innerText.includes("milik Uji Batal Satu")`,
+      )),
   );
   check(
     "halaman tanpa error JavaScript",

@@ -136,7 +136,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah (hanya LABORAN), lihat "Ubah Mata Kuliah" |
 | `/dashboard/master-data/jam-sesi` | Jam sesi Senin–Kamis dan Jumat: tambah, ubah jam, nonaktifkan, hapus, dan daftar kelas di tiap sesi (hanya LABORAN) |
-| `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up. Ada pilihan periode; periode lama hanya bisa dilihat |
+| `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up, dan hapus pendaftaran yang belum bayar. Ada pilihan periode; periode lama hanya bisa dilihat |
 | `/dashboard/master-data/periode` | Periode akademik: periode aktif, Mulai Semester Baru, dan daftar periode (hanya LABORAN), lihat "Periode Akademik" |
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman |
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman |
@@ -250,6 +250,19 @@ server mati atau sibuk semua halaman terlempar ke Dashboard tanpa pesan.
   dengan jumlah presensinya bila sudah ada presensi. Memilih atau mengganti
   kelas sambil Belum Bayar ditolak di browser ("Geser tombol ke Sudah Bayar
   untuk memilih kelas.") tanpa mengirim permintaan
+- Hapus pendaftaran (30 September 2026): mata kuliah berstatus Belum Bayar di
+  pop-up mahasiswa punya tombol **Hapus** di sebelah Ubah. Baris pop-up memakai
+  grid berlebar tetap (status 120 px, tombol 148 px), jadi tombol tidak
+  menimpa kotak status dan Ubah sejajar di semua baris. Tombol itu membuka
+  konfirmasi "Hapus pendaftaran X?" (Batal / Ya, hapus) yang menyebut bahwa
+  mahasiswa bisa mendaftar lagi dari aplikasi. Setelah berhasil, pesan
+  "Pendaftaran X milik Y dihapus." tampil di pop-up. Bila itu pendaftaran
+  terakhir mahasiswa tersebut, pop-up tertutup, pesannya pindah ke atas
+  halaman, dan mahasiswa itu hilang dari daftar.
+  Penolakan server, misalnya pendaftaran lama yang masih punya kelas, tampil
+  merah di konfirmasi. Mata kuliah yang sudah lunas harus digeser ke Belum
+  Bayar dulu. Aturannya di README backend, bagian "Batal pendaftaran mata
+  kuliah"
 - Kartu dashboard: fungsi store yang tertukar diperbaiki, endpoint kembar
   dipisah dengan `?status=true/false`
 - Pengumuman: validasi judul/deskripsi, Lihat Detail, Edit, dan Hapus
@@ -588,7 +601,7 @@ periode, misalnya "2026/2027 Ganjil". Aturannya ada di README backend bagian
   tombol yang mengubah data:
   - Praktikum: banner Tambah Praktikum dan tombol ubah mata kuliah; hanya
     mata kuliah yang punya kelas di periode itu yang ditampilkan.
-  - Pembayaran: tombol Ubah di pop-up mahasiswa.
+  - Pembayaran: tombol Ubah dan Hapus di pop-up mahasiswa.
   - Detail kelas (dibaca dari `period.is_active` di `GET /class/:id`, jadi
     berlaku juga bila dibuka lewat tautan langsung): Ubah Kelas, Hapus Kelas,
     kelola asisten, tambah/ubah/hapus pertemuan, buka sesi, QR, dan ubah
@@ -729,9 +742,9 @@ node tests/login.mjs        # satu tes saja
 | `login` | pesan saat server tidak terjangkau, balasan error tanpa pesan, password salah, dan login benar | 9 |
 | `sesi-pulih` | token kedaluwarsa diperbarui diam-diam, server mati memunculkan pemberitahuan tanpa melempar ke login, halaman pulih sendiri saat server hidup, tombol Coba lagi, token rusak kembali ke login dan cookie dihapus | 15 |
 | `server-mati` | 13 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 29 |
-| `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi | 50 |
+| `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi. Hapus pendaftaran: tombol hanya di mata kuliah Belum Bayar, tidak menimpa kotak status, dan Ubah sejajar di semua baris, Batal tidak menghapus, Ya, hapus mengirim satu DELETE, penolakan server tampil di konfirmasi, pendaftaran terakhir menutup pop-up dengan pesan di halaman | 67 |
 | `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
-| `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus) | 32 |
+| `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah dan hapus tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus) | 32 |
 | `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |
 | `pengumuman` | List dan Detail: Loading... saat memuat, label jenis, tanggal jam lokal beserta penulis, Edit tanpa perubahan tidak mengirim apa pun, dosen tanpa menu Edit/Hapus. Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Hapus, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 1000 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, pengumuman panjang dipotong 3 baris di daftar dan tampil utuh dengan paragraf terpisah di detail, dosen melihat pesan hanya laboran. Permintaan simpan dan ubah dicegat, jadi tidak ada pengumuman asli yang terkirim | 34 |
 | `info-kelas` | kotak informasi di detail kelas pada layar 1440 dan 1280 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 14 |

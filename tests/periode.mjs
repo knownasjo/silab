@@ -44,6 +44,10 @@ await runWebTest("Periode akademik di web", data, async (browser) => {
   const student = await data.student("Uji Periode Mahasiswa");
   await data.activate(student, subject, true);
   await data.enroll(student, cls);
+  const unpaidSubject = await data.subject("Uji Periode Belum Bayar", {
+    semester: "8",
+  });
+  await data.activate(student, unpaidSubject, false);
   const meeting = await data.meeting(cls, "Pertemuan 1");
   await data.attend(meeting, student, true);
   const activeName = async () =>
@@ -228,10 +232,13 @@ await runWebTest("Periode akademik di web", data, async (browser) => {
   );
   await realClick(studentRow);
   check(
-    "  dialog terbuka tanpa tombol Ubah",
-    (await waitFor(bodyHas("Status Pembayaran Mahasiswa"), 5000)) &&
+    "  dialog terbuka tanpa tombol Ubah dan Hapus",
+    (await waitFor(
+      `${bodyHas("Status Pembayaran Mahasiswa")} && ${bodyHas("Uji Periode Belum Bayar")}`,
+      5000,
+    )) &&
       !(await evaluate(
-        `!!document.querySelector('[aria-label="Ubah Uji Periode Web"]')`,
+        `!!document.querySelector('[aria-label="Ubah Uji Periode Web"], [aria-label="Hapus Uji Periode Belum Bayar"]')`,
       )),
   );
   await clickText("Tutup");

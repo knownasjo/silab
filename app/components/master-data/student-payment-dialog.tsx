@@ -21,19 +21,24 @@ import Image from "next/image";
 import { useState } from "react";
 
 const NEED_PAID_FOR_CLASS = "Geser tombol ke Sudah Bayar untuk memilih kelas.";
+const ROW_GRID =
+  "grid grid-cols-[minmax(0,1fr)_48px_120px_148px] items-center gap-x-3";
 
 interface StudentPaymentDialogProps {
   student?: IStudentActivations;
   readOnly?: boolean;
   onClose: () => void;
+  onDeletedLast: (message: string) => void;
 }
 
 export default function StudentPaymentDialog({
   student,
   readOnly = false,
   onClose,
+  onDeletedLast,
 }: StudentPaymentDialogProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<boolean>(false);
   const [selectedClass, setSelectedClass] = useState<IAvailableClass | null>(
     null,
@@ -41,11 +46,19 @@ export default function StudentPaymentDialog({
   const [dialogError, setDialogError] = useState<string>("");
   const [notice, setNotice] = useState<string>("");
 
-  const { updatePaymentStatus, updateStudentClass, isLoading } =
-    useActivationStore();
+  const {
+    updatePaymentStatus,
+    updateStudentClass,
+    removeActivation,
+    isLoading,
+  } = useActivationStore();
 
   const editing = student?.activations.find(
     (activation) => activation.id === editingId,
+  );
+
+  const deleting = student?.activations.find(
+    (activation) => activation.id === deletingId,
   );
 
   const openEdit = (activation: IGetActivationResponseBody) => {
@@ -60,6 +73,30 @@ export default function StudentPaymentDialog({
     setDialogError("");
     setNotice("");
     setEditingId(activation.id);
+  };
+
+  const openDelete = (activation: IGetActivationResponseBody) => {
+    setDialogError("");
+    setNotice("");
+    setDeletingId(activation.id);
+  };
+
+  const handleDelete = async () => {
+    if (!student || !deleting) return;
+
+    const isLast = student.activations.length === 1;
+
+    await removeActivation(deleting.id);
+
+    const { error, message: storeMessage } = useActivationStore.getState();
+
+    if (error) return fail(error);
+
+    setDeletingId(null);
+
+    if (isLast) return onDeletedLast(storeMessage ?? "Berhasil");
+
+    setNotice(storeMessage ?? "Berhasil");
   };
 
   const finish = (successMessage: string) => {
@@ -142,9 +179,9 @@ export default function StudentPaymentDialog({
       <DialogBackdrop className="fixed inset-0 bg-black/30" />
       <div className="fixed inset-0 flex h-full w-screen items-center justify-center p-4">
         <DialogPanel
-          className={`flex max-h-[85vh] flex-col space-y-4 overflow-y-auto rounded-2xl bg-white p-10 ${editing ? "w-[500px]" : "w-[680px]"}`}
+          className={`flex max-h-[85vh] flex-col space-y-4 overflow-y-auto rounded-2xl bg-white p-10 ${editing || deleting ? "w-[500px]" : "w-[680px]"}`}
         >
-          {student && !editing && (
+          {student && !editing && !deleting && (
             <>
               <DialogTitle className="font-bold text-[#1d1d1d]">
                 Status Pembayaran Mahasiswa
@@ -183,20 +220,20 @@ export default function StudentPaymentDialog({
                   </p>
                 )}
                 <div className="flex flex-col space-y-3">
-                  <div className="flex flex-row px-4 text-xs font-bold text-[#5E6278]">
-                    <p className="w-5/12">Mata Kuliah</p>
-                    <p className="flex w-2/12 justify-center">Kelas</p>
-                    <p className="flex w-3/12 justify-center">
-                      Status Pembayaran
-                    </p>
-                    <p className="w-2/12"></p>
+                  <div
+                    className={`${ROW_GRID} px-[18px] text-xs font-bold text-[#5E6278]`}
+                  >
+                    <p>Mata Kuliah</p>
+                    <p className="text-center">Kelas</p>
+                    <p className="text-center">Status Pembayaran</p>
+                    <p></p>
                   </div>
                   {student.activations.map((activation) => (
                     <div
                       key={activation.id}
-                      className="flex flex-row items-center rounded-2xl border-2 border-[#F1F1F2] px-4 py-3 text-sm font-semibold text-[#5E6278]"
+                      className={`${ROW_GRID} rounded-2xl border-2 border-[#F1F1F2] px-4 py-3 text-sm font-semibold text-[#5E6278]`}
                     >
-                      <div className="flex w-5/12 flex-col">
+                      <div className="flex min-w-0 flex-col break-words">
                         <p className="font-bold text-[#1D1D1D]">
                           {activationSubjectName(activation)}
                         </p>
@@ -206,17 +243,17 @@ export default function StudentPaymentDialog({
                           </p>
                         )}
                       </div>
-                      <p className="flex w-2/12 justify-center">
+                      <p className="text-center">
                         {activation.registered_class
                           ? activation.registered_class.name
                           : "-"}
                       </p>
                       <p
-                        className={`flex h-fit w-3/12 justify-center rounded-md p-2 ${activation.status ? "bg-[#E8FFF3] text-[#50CD89]" : "bg-[#F1F1F2]"}`}
+                        className={`rounded-md p-2 text-center ${activation.status ? "bg-[#E8FFF3] text-[#50CD89]" : "bg-[#F1F1F2]"}`}
                       >
                         {activation.status ? "Sudah Bayar" : "Belum Bayar"}
                       </p>
-                      <div className="flex w-2/12 justify-end">
+                      <div className="flex flex-row space-x-2">
                         {!readOnly && (
                           <button
                             onClick={() => openEdit(activation)}
@@ -224,6 +261,15 @@ export default function StudentPaymentDialog({
                             className="h-fit w-fit rounded-full border-2 border-[#BFD9EF] px-4 py-2 text-xs font-semibold text-[#3272CA]"
                           >
                             Ubah
+                          </button>
+                        )}
+                        {!readOnly && !activation.status && (
+                          <button
+                            onClick={() => openDelete(activation)}
+                            aria-label={`Hapus ${activationSubjectName(activation)}`}
+                            className="h-fit w-fit rounded-full border-2 border-[#FFD9D9] bg-[#FFD9D9] px-4 py-2 text-xs font-semibold text-[#FE2F60]"
+                          >
+                            Hapus
                           </button>
                         )}
                       </div>
@@ -237,6 +283,48 @@ export default function StudentPaymentDialog({
               >
                 Tutup
               </button>
+            </>
+          )}
+          {student && deleting && !editing && (
+            <>
+              <DialogTitle className="font-bold text-[#1d1d1d]">
+                Hapus pendaftaran {activationSubjectName(deleting)}?
+              </DialogTitle>
+              <div className="flex flex-col space-y-2 text-sm font-semibold">
+                <p className="text-[#1D1D1D]">
+                  {student.student} ({student.nim}) belum membayar mata kuliah
+                  ini. Setelah dihapus, mahasiswa bisa mendaftar lagi dari
+                  aplikasi.
+                </p>
+                <p className="text-[#F1416C]">
+                  Penghapusan tidak bisa dibatalkan.
+                </p>
+              </div>
+              {dialogError && (
+                <p
+                  role="alert"
+                  className="rounded-xl bg-[#FFF5F8] p-3 text-sm font-semibold text-[#F1416C]"
+                >
+                  {dialogError}
+                </p>
+              )}
+              <div className="flex w-full flex-row justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setDeletingId(null)}
+                  className="rounded-full border-2 border-[#F1F1F2] px-[16px] py-[8px] text-[16px] font-semibold text-[#5E6278]"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isLoading}
+                  className="rounded-full bg-[#F1416C] px-[16px] py-[8px] text-[16px] font-semibold text-white disabled:opacity-60"
+                >
+                  {isLoading ? "Menghapus..." : "Ya, hapus"}
+                </button>
+              </div>
             </>
           )}
           {student && editing && (
