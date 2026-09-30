@@ -82,11 +82,13 @@ export default function Profile() {
       ? "Password lama wajib diisi."
       : password.length < 8
         ? "Password baru minimal 8 karakter."
-        : password === oldPassword
-          ? "Password baru harus berbeda dari password lama."
-          : password !== confirmPassword
-            ? "Konfirmasi password tidak sama."
-            : null;
+        : /\s/.test(password)
+          ? "Password baru tidak boleh mengandung spasi."
+          : password === oldPassword
+            ? "Password baru harus berbeda dari password lama."
+            : password !== confirmPassword
+              ? "Konfirmasi password tidak sama."
+              : null;
 
     if (problem) {
       setPasswordFeedback({ ok: false, message: problem });

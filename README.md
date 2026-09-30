@@ -154,8 +154,10 @@ mahasiswa (termasuk asisten) mengelola akunnya di aplikasi mobile.
   server. NIM/NIY dan email tidak bisa diubah; halaman Profil menulis "NIY"
   untuk dosen dan laboran.
 - **Ganti password**: `PUT /auth/me/password` dengan password lama, password
-  baru (min. 8, harus berbeda), dan konfirmasi. Isian diperiksa dulu di
-  browser. Server membalas token baru yang langsung disimpan ke cookie, jadi
+  baru (min. 8, tanpa spasi, harus berbeda), dan konfirmasi. Isian diperiksa
+  dulu di browser; password baru berspasi di mana pun dibalas "Password baru
+  tidak boleh mengandung spasi." tanpa mengirim apa pun, dan server juga
+  menolaknya (aturan sejak 1 Oktober 2026, lihat README backend). Server membalas token baru yang langsung disimpan ke cookie, jadi
   browser ini tetap masuk, sedangkan browser/HP lain dengan akun yang sama
   kembali ke `/auth` sekitar 1,5 detik kemudian.
 - `GET /auth/me` membalas `name`, bukan `fullname`; `IMeResponseBody` sudah
@@ -800,6 +802,7 @@ node tests/login.mjs        # satu tes saja
 | `pengumuman-matkul` | pilihan Untuk di Buat Pengumuman: bawaan Semua mahasiswa, hilang untuk jenis pendaftaran, daftar mata kuliah dengan kode dan semester, tanpa centang ditolak tanpa mengirim, `subjectIds` yang terkirim dan tersimpan, pendaftaran tetap terkirim untuk semua; kartu dan detail menyebut tujuan beserta semesternya; Edit terisi tujuan lama, tanpa perubahan tidak mengirim, mengganti mata kuliah dan kembali ke Semua mahasiswa; kotak centang dan pilihan bergaya tema (input asli tersembunyi, biru `#3272CA`, pilihan tanpa garis luar) dan tersusun atas-bawah | 28 |
 | `hapus-matkul` | tombol Hapus Mata Kuliah di dialog Ubah (dosen tidak punya), letaknya di kiri dan tidak bertumpuk dengan Batal/Simpan, Batal tidak menghapus, Ya, hapus mengirim satu DELETE lalu kartu hilang dengan pesan hijau, halaman dosen di browser kedua ikut berubah tanpa dimuat ulang, penolakan server untuk mata kuliah yang sudah punya kelas tampil di konfirmasi | 21 |
 | `info-kelas` | kotak informasi di detail kelas pada layar 1440 dan 1280 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 14 |
+| `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|
