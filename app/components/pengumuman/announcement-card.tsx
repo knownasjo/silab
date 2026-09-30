@@ -15,6 +15,7 @@ import {
 } from "@headlessui/react";
 import AnnouncementSettingsDropdownItem from "./announcement-settings-dropdown-item";
 import AnnouncementTypeBadge from "./announcement-type-badge";
+import AnnouncementAudienceField from "./announcement-audience-field";
 import Image from "next/image";
 import { useState } from "react";
 import {
@@ -23,7 +24,21 @@ import {
 } from "@/app/interfaces/announcement/announcement.interface";
 import useAnnouncementStore from "@/app/store/useAnnouncementStore";
 import useAuthStore from "@/app/store/useAuthStore";
-import { ANNOUNCEMENT_TYPES, formatPostedAt } from "@/app/utils/announcement";
+import {
+  ANNOUNCEMENT_TYPES,
+  audienceLabel,
+  formatPostedAt,
+  NEED_TARGET_SUBJECT,
+  targetSubjectIds,
+} from "@/app/utils/announcement";
+
+const audienceOf = (announcement: IGetAllAnnouncementsResponseBody) =>
+  announcement.for_all === false
+    ? announcement.subjects.map((subject) => subject.id)
+    : null;
+
+const sameIds = (a: string[], b: string[]) =>
+  a.length === b.length && a.every((id) => b.includes(id));
 
 interface AnnouncementCardProps {
   announcement: IGetAllAnnouncementsResponseBody;
@@ -49,11 +64,15 @@ export default function AnnouncementCard({
   const [type, setType] = useState<AnnouncementTypeEnum>(
     announcement.type ?? AnnouncementTypeEnum.BASIC,
   );
+  const [audience, setAudience] = useState<string[] | null>(() =>
+    audienceOf(announcement),
+  );
 
   const openEdit = () => {
     setTitle(announcement.title);
     setBody(announcement.body);
     setType(announcement.type ?? AnnouncementTypeEnum.BASIC);
+    setAudience(audienceOf(announcement));
     setFormError("");
     setIsEditOpen(true);
   };
@@ -69,10 +88,22 @@ export default function AnnouncementCard({
       return;
     }
 
+    const subjectIds = targetSubjectIds(type, audience);
+
+    if (
+      type === AnnouncementTypeEnum.BASIC &&
+      audience !== null &&
+      subjectIds.length === 0
+    ) {
+      setFormError(NEED_TARGET_SUBJECT);
+      return;
+    }
+
     if (
       title.trim() === announcement.title &&
       body.trim() === announcement.body &&
-      type === (announcement.type ?? AnnouncementTypeEnum.BASIC)
+      type === (announcement.type ?? AnnouncementTypeEnum.BASIC) &&
+      sameIds(subjectIds, targetSubjectIds(type, audienceOf(announcement)))
     ) {
       setFormError("Tidak ada perubahan yang perlu disimpan.");
       return;
@@ -82,6 +113,7 @@ export default function AnnouncementCard({
       type,
       title: title.trim(),
       body: body.trim(),
+      subjectIds,
     });
 
     if (!isSuccess) {
@@ -119,6 +151,9 @@ export default function AnnouncementCard({
           </div>
           <p className="text-[16px] font-light">
             {formatPostedAt(announcement.created_at)} oleh {announcement.author}
+          </p>
+          <p className="mt-1 break-words text-[14px] font-semibold text-[#5E6278]">
+            Untuk: {audienceLabel(announcement)}
           </p>
         </div>
         <p className="line-clamp-3 whitespace-pre-line break-words text-[18px] font-semibold">
@@ -227,6 +262,15 @@ export default function AnnouncementCard({
                 </ListboxOptions>
               </Listbox>
             </div>
+
+            <AnnouncementAudienceField
+              type={type}
+              value={audience}
+              onChange={(value) => {
+                setAudience(value);
+                setFormError("");
+              }}
+            />
 
             <div className="flex flex-col space-y-2">
               <label className="text-sm font-semibold text-[#5E6278]">

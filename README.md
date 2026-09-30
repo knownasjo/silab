@@ -138,8 +138,8 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `/dashboard/master-data/jam-sesi` | Jam sesi Senin–Kamis dan Jumat: tambah, ubah jam, nonaktifkan, hapus, dan daftar kelas di tiap sesi (hanya LABORAN) |
 | `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up, dan hapus pendaftaran yang belum bayar. Ada pilihan periode; periode lama hanya bisa dilihat |
 | `/dashboard/master-data/periode` | Periode akademik: periode aktif, Mulai Semester Baru, dan daftar periode (hanya LABORAN), lihat "Periode Akademik" |
-| `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman |
-| `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman |
+| `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman untuk semua mahasiswa atau untuk mahasiswa mata kuliah tertentu (hanya LABORAN), lihat "Pengumuman untuk Mata Kuliah Tertentu" |
+| `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman, masing-masing dengan keterangan "Untuk: ..." |
 | `/dashboard/profil` | LABORAN/DOSEN: data akun, ubah nama, ganti password. Asisten: data akun saja + arahan memakai aplikasi mobile |
 
 ### Profil
@@ -554,6 +554,30 @@ sudah terisi data sekarang.
   dicocokkan dengan id mata kuliah, bukan namanya, jadi tetap tampil setelah
   mata kuliah diganti nama.
 
+### Pengumuman untuk Mata Kuliah Tertentu
+
+Halaman Buat Pengumuman dan dialog Edit punya pilihan **Untuk**
+(`components/pengumuman/announcement-audience-field.tsx`):
+
+- **Semua mahasiswa** (bawaan), atau **Mahasiswa mata kuliah tertentu**, yang
+  memunculkan daftar centang semua mata kuliah (nama, kode, semester),
+  diurutkan per semester. Simpan tanpa satu pun centang ditolak di browser:
+  "Pilih minimal satu mata kuliah tujuan.".
+- Untuk jenis Pendaftaran Praktikum, Pendaftaran Inhal, dan Pendaftaran Asisten
+  Praktikum, pilihan ini diganti keterangan "Semua mahasiswa. Pengumuman
+  pendaftaran selalu untuk semua mahasiswa.", dan `subjectIds` dikirim kosong
+  walaupun sebelumnya sempat ada mata kuliah yang dicentang.
+- Setelah Simpan atau Hapus, form kembali ke Semua mahasiswa.
+- Dialog Edit terisi tujuan yang tersimpan. "Tidak ada perubahan yang perlu
+  disimpan." kini juga memperhitungkan mata kuliah tujuan.
+- Kartu di List Pengumuman dan halaman detail menampilkan "Untuk: Semua
+  mahasiswa" atau "Untuk: Mahasiswa Algoritma dan Pemrograman (2026/2027
+  Genap)". Nama semester ikut disebut karena pengumuman mata kuliah hanya
+  berlaku di semester saat dibuat.
+
+Siapa yang menerima pengumuman di aplikasi HP ditentukan server; lihat README
+backend, bagian "Pengumuman untuk mata kuliah tertentu".
+
 ### Hapus Mata Kuliah
 
 Dialog Ubah Mata Kuliah punya tombol **Hapus Mata Kuliah** di kiri bawah,
@@ -768,6 +792,7 @@ node tests/login.mjs        # satu tes saja
 | `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah dan hapus tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus) | 32 |
 | `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |
 | `pengumuman` | List dan Detail: Loading... saat memuat, label jenis, tanggal jam lokal beserta penulis, Edit tanpa perubahan tidak mengirim apa pun, dosen tanpa menu Edit/Hapus. Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Hapus, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 1000 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, pengumuman panjang dipotong 3 baris di daftar dan tampil utuh dengan paragraf terpisah di detail, dosen melihat pesan hanya laboran. Permintaan simpan dan ubah dicegat, jadi tidak ada pengumuman asli yang terkirim | 34 |
+| `pengumuman-matkul` | pilihan Untuk di Buat Pengumuman: bawaan Semua mahasiswa, hilang untuk jenis pendaftaran, daftar mata kuliah dengan kode dan semester, tanpa centang ditolak tanpa mengirim, `subjectIds` yang terkirim dan tersimpan, pendaftaran tetap terkirim untuk semua; kartu dan detail menyebut tujuan beserta semesternya; Edit terisi tujuan lama, tanpa perubahan tidak mengirim, mengganti mata kuliah dan kembali ke Semua mahasiswa | 26 |
 | `hapus-matkul` | tombol Hapus Mata Kuliah di dialog Ubah (dosen tidak punya), letaknya di kiri dan tidak bertumpuk dengan Batal/Simpan, Batal tidak menghapus, Ya, hapus mengirim satu DELETE lalu kartu hilang dengan pesan hijau, halaman dosen di browser kedua ikut berubah tanpa dimuat ulang, penolakan server untuk mata kuliah yang sudah punya kelas tampil di konfirmasi | 21 |
 | `info-kelas` | kotak informasi di detail kelas pada layar 1440 dan 1280 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 14 |
 

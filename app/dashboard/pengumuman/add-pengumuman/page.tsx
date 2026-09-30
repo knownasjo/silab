@@ -1,6 +1,11 @@
 "use client";
 
 import AnnouncementTypeDropdown from "@/app/components/pengumuman/announcement-type-dropdown";
+import AnnouncementAudienceField from "@/app/components/pengumuman/announcement-audience-field";
+import {
+  NEED_TARGET_SUBJECT,
+  targetSubjectIds,
+} from "@/app/utils/announcement";
 import ErrorDialog from "@/app/components/error-dialog";
 import SuccessDialog from "@/app/components/success-dialog";
 import { useState } from "react";
@@ -28,6 +33,7 @@ export default function Pengumuman() {
   const [dialogMessage, setDialogMessage] = useState<string>("");
   const [announcement, setAnnouncement] =
     useState<IAddAnnouncementRequestBody>(emptyAnnouncement);
+  const [audience, setAudience] = useState<string[] | null>(null);
 
   const { isLoading, addAnnouncement } = useAnnouncementStore();
   const { userData } = useAuthStore();
@@ -45,6 +51,7 @@ export default function Pengumuman() {
 
   const resetAnnouncement = () => {
     setAnnouncement(emptyAnnouncement);
+    setAudience(null);
     setFormError("");
   };
 
@@ -67,10 +74,22 @@ export default function Pengumuman() {
       return;
     }
 
+    const subjectIds = targetSubjectIds(announcement.type, audience);
+
+    if (
+      audience !== null &&
+      subjectIds.length === 0 &&
+      announcement.type === AnnouncementTypeEnum.BASIC
+    ) {
+      setFormError(NEED_TARGET_SUBJECT);
+      return;
+    }
+
     const isSuccess = await addAnnouncement({
       type: announcement.type,
       title,
       body,
+      subjectIds,
     });
 
     const { error, message } = useAnnouncementStore.getState();
@@ -125,6 +144,14 @@ export default function Pengumuman() {
             value={announcement.type}
           />
         </div>
+        <AnnouncementAudienceField
+          type={announcement.type}
+          value={audience}
+          onChange={(value) => {
+            setAudience(value);
+            setFormError("");
+          }}
+        />
         <div className="w-full space-y-3">
           <label className="text-base font-semibold text-[#5E6278]">
             Deskripsi Pengumuman{" "}

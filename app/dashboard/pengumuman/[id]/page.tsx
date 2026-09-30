@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 import FeedbackBox from "@/app/components/feedback-box";
 import AnnouncementTypeBadge from "@/app/components/pengumuman/announcement-type-badge";
-import { formatPostedAt } from "@/app/utils/announcement";
+import { audienceLabel, formatPostedAt } from "@/app/utils/announcement";
 
 export default function AnnouncementDetails() {
   const params = useParams<{ id: string }>();
@@ -66,6 +66,12 @@ export default function AnnouncementDetails() {
             <div className="w-1/3">
               <AnnouncementTypeBadge type={announcement.type} />
             </div>
+          </div>
+          <div className="flex flex-row justify-between">
+            <p className="w-1/3 text-lg font-bold text-[#1D1D1D]/50">Untuk</p>
+            <p className="w-1/3 break-words text-lg font-bold text-[#1D1D1D]">
+              {audienceLabel(announcement)}
+            </p>
           </div>
           <div className="flex flex-row justify-between">
             <p className="w-1/3 text-lg font-bold text-[#1D1D1D]/50">
