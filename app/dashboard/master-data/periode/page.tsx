@@ -51,9 +51,10 @@ export default function PeriodeAkademik() {
       <div className="flex flex-col">
         <p className="text-[32px] font-bold text-black">Periode Akademik</p>
         <p className="text-base font-semibold text-[#5E6278]">
-          Kelas dan pendaftaran mata kuliah dikelompokkan per semester. Setelah
-          semester baru dimulai, data semester sebelumnya menjadi arsip yang
-          hanya bisa dilihat.
+          Kelas, pendaftaran mata kuliah, dan jam sesi dikelompokkan per
+          semester. Setelah semester baru dimulai, data semester sebelumnya
+          menjadi arsip yang hanya bisa dilihat, dan jam sesinya disalin ke
+          semester baru.
         </p>
       </div>
       <FeedbackBox feedback={feedback} />

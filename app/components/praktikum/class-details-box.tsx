@@ -9,6 +9,10 @@ interface IClassDetailBox {
   readOnly?: boolean;
 }
 
+const Divider = () => (
+  <div className="w-[0.3px] shrink-0 self-stretch rounded-full border border-dashed border-[#1d1d1d]/30"></div>
+);
+
 const ClassDetailsBox: React.FC<IClassDetailBox> = ({
   data,
   assistant,
@@ -17,26 +21,33 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
   const { userData } = useAuthStore();
 
   return (
-    <div className="flex h-[150px] w-full flex-row justify-between space-x-6 rounded-[20px] bg-white p-5">
-      <div className="flex h-full flex-col space-y-4">
+    <div className="flex min-h-[150px] w-full flex-row space-x-6 rounded-[20px] bg-white p-5">
+      <div className="flex shrink-0 flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Hari, Jam</p>
         <p className="text-[18px] font-semibold text-black">
-          {formatDay(data.day)}, <br /> {data.startAt} - {data.endAt}
+          {formatDay(data.day)}, <br />
+          <span className="whitespace-nowrap">
+            {data.startAt} - {data.endAt}
+          </span>
         </p>
       </div>
-      <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
-      <div className="flex h-full flex-col space-y-4">
+      <Divider />
+      <div className="flex shrink-0 flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Ruangan</p>
-        <p className="text-[18px] font-semibold text-black">{data.room}</p>
+        <p className="whitespace-nowrap text-[18px] font-semibold text-black">
+          {data.room}
+        </p>
       </div>
-      <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
-      <div className="flex h-full flex-col space-y-4">
+      <Divider />
+      <div className="flex min-w-0 flex-1 flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Dosen</p>
-        <p className="text-[18px] font-semibold text-black">{data.lecturer}</p>
+        <p className="break-words text-[18px] font-semibold text-black">
+          {data.lecturer}
+        </p>
       </div>
-      <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
-      <div className="flex h-full flex-col space-y-4">
-        <div className="flex flex-row items-center justify-between space-x-2">
+      <Divider />
+      <div className="flex min-w-0 flex-[2] flex-col space-y-4">
+        <div className="flex flex-row items-center space-x-2">
           <p className="text-[16px] font-semibold text-[#5E6278]">
             Asisten Praktikum
           </p>
@@ -51,8 +62,8 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
           {assistant.length !== 0 &&
             assistant.map((assistant, idx) => (
               <div className="flex flex-row space-x-[10px]" key={idx}>
-                <div className="h-full w-[6px] rounded-full bg-[#D2E3F1]"></div>
-                <p className="text-[18px] font-semibold text-black">
+                <div className="w-[6px] shrink-0 self-stretch rounded-full bg-[#D2E3F1]"></div>
+                <p className="min-w-0 break-words text-[18px] font-semibold text-black">
                   {assistant.fullname}
                 </p>
               </div>
@@ -66,10 +77,10 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
           )}
         </div>
       </div>
-      <div className="h-full w-[0.3px] rounded-full border border-dashed border-[#1d1d1d]/30"></div>
-      <div className="flex h-full flex-col space-y-4">
+      <Divider />
+      <div className="flex shrink-0 flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Kuota</p>
-        <p className="text-[18px] font-semibold text-black">
+        <p className="whitespace-nowrap text-[18px] font-semibold text-black">
           {data.participants} / {data.quota}
         </p>
       </div>

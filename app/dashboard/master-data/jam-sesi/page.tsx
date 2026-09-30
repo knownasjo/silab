@@ -441,8 +441,10 @@ export default function JamSesi() {
   }, [getSessions, getAllClass]);
 
   useRealtimeEvents(({ type }) => {
-    if (["ready", "session", "class"].includes(type)) refreshSessions();
-    if (["ready", "class", "subject"].includes(type)) refreshAllClass();
+    if (["ready", "session", "class", "period"].includes(type))
+      refreshSessions();
+    if (["ready", "class", "subject", "period"].includes(type))
+      refreshAllClass();
   });
 
   if (userData && userData.role !== "LABORAN") {
@@ -460,9 +462,11 @@ export default function JamSesi() {
       <div className="flex flex-col">
         <p className="text-[32px] font-bold text-black">Jam Sesi</p>
         <p className="text-base font-semibold text-[#5E6278]">
-          Jam kelas mengikuti sesinya. Mengubah jam sesi ikut mengubah jam semua
-          kelas di sesi itu. Sesi yang sudah dipakai kelas tidak bisa dihapus,
-          hanya dinonaktifkan agar tidak muncul di pilihan kelas baru.
+          Jam sesi berlaku untuk semester yang sedang aktif; setiap semester
+          baru mendapat salinannya sendiri. Jam kelas mengikuti sesinya.
+          Mengubah jam sesi ikut mengubah jam semua kelas di sesi itu. Sesi yang
+          sudah dipakai kelas tidak bisa dihapus, hanya dinonaktifkan agar tidak
+          muncul di pilihan kelas baru.
         </p>
       </div>
       {error && <FeedbackBox feedback={{ ok: false, message: error }} />}

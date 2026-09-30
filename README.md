@@ -442,6 +442,24 @@ bertambah, dan jam sesi tertulis tetap di kode.
   aturan sesi per hari ada di `components/praktikum/class-form-fields.tsx`,
   dipakai bersama oleh Tambah Praktikum dan dialog Ubah Kelas.
 
+### Kotak informasi kelas
+
+Kotak Hari/Jam, Ruangan, Dosen, Asisten Praktikum, dan Kuota di detail kelas
+(`components/praktikum/class-details-box.tsx`) dirapikan pada 30 September
+2026:
+
+- Kolom pendek (Hari/Jam, Ruangan, Kuota) tidak lagi terpecah. Dulu di layar
+  1280 px "0 / 30" turun menjadi dua baris karena kolom paling kanan mendapat
+  sisa ruang paling sedikit.
+- Kolom Dosen dan Asisten Praktikum mengambil sisa ruang (asisten dua kali
+  lebih lebar). Nama yang sangat panjang turun ke baris berikutnya, tetap di
+  dalam kotak.
+- Tinggi kotak mengikuti isi, jadi asisten ketiga dan seterusnya tidak lagi
+  keluar dari kotak (dulu tingginya dikunci 150 px). Garis pemisah ikut
+  memanjang.
+- Ikon pensil "Kelola asisten" (khusus laboran) menempel di sebelah tulisan
+  Asisten Praktikum, tidak lagi di ujung kanan kolom.
+
 ### Ubah dan Hapus Kelas
 
 Di halaman detail kelas, laboran melihat tombol **Ubah Kelas** dan **Hapus
@@ -555,7 +573,8 @@ periode, misalnya "2026/2027 Ganjil". Aturannya ada di README backend bagian
   periode itu terpilih.
 - **Mulai semester baru** membuka dialog yang menjelaskan akibatnya: semua
   data semester lama menjadi arsip, sesi presensi yang masih terbuka ditutup,
-  mahasiswa mendaftar ulang, dan tidak bisa dibatalkan dari aplikasi. Tombol
+  jam sesi disalin ke semester baru, mahasiswa mendaftar ulang, dan tidak
+  bisa dibatalkan dari aplikasi. Tombol
   baru bisa ditekan setelah laboran mengetik `MULAI` (huruf besar). Bila belum
   ada periode sama sekali, dialog meminta tahun ajaran dan Ganjil/Genap untuk
   periode pertama.
@@ -583,6 +602,16 @@ periode, misalnya "2026/2027 Ganjil". Aturannya ada di README backend bagian
 - Halaman Jam Sesi dan Tambah Praktikum selalu memakai kelas periode aktif,
   karena `getAllClass()` di `useClassStore` tanpa `periodId` berarti periode
   aktif.
+- **Jam sesi per semester** (sejak 30 September 2026). Semester baru mendapat
+  salinan jam sesi semester sebelumnya, dan halaman Jam Sesi hanya
+  menampilkan jam sesi semester aktif, jadi jumlah kelasnya mulai dari 0.
+  Mengubah jam sesi semester baru tidak mengubah semester lama, dan bila
+  semester baru dihapus lewat `npm run hapus-periode`, jam sesi semester
+  sebelumnya tampil lagi. Dialog Mulai Semester dan keterangan di halaman
+  Periode Akademik serta Jam Sesi menyebut hal ini. Halaman Jam Sesi yang
+  sedang terbuka kini ikut memuat ulang saat event `period` datang. Dulu
+  halaman itu masih menghitung kelas semester lalu ("2 kelas") dan daftar
+  kelasnya tertahan di "Memuat daftar kelas...".
 
 ### Tambah, Ubah, dan Hapus Pertemuan
 
@@ -702,9 +731,10 @@ node tests/login.mjs        # satu tes saja
 | `server-mati` | 13 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 29 |
 | `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi | 50 |
 | `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
-| `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang | 29 |
+| `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus) | 32 |
 | `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |
 | `pengumuman` | List dan Detail: Loading... saat memuat, label jenis, tanggal jam lokal beserta penulis, Edit tanpa perubahan tidak mengirim apa pun, dosen tanpa menu Edit/Hapus. Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Hapus, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 1000 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, pengumuman panjang dipotong 3 baris di daftar dan tampil utuh dengan paragraf terpisah di detail, dosen melihat pesan hanya laboran. Permintaan simpan dan ubah dicegat, jadi tidak ada pengumuman asli yang terkirim | 34 |
+| `info-kelas` | kotak informasi di detail kelas pada layar 1440 dan 1280 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 14 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|

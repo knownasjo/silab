@@ -153,6 +153,10 @@ export default function StartPeriodDialog({
                   </li>
                   <li>Sesi presensi yang masih terbuka akan ditutup.</li>
                   <li>
+                    Jam sesi {activePeriod.name} disalin ke semester baru dan
+                    bisa diubah tanpa mengubah jam sesi {activePeriod.name}.
+                  </li>
+                  <li>
                     Mahasiswa mendaftar ulang mata kuliah untuk semester baru.
                   </li>
                   <li className="text-[#F1416C]">

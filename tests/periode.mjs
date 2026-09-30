@@ -2,6 +2,7 @@ import {
   bodyHas,
   check,
   db,
+  openBrowser,
   runWebTest,
   section,
   sleep,
@@ -76,7 +77,7 @@ await runWebTest("Periode akademik di web", data, async (browser) => {
   check(
     "dialog konfirmasi menjelaskan akibatnya",
     await waitFor(
-      `${bodyHas(`Mulai semester ${nextName}?`)} && ${bodyHas("menjadi arsip yang hanya bisa dilihat")} && ${bodyHas("Tidak bisa dibatalkan dari aplikasi.")}`,
+      `${bodyHas(`Mulai semester ${nextName}?`)} && ${bodyHas("menjadi arsip yang hanya bisa dilihat")} && ${bodyHas(`Jam sesi ${oldName} disalin ke semester baru`)} && ${bodyHas("Tidak bisa dibatalkan dari aplikasi.")}`,
       5000,
     ),
   );
@@ -105,11 +106,38 @@ await runWebTest("Periode akademik di web", data, async (browser) => {
   await clickText(startButton);
   await waitFor(`!!document.querySelector('${confirmInput}')`, 5000);
   await typeInto(confirmInput, "MULAI");
-  await realClick(submit);
-  check(
-    `semester ${nextName} dimulai dari web`,
-    await waitFor(bodyHas(`Semester ${nextName} dimulai`), 15000),
-  );
+  const [testSession] = await data.sessions();
+  const sessionRow = `[...document.querySelectorAll("div.grid")].find((row) => row.firstElementChild?.innerText === "Sesi ${testSession.number}")`;
+  const jamSesi = await openBrowser();
+  try {
+    check(
+      "login laboran di browser kedua",
+      await jamSesi.login(data.laboran, data.password),
+    );
+    await jamSesi.navigate("/dashboard/master-data/jam-sesi");
+    check(
+      "  Jam Sesi sebelum semester baru: sesi uji dipakai 1 kelas",
+      await jamSesi.waitFor(
+        `(${sessionRow})?.innerText.includes("1 kelas")`,
+        20000,
+      ),
+    );
+    await realClick(submit);
+    check(
+      `semester ${nextName} dimulai dari web`,
+      await waitFor(bodyHas(`Semester ${nextName} dimulai`), 15000),
+    );
+    check(
+      "  Jam Sesi yang terbuka langsung berganti ke salinan: 0 kelas dan bisa dihapus",
+      await jamSesi.waitFor(
+        `(${sessionRow})?.innerText.includes("0 kelas") && (${sessionRow}).innerText.includes("Hapus")`,
+        15000,
+      ),
+      await jamSesi.evaluate(`(${sessionRow})?.innerText`),
+    );
+  } finally {
+    await jamSesi.close();
+  }
   check(
     "  tersimpan di database",
     (await activeName()) === nextName,
