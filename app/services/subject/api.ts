@@ -36,3 +36,9 @@ export const addSubject = async (body: IAddSubjectRequestBody) => {
 
   return res.data;
 };
+
+export const deleteSubject = async (id: string) => {
+  const res = await satellite.delete<IBaseResponse>(`/subject/${id}`);
+
+  return res.data;
+};

@@ -130,7 +130,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 |---|---|
 | `/auth` | Login NIM/NIY + password (mahasiswa memakai NIM, dosen dan laboran NIY 8 angka) |
 | `/dashboard` | Kartu statistik. LABORAN: mata kuliah dan pembayaran. Asisten: kelas yang ia pegang. DOSEN: kelas, mahasiswa, pertemuan, dan rata-rata kehadiran mata kuliah yang ia ampu |
-| `/dashboard/praktikum` | LABORAN: semua mata kuliah dikelompokkan per semester dengan tombol Ubah, lihat "Praktikum per Semester" dan "Ubah Mata Kuliah". DOSEN: kelompok semester yang sama, hanya mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
+| `/dashboard/praktikum` | LABORAN: semua mata kuliah dikelompokkan per semester dengan tombol Ubah (di dalamnya ada Hapus Mata Kuliah), lihat "Praktikum per Semester", "Ubah Mata Kuliah", dan "Hapus Mata Kuliah". DOSEN: kelompok semester yang sama, hanya mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
 | `/dashboard/praktikum/[classId]` | Detail kelas (hari, jam, ruangan, dosen, asisten, kuota) + panel pertemuan & presensi. LABORAN: tombol Ubah Kelas dan Hapus Kelas, lihat "Ubah dan Hapus Kelas". LABORAN dan asisten: tambah, ubah judul, dan hapus pertemuan, lihat "Tambah, Ubah, dan Hapus Pertemuan". DOSEN hanya melihat |
 | `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
@@ -554,6 +554,27 @@ sudah terisi data sekarang.
   dicocokkan dengan id mata kuliah, bukan namanya, jadi tetap tampil setelah
   mata kuliah diganti nama.
 
+### Hapus Mata Kuliah
+
+Dialog Ubah Mata Kuliah punya tombol **Hapus Mata Kuliah** di kiri bawah,
+sedangkan Batal dan Simpan tetap di kanan. Hanya laboran yang melihatnya,
+dan di periode lama tombol Ubah sendiri tersembunyi.
+
+1. Tombol itu mengganti isi dialog dengan konfirmasi "Hapus mata kuliah X?".
+   Konfirmasi ini menjelaskan bahwa hanya mata kuliah yang belum pernah punya
+   kelas maupun pendaftaran, termasuk di semester lama, yang bisa dihapus.
+   Batal kembali ke form ubah.
+2. **Ya, hapus** mengirim `DELETE /subject/:id`. Berhasil: dialog tertutup,
+   pesan hijau "Mata kuliah X berhasil dihapus" tampil di atas daftar, dan
+   kartunya hilang. Halaman dosen, halaman laboran lain, dan daftar
+   Pendaftaran Praktikum di HP ikut berubah lewat event `subject`.
+3. Ditolak server, misalnya "X sudah punya 1 kelas, jadi tidak bisa
+   dihapus.": pesan merah tampil di konfirmasi dan dialog tetap terbuka.
+
+Web tidak memeriksa sendiri apakah mata kuliah sudah dipakai, karena
+pendaftaran dan kelas semester lama tidak dimuat di halaman ini. Aturannya
+ada di server; lihat README backend, bagian "Hapus mata kuliah".
+
 ### Praktikum per Semester
 
 Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
@@ -747,6 +768,7 @@ node tests/login.mjs        # satu tes saja
 | `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah dan hapus tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus) | 32 |
 | `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |
 | `pengumuman` | List dan Detail: Loading... saat memuat, label jenis, tanggal jam lokal beserta penulis, Edit tanpa perubahan tidak mengirim apa pun, dosen tanpa menu Edit/Hapus. Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Hapus, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 1000 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, pengumuman panjang dipotong 3 baris di daftar dan tampil utuh dengan paragraf terpisah di detail, dosen melihat pesan hanya laboran. Permintaan simpan dan ubah dicegat, jadi tidak ada pengumuman asli yang terkirim | 34 |
+| `hapus-matkul` | tombol Hapus Mata Kuliah di dialog Ubah (dosen tidak punya), letaknya di kiri dan tidak bertumpuk dengan Batal/Simpan, Batal tidak menghapus, Ya, hapus mengirim satu DELETE lalu kartu hilang dengan pesan hijau, halaman dosen di browser kedua ikut berubah tanpa dimuat ulang, penolakan server untuk mata kuliah yang sudah punya kelas tampil di konfirmasi | 21 |
 | `info-kelas` | kotak informasi di detail kelas pada layar 1440 dan 1280 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 14 |
 
 | Variabel | Bawaan | Kegunaan |

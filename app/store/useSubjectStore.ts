@@ -6,6 +6,7 @@ import {
 import { create } from "zustand";
 import {
   addSubject,
+  deleteSubject,
   getAllSubjects,
   putSubject,
 } from "../services/subject/api";
@@ -25,6 +26,7 @@ type SubjectActions = {
     id: string,
     body: IUpdateSubjectRequestBody,
   ) => Promise<{ ok: boolean; message: string }>;
+  deleteSubject: (id: string) => Promise<{ ok: boolean; message: string }>;
 };
 
 const initialState = {
@@ -74,6 +76,17 @@ const useSubjectStore = create<SubjectState & SubjectActions>((set, get) => ({
   updateSubject: async (id, body) => {
     try {
       const res = await putSubject(id, body);
+
+      await get().refreshAllSubjects();
+      return { ok: true, message: res.message };
+    } catch (error: any) {
+      return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
+    }
+  },
+
+  deleteSubject: async (id) => {
+    try {
+      const res = await deleteSubject(id);
 
       await get().refreshAllSubjects();
       return { ok: true, message: res.message };

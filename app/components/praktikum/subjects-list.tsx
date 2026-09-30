@@ -45,6 +45,7 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
     subjectId: string;
     message: string;
   } | null>(null);
+  const [deletedNotice, setDeletedNotice] = useState<string | null>(null);
   const [openSemesters, setOpenSemesters] = useState<Record<string, boolean>>(
     {},
   );
@@ -74,7 +75,15 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
 
   return (
     <div className="flex h-full w-full flex-col items-start space-y-4">
-      <FeedbackBox feedback={error ? { ok: false, message: error } : null} />
+      <FeedbackBox
+        feedback={
+          error
+            ? { ok: false, message: error }
+            : deletedNotice
+              ? { ok: true, message: deletedNotice }
+              : null
+        }
+      />
       {emptyMessage && isReady && !error && subjectsData.length === 0 && (
         <p className="text-sm font-semibold text-[#5E6278]">{emptyMessage}</p>
       )}
@@ -137,11 +146,16 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
                         <EditSubjectButton
                           subject={subject}
                           onSaved={(message, savedSemester) => {
+                            setDeletedNotice(null);
                             setNotice({ subjectId: subject.id, message });
                             setOpenSemesters((prev) => ({
                               ...prev,
                               [savedSemester]: true,
                             }));
+                          }}
+                          onDeleted={(message) => {
+                            setNotice(null);
+                            setDeletedNotice(message);
                           }}
                         />
                       )}
