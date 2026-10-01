@@ -67,31 +67,6 @@ export async function hasRefreshToken(): Promise<boolean> {
   return Boolean(cookie.get("refreshToken")?.value);
 }
 
-export async function getUserData(): Promise<{
-  role: string;
-  fullname: string;
-  nim: string;
-  email: string;
-} | null> {
-  const cookie = await cookies();
-
-  const role = cookie.get("role");
-  const fullname = cookie.get("fullname");
-  const nim = cookie.get("nim");
-  const email = cookie.get("email");
-
-  if (role && fullname && email && nim) {
-    return {
-      role: role.value,
-      fullname: fullname.value,
-      email: email.value,
-      nim: nim.value,
-    };
-  }
-
-  return null;
-}
-
 export async function setToken(token: string): Promise<void> {
   const cookie = await cookies();
 
@@ -114,18 +89,9 @@ export async function setRefreshToken(token: string): Promise<void> {
   }
 }
 
-export async function setUserRole(role: string): Promise<void> {
-  const cookie = await cookies();
-
-  if (role) {
-    cookie.set("role", role);
-  }
-}
-
 export async function deleteToken(): Promise<void> {
   const cookie = await cookies();
 
   cookie.delete("accessToken");
   cookie.delete("refreshToken");
-  cookie.delete("role");
 }

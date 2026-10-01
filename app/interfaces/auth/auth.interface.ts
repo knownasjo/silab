@@ -21,9 +21,3 @@ export interface IChangePasswordRequestBody {
   password: string;
   confirmPassword: string;
 }
-
-export type UserDetails = {
-  nim: string;
-  email: string;
-  fullname: string;
-};

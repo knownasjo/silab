@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { use, useState } from "react";
 import ErrorDialog from "../components/error-dialog";
 import WelcomeHero from "../components/welcome-hero";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,13 +11,19 @@ import { ILoginRequestBody } from "../interfaces/auth/auth.interface";
 import useAuthStore from "../store/useAuthStore";
 import { useRouter } from "next/navigation";
 
-export default function Authentication() {
+export default function Authentication({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const router = useRouter();
+  const { sesi } = use(searchParams);
 
   const [visible, setVisible] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const { error, isLoading, login } = useAuthStore();
+  const { error, login } = useAuthStore();
 
   const {
     register,
@@ -34,9 +40,11 @@ export default function Authentication() {
   const onSubmit = async () => {
     const body = watch();
 
+    setIsSubmitting(true);
     const isSuccess = await login(body);
 
     if (!isSuccess) {
+      setIsSubmitting(false);
       setDialogOpen(true);
       return;
     }
@@ -61,6 +69,14 @@ export default function Authentication() {
             onSubmit={handleSubmit(onSubmit)}
             className="flex w-full flex-col space-y-5"
           >
+            {sesi === "berakhir" && (
+              <p
+                role="status"
+                className="rounded-xl bg-[#FFF8DD] p-3 text-sm font-semibold text-[#B58100]"
+              >
+                Sesi Anda berakhir, silakan masuk kembali.
+              </p>
+            )}
             <div className="space-y-2">
               <label htmlFor="nim" className="sr-only">
                 NIM / NIY
@@ -125,10 +141,10 @@ export default function Authentication() {
             </div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="h-[48px] w-full rounded-[30px] bg-[#3272CA] text-[18px] font-semibold text-white disabled:opacity-60"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <span className="loading loading-dots loading-md" />
               ) : (
                 "Log In"

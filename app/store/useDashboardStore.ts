@@ -16,8 +16,8 @@ type DashboardState = GlobalState & {
 };
 
 type DashboardActions = {
-  getDashboardData: () => Promise<void>;
-  refreshDashboardData: () => Promise<void>;
+  getDashboardData: (role: string) => Promise<void>;
+  refreshDashboardData: (role: string) => Promise<void>;
   getLecturerSummary: (periodId?: string) => Promise<void>;
   refreshLecturerSummary: () => Promise<void>;
 };
@@ -33,21 +33,32 @@ const initialState = {
   lecturerSummary: null,
 };
 
-const loadDashboardData = async () => {
-  const [subjects, classes, allActivations, paid, unpaid] = await Promise.all([
+const loadDashboardData = async (role: string) => {
+  if (role === "MAHASISWA") {
+    const classes = (await getAllClass()).data ?? [];
+
+    return {
+      totalSubject: new Set(classes.map((item) => item.subjectId)).size,
+      totalClass: classes.length,
+    };
+  }
+
+  const [subjects, classes, activations] = await Promise.all([
     getAllSubjects(),
     getAllClass(),
     getActivations(),
-    getActivations("true"),
-    getActivations("false"),
   ]);
+  const allActivations = activations.data ?? [];
+  const totalPaidStudent = allActivations.filter(
+    (activation) => activation.status,
+  ).length;
 
   return {
     totalSubject: subjects.data?.length ?? 0,
     totalClass: classes.data?.length ?? 0,
-    totalActivation: allActivations.data?.length ?? 0,
-    totalPaidStudent: paid.data?.length ?? 0,
-    totalUnpaidStudent: unpaid.data?.length ?? 0,
+    totalActivation: allActivations.length,
+    totalPaidStudent,
+    totalUnpaidStudent: allActivations.length - totalPaidStudent,
   };
 };
 
@@ -56,11 +67,11 @@ type DashboardStore = DashboardState & DashboardActions;
 const useDashboardStore = create<DashboardStore>((set, get) => ({
   ...initialState,
 
-  getDashboardData: async () => {
+  getDashboardData: async (role) => {
     set({ isLoading: true, error: null });
 
     try {
-      set(await loadDashboardData());
+      set(await loadDashboardData(role));
     } catch (error: any) {
       set({ error: error?.message ?? "Terjadi kesalahan" });
     } finally {
@@ -68,8 +79,8 @@ const useDashboardStore = create<DashboardStore>((set, get) => ({
     }
   },
 
-  refreshDashboardData: coalesce(async () =>
-    set({ ...(await loadDashboardData()), error: null }),
+  refreshDashboardData: coalesce(async (role: string) =>
+    set({ ...(await loadDashboardData(role)), error: null }),
   ),
 
   getLecturerSummary: async (periodId) => {

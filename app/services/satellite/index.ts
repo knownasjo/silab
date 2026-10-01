@@ -39,7 +39,8 @@ const leaveEndedSession = async () => {
   if (typeof window === "undefined" || window.location.pathname === "/auth")
     return;
 
-  if (!(await hasRefreshToken())) window.location.replace("/auth");
+  if (!(await hasRefreshToken()))
+    window.location.replace("/auth?sesi=berakhir");
 };
 
 export const refreshOnce = () =>

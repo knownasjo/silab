@@ -39,7 +39,7 @@ export default function Dashboard() {
     if (!role) return;
 
     if (role === "DOSEN") getLecturerSummary(viewedPeriodId);
-    else getDashboardData();
+    else getDashboardData(role);
   }, [role, getDashboardData, getLecturerSummary, viewedPeriodId]);
 
   useRealtimeEvents(({ type }) => {
@@ -64,7 +64,7 @@ export default function Dashboard() {
       refreshPeriods();
 
     if (["ready", "activation", "class", "subject", "period"].includes(type)) {
-      refreshDashboardData();
+      refreshDashboardData(role);
     }
   });
 

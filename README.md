@@ -64,11 +64,19 @@ IP kampus (`10.4.52.201:3001`) yang sudah mati, dan sudah digantikan
   memanggil fungsinya, jadi tidak ada yang perlu dipindah.
 - Folder `app/types/`. Lima type yang masih dipakai pindah ke `app/interfaces/`:
   `SubjectBySemester` (subject), `Lecturer` (user), `day` (class),
-  `AnnouncementType` (announcement), dan `UserDetails` (auth).
+  `AnnouncementType` (announcement), dan `UserDetails` (auth, kemudian ikut
+  dihapus bersama bar atas lama).
 - Tujuh komponen yang tidak dipakai halaman mana pun (`appbar-component`,
   `class-room-dropdown` di luar folder praktikum, `classes-dropdown-menu`,
   `date-picker`, `semester-dropdown-menu`, `subject-container`, `time-field`),
   `app/helpers/helpers.ts`, dan `app/lib/sessions.ts` yang kosong.
+- Bar atas lama `app/appbar.tsx` ("You logged in as a ..."). Bar ini tidak
+  pernah tampil karena cookie `fullname`/`nim`/`email`/`role` yang dibacanya
+  tidak pernah diisi. Ikut dihapus: `getUserData()`, `setUserRole()`, dan type
+  `UserDetails`, jadi root layout tidak membaca cookie lagi.
+- Halaman awal `/` (gambar sambutan + tombol Login). Gambar yang sama sudah ada
+  di `/auth`, dan `middleware.ts` kini langsung mengalihkan `/` ke `/dashboard`
+  bila ada cookie sesi, atau ke `/auth`.
 - Dependensi `html2canvas`, `cookie`, `jose`, `jwt-decode`, dan
   `@types/jsonwebtoken`. `html2canvas` tetap terpasang sebagai bagian opsional
   jsPDF, tetapi rekap PDF tidak memakainya.
@@ -99,6 +107,11 @@ tampak kosong sampai di-refresh.
 Setelah login, `router.replace("/dashboard")` **harus diikuti**
 `router.refresh()` untuk membuang Router Cache Next.js.
 
+Tombol Log In menampilkan titik-titik loading sejak dikirim sampai Dashboard
+terbuka. Halaman memakai state `isSubmitting` miliknya sendiri, bukan
+`isLoading` store, karena `isLoading` sudah selesai sebelum navigasi ke
+Dashboard rampung dan tombol sempat terlihat seperti belum ditekan.
+
 Access token berlaku 15 menit dan diperbarui sendiri (`app/utils/cookie.ts`):
 
 - Cookie `accessToken` hilang saat tokennya kedaluwarsa. `getToken()` lalu
@@ -112,12 +125,19 @@ Access token berlaku 15 menit dan diperbarui sendiri (`app/utils/cookie.ts`):
   dihapus. `refreshAccessToken()` lalu menghapus semua cookie sesi. Saat
   halaman dimuat, `GET /auth/me` ditolak 400/401, `useAuthStore.me()`
   menghapus cookie dan menandai `sessionEnded`, lalu `SignOutButton`
-  mengalihkan ke `/auth`; di halaman yang
+  mengalihkan ke `/auth?sesi=berakhir`; di halaman yang
   sedang terbuka, `refreshOnce()` (`app/services/satellite/index.ts`)
-  mengalihkan ke `/auth` bila cookie `refreshToken` memang sudah tidak ada
-  (`hasRefreshToken()`), jadi gangguan jaringan sesaat tidak mengeluarkan
-  pengguna. Karena backend memutus stream SSE akun yang password-nya diganti,
-  halaman dashboard yang terbuka kembali ke `/auth` sekitar 2 detik kemudian.
+  mengalihkan ke `/auth?sesi=berakhir` bila cookie `refreshToken` memang sudah
+  tidak ada (`hasRefreshToken()`), jadi gangguan jaringan sesaat tidak
+  mengeluarkan pengguna. Karena backend memutus stream SSE akun yang
+  password-nya diganti, halaman dashboard yang terbuka kembali ke `/auth`
+  sekitar 2 detik kemudian.
+- Dengan `?sesi=berakhir`, halaman login menampilkan kotak kuning "Sesi Anda
+  berakhir, silakan masuk kembali.", sama dengan aplikasi mobile. Sign Out
+  biasa dan `/auth` yang dibuka langsung tidak memakai parameter ini, jadi
+  pesannya tidak muncul. Bila cookie sudah kedaluwarsa sebelum halaman dibuka
+  (misalnya keesokan harinya), `middleware.ts` mengalihkan ke `/auth` tanpa
+  pesan karena tidak bisa membedakannya dari pengguna yang belum masuk.
 
 Lupa password tidak punya alur di web. Halaman `/auth` hanya menulis "Lupa
 password? Hubungi laboran.", karena akun laboran dan dosen diganti password-nya
@@ -128,8 +148,9 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 
 | Route | Isi |
 |---|---|
-| `/auth` | Login NIM/NIY + password (mahasiswa memakai NIM, dosen dan laboran NIY 8 angka) |
-| `/dashboard` | Kartu statistik. LABORAN: mata kuliah dan pembayaran. Asisten: kelas yang ia pegang. DOSEN: kelas, mahasiswa, pertemuan, dan rata-rata kehadiran mata kuliah yang ia ampu |
+| `/` | Tidak punya isi: langsung ke `/dashboard` bila sudah masuk, atau ke `/auth` |
+| `/auth` | Login NIM/NIY + password (mahasiswa memakai NIM, dosen dan laboran NIY 8 angka). Kotak "Sesi Anda berakhir" hanya bila baru dikeluarkan, lihat Autentikasi |
+| `/dashboard` | Kartu statistik, lihat "Dashboard". LABORAN: mata kuliah, kelas periode aktif, dan pembayaran. Asisten: mata kuliah dan kelas yang ia pegang. DOSEN: kelas, mahasiswa, pertemuan, dan rata-rata kehadiran mata kuliah yang ia ampu |
 | `/dashboard/praktikum` | LABORAN: semua mata kuliah dikelompokkan per semester dengan tombol Ubah (di dalamnya ada Hapus Mata Kuliah), lihat "Praktikum per Semester", "Ubah Mata Kuliah", dan "Hapus Mata Kuliah". DOSEN: kelompok semester yang sama, hanya mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
 | `/dashboard/praktikum/[classId]` | Detail kelas (hari, jam, ruangan, dosen, asisten, kuota) + panel pertemuan & presensi. LABORAN: tombol Ubah Kelas dan Hapus Kelas, lihat "Ubah dan Hapus Kelas". LABORAN dan asisten: tambah, ubah judul, dan hapus pertemuan, lihat "Tambah, Ubah, dan Hapus Pertemuan". DOSEN hanya melihat |
 | `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
@@ -141,6 +162,26 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman untuk semua mahasiswa atau untuk mahasiswa mata kuliah tertentu (hanya LABORAN), lihat "Pengumuman untuk Mata Kuliah Tertentu" |
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman, masing-masing dengan keterangan "Untuk: ..." |
 | `/dashboard/profil` | LABORAN/DOSEN: data akun, ubah nama, ganti password. Asisten: data akun saja + arahan memakai aplikasi mobile |
+
+### Dashboard
+
+- Kartu laboran: Jumlah Praktikum (`GET /subject`), Jumlah Kelas di periode
+  aktif (`GET /class`), dan dua kartu Jumlah Mahasiswa (sudah dan belum
+  bayar). Kartu bayar menghitung **pendaftaran mata kuliah**
+  (`GET /activation`), bukan orang: mahasiswa yang mendaftar dua mata kuliah
+  terhitung dua kali, sama dengan kartu di Pembayaran. Daftar pendaftaran
+  diminta sekali, lalu lunas dan belum dihitung di browser, jadi jumlah
+  keduanya selalu sama dengan total.
+- Kartu asisten: Jumlah Praktikum adalah mata kuliah dari kelas yang ia pegang
+  (`subjectId` unik dari `GET /class`), bukan semua mata kuliah. Asisten tidak
+  meminta `GET /subject` dan `GET /activation`.
+- Angka kartu selalu satu baris. Ukuran hurufnya mengikuti lebar kartu
+  (`[container-type:inline-size]` dengan satuan `cqi`), dan "/ total" lebih
+  kecil. Kartu laboran dan dosen tampil 4 kolom mulai lebar 1280 px, dan 2 × 2
+  di bawahnya. Sambutan memakai huruf lebih kecil di bawah 1280 px dan
+  tingginya mengikuti isi, jadi tidak menimpa "Periode aktif".
+- Pop-up Sign Out mengikuti pop-up konfirmasi lain: Batal abu-abu, Keluar
+  merah di kanan.
 
 ### Profil
 
@@ -161,8 +202,7 @@ mahasiswa (termasuk asisten) mengelola akunnya di aplikasi mobile.
   browser ini tetap masuk, sedangkan browser/HP lain dengan akun yang sama
   kembali ke `/auth` sekitar 1,5 detik kemudian.
 - `GET /auth/me` membalas `name`, bukan `fullname`; `IMeResponseBody` sudah
-  disesuaikan. `app/appbar.tsx` (nama di bagian atas) tidak tampil karena
-  cookie `fullname`/`nim`/`email` yang dibacanya tidak pernah diisi.
+  disesuaikan.
 
 ## Logika status presensi
 
@@ -265,8 +305,9 @@ server mati atau sibuk semua halaman terlempar ke Dashboard tanpa pesan.
   merah di konfirmasi. Mata kuliah yang sudah lunas harus digeser ke Belum
   Bayar dulu. Aturannya di README backend, bagian "Batal pendaftaran mata
   kuliah"
-- Kartu dashboard: fungsi store yang tertukar diperbaiki, endpoint kembar
-  dipisah dengan `?status=true/false`
+- Kartu dashboard: fungsi store yang tertukar diperbaiki. Sejak 1 Oktober 2026
+  sudah dan belum bayar dihitung dari satu `GET /activation`, lihat
+  "Dashboard"
 - Pengumuman: validasi judul/deskripsi, Lihat Detail, Edit, dan Hapus
 - Buat Pengumuman (30 September 2026):
   - Pilihan **Jenis Pengumuman** kini selalu menampilkan nama jenis yang
@@ -791,7 +832,7 @@ node tests/login.mjs        # satu tes saja
 | Tes | Yang diperiksa | Cek |
 |---|---|---|
 | `halaman` | semua halaman laboran tampil tanpa error JavaScript; pilihan dosen, mata kuliah, hari, ruangan, dan jenis pengumuman terisi | 32 |
-| `login` | pesan saat server tidak terjangkau, balasan error tanpa pesan, password salah, dan login benar | 9 |
+| `login` | pesan saat server tidak terjangkau, balasan error tanpa pesan, password salah, dan login benar; `/` langsung ke Dashboard atau login; tombol tetap loading sampai Dashboard terbuka; pesan "Sesi Anda berakhir" saat token ditolak server dan saat password diganti dari perangkat lain, tetapi tidak setelah Sign Out biasa atau saat login dibuka langsung | 22 |
 | `sesi-pulih` | token kedaluwarsa diperbarui diam-diam, server mati memunculkan pemberitahuan tanpa melempar ke login, halaman pulih sendiri saat server hidup, tombol Coba lagi, token rusak kembali ke login dan cookie dihapus | 15 |
 | `server-mati` | 13 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 29 |
 | `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi. Hapus pendaftaran: tombol hanya di mata kuliah Belum Bayar, tidak menimpa kotak status, dan Ubah sejajar di semua baris, Batal tidak menghapus, Ya, hapus mengirim satu DELETE, penolakan server tampil di konfirmasi, pendaftaran terakhir menutup pop-up dengan pesan di halaman | 67 |
@@ -802,6 +843,7 @@ node tests/login.mjs        # satu tes saja
 | `pengumuman-matkul` | pilihan Untuk di Buat Pengumuman: bawaan Semua mahasiswa, hilang untuk jenis pendaftaran, daftar mata kuliah dengan kode dan semester, tanpa centang ditolak tanpa mengirim, `subjectIds` yang terkirim dan tersimpan, pendaftaran tetap terkirim untuk semua; kartu dan detail menyebut tujuan beserta semesternya; Edit terisi tujuan lama, tanpa perubahan tidak mengirim, mengganti mata kuliah dan kembali ke Semua mahasiswa; kotak centang dan pilihan bergaya tema (input asli tersembunyi, biru `#3272CA`, pilihan tanpa garis luar) dan tersusun atas-bawah | 28 |
 | `hapus-matkul` | tombol Hapus Mata Kuliah di dialog Ubah (dosen tidak punya), letaknya di kiri dan tidak bertumpuk dengan Batal/Simpan, Batal tidak menghapus, Ya, hapus mengirim satu DELETE lalu kartu hilang dengan pesan hijau, halaman dosen di browser kedua ikut berubah tanpa dimuat ulang, penolakan server untuk mata kuliah yang sudah punya kelas tampil di konfirmasi | 21 |
 | `info-kelas` | kotak informasi di detail kelas pada layar 1440 dan 1280 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 14 |
+| `dashboard` | kartu laboran (termasuk Jumlah Kelas) sama dengan data server, sekali memuat hanya satu `GET /activation`, angka ikut berubah saat pembayaran dikonfirmasi di tempat lain; angka 312 / 480 tetap satu baris dan semua tulisan di dalam kartu pada layar 1440, 1366, 1280, dan 1024 px; pop-up Sign Out (Keluar merah di kanan, Batal menutup tanpa keluar); kartu asisten menghitung mata kuliah dari kelas yang ia pegang | 14 |
 | `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
 
 | Variabel | Bawaan | Kegunaan |

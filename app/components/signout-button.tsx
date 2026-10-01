@@ -23,7 +23,7 @@ export default function SignOutButton({
   const { logout, sessionEnded } = useAuthStore();
 
   useEffect(() => {
-    if (sessionEnded) router.replace("/auth");
+    if (sessionEnded) router.replace("/auth?sesi=berakhir");
   }, [router, sessionEnded]);
 
   return (
@@ -58,20 +58,26 @@ export default function SignOutButton({
       >
         <DialogBackdrop className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-          <DialogPanel className="flex h-[200px] w-[500px] flex-col justify-between rounded-2xl bg-white p-10">
-            <DialogTitle className="font-bold text-[#FE2F60]">
-              Sign Out
-            </DialogTitle>
-            <p>Apakah anda ingin keluar?</p>
-            <div className="flex gap-4">
+          <DialogPanel className="flex w-[500px] max-w-[95vw] flex-col space-y-5 rounded-2xl bg-white p-10">
+            <div className="flex flex-col">
+              <DialogTitle className="font-bold text-[#1d1d1d]">
+                Sign Out
+              </DialogTitle>
+              <p className="text-sm font-semibold text-[#5E6278]">
+                Apakah Anda ingin keluar?
+              </p>
+            </div>
+            <div className="flex w-full flex-row justify-end space-x-3">
               <button
-                className="rounded-full bg-[#FF0000] px-4 py-2 text-white"
+                type="button"
+                className="rounded-full border-2 border-[#F1F1F2] px-[16px] py-[8px] text-[16px] font-semibold text-[#5E6278]"
                 onClick={() => setIsOpen(false)}
               >
                 Batal
               </button>
               <button
-                className="text-[#FF0000]"
+                type="button"
+                className="rounded-full bg-[#F1416C] px-[16px] py-[8px] text-[16px] font-semibold text-white"
                 onClick={async () => {
                   await logout();
                   setIsOpen(false);

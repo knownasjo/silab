@@ -4,7 +4,6 @@ interface DashboardDataContainerProps {
   suffix?: string;
   title: string;
   subTitle: string;
-  widthClassName?: string;
 }
 
 export default function DashboardDataContainer({
@@ -13,24 +12,23 @@ export default function DashboardDataContainer({
   suffix = "",
   title,
   subTitle,
-  widthClassName = "w-1/3",
 }: DashboardDataContainerProps) {
   const isReady = data !== null && data !== undefined;
 
   return (
-    <div
-      className={`flex h-[clamp(200px,32vh,280px)] ${widthClassName} flex-col justify-between rounded-3xl bg-[#3272CA] p-5`}
-    >
-      <p className="text-7xl font-bold text-[#FFBF01]">
+    <div className="flex min-h-[clamp(200px,32vh,280px)] min-w-0 flex-col justify-between space-y-4 rounded-3xl bg-[#3272CA] p-5 [container-type:inline-size]">
+      <p className="whitespace-nowrap text-[clamp(40px,26cqi,72px)] font-bold leading-none text-[#FFBF01]">
         {!isReady && "-"}
-        {isReady &&
-          (data2 !== null && data2 !== undefined
-            ? `${data} / ${data2}`
-            : `${data}${suffix}`)}
+        {isReady && `${data}${suffix}`}
+        {isReady && data2 !== null && data2 !== undefined && (
+          <span className="text-[0.4em]"> / {data2}</span>
+        )}
       </p>
       <div className="flex flex-col text-white">
-        <p className="text-[24px] font-bold">{title}</p>
-        <p className="min-h-[3.5rem] text-[18px] font-semibold">{subTitle}</p>
+        <p className="text-[clamp(16px,10.5cqi,24px)] font-bold">{title}</p>
+        <p className="min-h-[3.5rem] text-[clamp(14px,8.5cqi,18px)] font-semibold">
+          {subTitle}
+        </p>
       </div>
     </div>
   );

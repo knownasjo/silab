@@ -14,10 +14,11 @@ export const getAllSubjects = async () => {
   return res.data;
 };
 
-export const getActivations = async (status?: "true" | "false") => {
-  const res = await satellite.get<IBaseResponse<IGetActivationResponseBody[]>>(
-    `/activation/?status=${status ?? ""}`,
-  );
+export const getActivations = async () => {
+  const res =
+    await satellite.get<IBaseResponse<IGetActivationResponseBody[]>>(
+      "/activation",
+    );
 
   return res.data;
 };

@@ -11,6 +11,12 @@ export default async function middleware(req: NextRequest) {
     const isProtectedRoute = pathname.startsWith("/dashboard");
     const isAuthPage = pathname === "/auth";
 
+    if (pathname === "/") {
+      return NextResponse.redirect(
+        new URL(hasSession ? "/dashboard" : "/auth", req.url),
+      );
+    }
+
     if (isProtectedRoute && !hasSession) {
       if (!isAuthPage) {
         return NextResponse.redirect(new URL("/auth", req.url));
