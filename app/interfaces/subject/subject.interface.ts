@@ -15,9 +15,3 @@ export interface IAddSubjectRequestBody {
   semester: string;
   lecturer_id: string;
 }
-
-export type SubjectBySemester = {
-  id: string;
-  subject_code: string;
-  subject_name: string;
-};

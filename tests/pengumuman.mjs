@@ -273,10 +273,12 @@ await runWebTest("Pengumuman di web", data, async (browser) => {
   };
 
   await slow(1500);
-  await browser.navigate("/dashboard/pengumuman/list-pengumuman");
+  await browser.navigate("/dashboard/pengumuman/list-pengumuman", {
+    waitForLoad: false,
+  });
   const listLoading = await waitFor(
-    `${bodyHas("Loading...")} && !${bodyHas("Belum ada pengumuman.")}`,
-    3000,
+    `location.pathname === "/dashboard/pengumuman/list-pengumuman" && ${bodyHas("Loading...")} && !${bodyHas("Belum ada pengumuman.")}`,
+    20000,
   );
   await slow(0);
   check(
@@ -323,10 +325,12 @@ await runWebTest("Pengumuman di web", data, async (browser) => {
 
   section("Detail Pengumuman");
   await slow(1500);
-  await browser.navigate(`/dashboard/pengumuman/${practicum.id}`);
+  await browser.navigate(`/dashboard/pengumuman/${practicum.id}`, {
+    waitForLoad: false,
+  });
   const detailLoading = await waitFor(
-    `${bodyHas("Loading...")} && !${bodyHas("Tanggal / Waktu Posting")}`,
-    3000,
+    `location.pathname === "/dashboard/pengumuman/${practicum.id}" && ${bodyHas("Loading...")} && !${bodyHas("Tanggal / Waktu Posting")}`,
+    20000,
   );
   await slow(0);
   check("saat memuat tampil Loading...", detailLoading);

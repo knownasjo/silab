@@ -84,7 +84,7 @@ export default function ClassFormFields({
 
   return (
     <div className="flex w-full flex-col space-y-6">
-      <div className="flex h-[90px] w-full flex-row space-x-8">
+      <div className="flex w-full flex-row flex-wrap gap-x-6 gap-y-4">
         <ClassNameField
           value={form.name}
           onClassNameChange={(value) => onChange("name", value)}

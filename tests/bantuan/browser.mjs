@@ -63,6 +63,25 @@ export const ensureReachable = async (url, hint) => {
   process.exit(1);
 };
 
+const stopChrome = async (chrome, profile) => {
+  if (chrome.pid && chrome.exitCode === null && chrome.signalCode === null) {
+    const exited = new Promise((done) => chrome.once("exit", done));
+    chrome.kill();
+    await Promise.race([exited, sleep(5000)]);
+    if (chrome.exitCode === null && chrome.signalCode === null)
+      chrome.kill("SIGKILL");
+  }
+  for (let attempt = 1; ; attempt++) {
+    try {
+      rmSync(profile, { recursive: true, force: true });
+      return;
+    } catch (error) {
+      if (attempt === 10) throw error;
+      await sleep(300);
+    }
+  }
+};
+
 const launchChrome = async () => {
   const profile = mkdtempSync(join(tmpdir(), "silab-uji-chrome-"));
   const chrome = spawn(
@@ -95,8 +114,7 @@ const launchChrome = async () => {
     }
     await sleep(200);
   }
-  chrome.kill();
-  rmSync(profile, { recursive: true, force: true });
+  await stopChrome(chrome, profile);
   throw new Error(
     `Chrome tidak bisa dijalankan dari ${CHROME}. Atur lokasinya lewat CHROME.`,
   );
@@ -193,11 +211,11 @@ export const openBrowser = async () => {
     return false;
   };
 
-  const navigate = async (path) => {
+  const navigate = async (path, { waitForLoad = true } = {}) => {
     await send("Page.navigate", {
       url: path.startsWith("http") ? path : `${WEB}${path}`,
     });
-    await waitFor(`document.readyState === "complete"`, 30000);
+    if (waitForLoad) await waitFor(`document.readyState === "complete"`, 30000);
   };
 
   const realClick = async (elementExpression) => {
@@ -309,9 +327,7 @@ export const openBrowser = async () => {
     },
     close: async () => {
       ws.close();
-      chrome.kill();
-      await sleep(300);
-      rmSync(profile, { recursive: true, force: true });
+      await stopChrome(chrome, profile);
     },
   });
 

@@ -74,7 +74,9 @@ await runWebTest(
       "halaman tampil",
       await visit("/dashboard/praktikum/tambah-praktikum", "Mata Kuliah"),
     );
-    const subjects = await optionsOf(browser.visibleButton("Praktikum"));
+    const subjects = await optionsOf(
+      browser.visibleButton("Pilih mata kuliah"),
+    );
     check(
       "  pilihan mata kuliah memuat mata kuliah uji",
       subjects.some((o) => o.includes(subject.subject_name)),
@@ -96,7 +98,7 @@ await runWebTest(
       JSON.stringify(days),
     );
     await realClick(
-      `[...document.querySelectorAll('[role="option"] button')].find((o) => o.innerText.includes("Senin"))`,
+      `[...document.querySelectorAll('[role="option"]')].find((o) => o.innerText.includes("Senin"))`,
     );
     check(
       "  hari Senin terpilih",

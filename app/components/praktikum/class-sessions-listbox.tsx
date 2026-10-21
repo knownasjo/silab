@@ -25,7 +25,7 @@ export default function ClassSessionListbox({
   const selected = sessions.find((session) => session.id === value);
 
   return (
-    <div className="flex h-full w-full flex-col justify-between space-y-3">
+    <div className="flex min-w-[230px] flex-1 flex-col space-y-3">
       <p className="text-base font-semibold text-[#5E6278]">Sesi Kelas</p>
       <Listbox
         value={value}
@@ -34,7 +34,7 @@ export default function ClassSessionListbox({
       >
         <ListboxButton
           aria-label="Sesi Kelas"
-          className={`flex h-full w-full flex-row items-center justify-between rounded-2xl bg-[#f5f5f5] px-[15px] font-semibold text-[#1D1D1D] disabled:cursor-not-allowed disabled:opacity-60`}
+          className={`flex h-[54px] w-full flex-row items-center justify-between rounded-2xl bg-[#f5f5f5] px-[15px] font-semibold text-[#1D1D1D] disabled:cursor-not-allowed disabled:opacity-60`}
         >
           <p className="truncate">
             {selected

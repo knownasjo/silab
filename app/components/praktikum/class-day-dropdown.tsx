@@ -7,9 +7,7 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import Image from "next/image";
-import { day } from "@/app/interfaces/class/class.interface";
 import { DAY_LABELS, formatDay } from "@/app/utils/day";
-import { useEffect, useState } from "react";
 
 interface ClassDayDropdownProps {
   onDayChange: (value: string) => void;
@@ -20,25 +18,13 @@ export default function ClassDayDropdown({
   onDayChange,
   value,
 }: ClassDayDropdownProps) {
-  const [selectedDay, setSelectedDay] = useState<string>("");
-
-  const days: day[] = Object.entries(DAY_LABELS).map(([value, title]) => ({
-    title,
-    value,
-  }));
-
-  useEffect(() => setSelectedDay(value), [value]);
-
   return (
-    <div className="flex h-full w-full flex-col justify-between space-y-3">
+    <div className="flex min-w-[150px] flex-1 flex-col space-y-3">
       <p className="text-base font-semibold text-[#5E6278]">Hari</p>
-      <Listbox>
-        <ListboxButton
-          value={value}
-          className={`flex h-full w-full flex-row items-center justify-between rounded-2xl bg-[#f5f5f5] px-[15px] font-semibold text-[#1D1D1D]`}
-        >
-          {selectedDay === "" ? "Hari" : formatDay(selectedDay)}
-          <div className="relative h-[24px] w-[24px]">
+      <Listbox value={value} onChange={onDayChange}>
+        <ListboxButton className="flex h-[54px] w-full flex-row items-center justify-between rounded-2xl bg-[#f5f5f5] px-[15px] font-semibold text-[#1D1D1D] disabled:cursor-not-allowed disabled:opacity-60">
+          <p className="truncate">{value ? formatDay(value) : "Hari"}</p>
+          <div className="relative h-[24px] w-[24px] shrink-0">
             <Image src={"/down.png"} alt="chevron down" fill />
           </div>
         </ListboxButton>
@@ -46,21 +32,13 @@ export default function ClassDayDropdown({
           anchor="bottom"
           className={`w-[var(--button-width)] space-y-3 rounded-lg bg-[#f5f5f5]`}
         >
-          {days.map((day) => (
+          {Object.entries(DAY_LABELS).map(([day, title]) => (
             <ListboxOption
-              value={day.value}
-              key={day.value}
-              className={`text-[#1d1d1d] data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
+              value={day}
+              key={day}
+              className={`cursor-pointer px-[15px] py-2 font-semibold text-[#1d1d1d] data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
             >
-              <button
-                onClick={() => {
-                  setSelectedDay(day.value);
-                  onDayChange(day.value);
-                }}
-                className="flex w-full flex-row items-start justify-start px-[15px] py-2 font-semibold"
-              >
-                {day.title}
-              </button>
+              {title}
             </ListboxOption>
           ))}
         </ListboxOptions>

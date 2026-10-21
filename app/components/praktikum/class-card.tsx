@@ -13,7 +13,7 @@ const ClassCard: React.FC<IClassCardProps> = ({ subjectClass }) => {
 
   return (
     <Link
-      href={`praktikum/${subjectClass.id}`}
+      href={`/dashboard/praktikum/${subjectClass.id}`}
       key={subjectClass.id}
       className="flex min-h-[175px] w-full flex-col justify-between space-y-3 rounded-2xl bg-[#3272CA] p-3"
     >

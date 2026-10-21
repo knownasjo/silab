@@ -8,7 +8,7 @@ export default function ClassQuotaField({
   value,
 }: ClassQuotaFieldProps) {
   return (
-    <div className="flex h-full w-fit flex-col space-y-3">
+    <div className="flex w-[88px] shrink-0 flex-col space-y-3">
       <label
         htmlFor="class-quota"
         className="text-base font-semibold text-[#5E6278]"
@@ -17,7 +17,7 @@ export default function ClassQuotaField({
       </label>
       <input
         id="class-quota"
-        className="h-[54px] w-full rounded-2xl bg-[#f5f5f5] p-5 font-semibold text-[#1D1D1D] focus:outline-[#3272CA]"
+        className="h-[54px] w-full rounded-2xl bg-[#f5f5f5] px-2 text-center font-semibold text-[#1D1D1D] focus:outline-[#3272CA] disabled:cursor-not-allowed disabled:opacity-60"
         maxLength={2}
         placeholder="25"
         type="text"

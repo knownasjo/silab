@@ -137,13 +137,15 @@ export default function EditClassButton({
               onSubmit={handleSubmit}
               className="flex flex-col space-y-6"
             >
-              <ClassFormFields
-                form={form}
-                sessions={sessionsData}
-                sessionsLoaded={isLoaded}
-                currentSessionId={data.sessionId}
-                onChange={updateForm}
-              />
+              <fieldset disabled={isSaving} className="min-w-0">
+                <ClassFormFields
+                  form={form}
+                  sessions={sessionsData}
+                  sessionsLoaded={isLoaded}
+                  currentSessionId={data.sessionId}
+                  onChange={updateForm}
+                />
+              </fieldset>
               {data.participants > 0 && (
                 <p className="text-sm font-semibold text-[#5E6278]">
                   Kuota minimal {data.participants}, sesuai jumlah peserta

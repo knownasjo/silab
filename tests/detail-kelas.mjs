@@ -87,8 +87,11 @@ await runWebTest("Detail Kelas", data, async (browser) => {
     downloadThroughput: -1,
     uploadThroughput: -1,
   });
-  await browser.navigate(page(withOpen));
-  const sawLoading = await waitFor(bodyHas("Loading..."), 20000);
+  await browser.navigate(page(withOpen), { waitForLoad: false });
+  const sawLoading = await waitFor(
+    `location.pathname === "${page(withOpen)}" && ${bodyHas("Loading...")}`,
+    20000,
+  );
   await send("Network.emulateNetworkConditions", {
     offline: false,
     latency: 0,

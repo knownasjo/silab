@@ -70,8 +70,11 @@ await runWebTest("Halaman Praktikum", data, async (browser) => {
     downloadThroughput: -1,
     uploadThroughput: -1,
   });
-  await browser.navigate(PAGE);
-  const sawLoading = await waitFor(bodyHas("Loading..."), 20000);
+  await browser.navigate(PAGE, { waitForLoad: false });
+  const sawLoading = await waitFor(
+    `location.pathname === "${PAGE}" && ${bodyHas("Loading...")}`,
+    20000,
+  );
   await send("Network.emulateNetworkConditions", {
     offline: false,
     latency: 0,

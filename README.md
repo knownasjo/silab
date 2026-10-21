@@ -470,7 +470,8 @@ bertambah, dan jam sesi tertulis tetap di kode.
   ruang, sesi), lalu hasil server tampil sebagai pesan hijau atau merah di
   bawah form (`components/feedback-box.tsx`, dipakai juga halaman Profil).
   Kolom Kelas otomatis menjadi satu huruf besar dan kolom Kuota hanya menerima
-  angka.
+  angka. Mengetik huruf lain di kolom Kelas langsung mengganti huruf lama,
+  tanpa perlu menghapusnya dulu (juga di Ubah Kelas).
 - Pilihan **Sesi Kelas** diambil dari `GET /session`, terkunci sampai hari
   dipilih, dan menyesuaikan hari: Senin–Kamis memakai sesi Senin–Kamis, Jumat
   memakai sesi Jumat. Bila sesi hari itu belum ada, muncul "Jam sesi hari Jumat
@@ -479,6 +480,40 @@ bertambah, dan jam sesi tertulis tetap di kode.
   baru langsung muncul di pratinjau. Pratinjau dan pilihan sesi ikut berubah
   lewat event `class`, `subject`, dan `session`. Tombol "Hapus" diganti
   "Kosongkan" dan tidak lagi menutup form.
+- Perbaikan 21 Oktober 2026:
+  - Halaman berjudul **Tambah Praktikum** dengan tombol Kembali ke Praktikum,
+    lalu keterangan periode tempat kelas baru masuk.
+  - Pilihan **Mata Kuliah** urut abjad, tiap mata kuliah menulis semesternya,
+    dan tulisan awalnya "Pilih mata kuliah". Selama daftar dimuat tombolnya
+    menulis "Loading..." dan belum bisa dibuka. Nama panjang dipotong "…",
+    nama lengkap muncul saat disorot. Daftar ikut berubah tanpa refresh lewat
+    event `subject` (mata kuliah baru, ganti nama, dihapus). Bila belum ada
+    mata kuliah sama sekali muncul "Belum ada mata kuliah. Tambah dulu di
+    Master Data → Tambah Mata Kuliah." beserta tautannya.
+  - Mata Kuliah, Hari, Ruangan, dan Sesi Kelas bisa dipilih dengan keyboard:
+    panah bawah atau Spasi membuka pilihan, panah atas/bawah berpindah, Enter
+    memilih. Dulu Mata Kuliah, Hari, dan Ruangan hanya bisa diklik (Enter
+    menutup pilihan tanpa memilih apa pun).
+  - Pratinjau diberi judul **Kelas yang sudah ada (n)** dan memakai kartu yang
+    sama dengan halaman Praktikum (`components/praktikum/class-card.tsx`):
+    urut A, B, C, tanda Penuh, ruangan, dan nama mata kuliah paling banyak 2
+    baris. Kartu kecil lama (`small-class-card.tsx`) dihapus. Link kartu kini
+    alamat lengkap `/dashboard/praktikum/<id>`, jadi benar dari halaman mana
+    pun. "Belum ada kelas untuk mata kuliah ini." hanya tampil bila daftar
+    kelas berhasil dimuat; bila gagal, cukup pesan error di atas.
+  - Kolom Kelas dan Kuota lebarnya tetap, dan isian yang tidak muat turun ke
+    baris berikutnya. Di layar 1024 px Sesi Kelas berada di baris kedua, mulai
+    1280 px semua isian satu baris. Dulu di 1024 px Kelas dan Kuota terjepit
+    sampai hurufnya terpotong dan Sesi Kelas keluar dari kotak, juga di dialog
+    Ubah Kelas.
+  - Selama menyimpan (sekitar 3 detik), semua isian, tombol Kosongkan, dan
+    pilihan mata kuliah dikunci (`<fieldset disabled>`). Dulu ketikan untuk
+    kelas berikutnya hilang begitu penyimpanan selesai. Dialog Ubah Kelas juga
+    mengunci isiannya selama menyimpan.
+  - Dua laboran atau dua tab yang menyimpan kelas bersamaan tidak lagi bisa
+    membuat nama kelas kembar atau memakai ruang yang sama, karena server
+    memproses tambah dan ubah kelas satu per satu per periode (lihat README
+    backend).
 - Halaman **Master Data → Jam Sesi** menampilkan dua kartu (Senin–Kamis dan
   Jumat). Tiap sesi punya tombol Ubah (nomor dan jam; bila sesi dipakai kelas
   muncul keterangan "Jam n kelas di sesi ini ikut berubah."), Nonaktifkan/
@@ -868,6 +903,23 @@ Chrome dikendalikan langsung lewat DevTools Protocol, jadi tidak ada dependensi
 tambahan. Untuk meniru server mati atau sibuk, tes mencegat permintaan ke
 backend di dalam Chrome, jadi backend asli tidak perlu dimatikan.
 
+Setiap Chrome uji memakai folder profil sementara. Saat ditutup
+(`stopChrome` di `tests/bantuan/browser.mjs`), alat bantu menunggu Chrome
+benar-benar berhenti, lalu menghapus foldernya dan mengulang penghapusan
+sampai 10 kali dengan jeda 300 ms bila proses pembantu Chrome masih menulis
+berkas. Dulu Chrome hanya ditunggu 300 ms lalu foldernya dihapus sekali,
+sehingga sesekali tes gagal dengan "ENOTEMPTY: directory not empty" walaupun
+semua ceknya lulus.
+
+Cek "Loading..." (praktikum, detail-kelas, tambah-praktikum, daftar dan
+detail pengumuman) memperlambat jaringan, lalu membuka halaman dengan
+`browser.navigate(alamat, { waitForLoad: false })` dan langsung mengamati
+halaman baru (dengan syarat `location.pathname` sudah alamat itu). Dulu tes
+baru mulai mengamati setelah semua berkas halaman termuat, padahal saat
+jaringan lambat itu bisa 9–12 detik dan data kadang sudah selesai dimuat lebih
+dulu, sehingga "Loading..." terlewat (1 dari 8 percobaan) dan tes gagal
+padahal halamannya benar.
+
 Syarat sebelum menjalankan:
 
 - Backend jalan (`npm run dev` di `silab-backend`) dan web jalan
@@ -907,6 +959,7 @@ node tests/login.mjs        # satu tes saja
 | `praktikum` | Loading... saat memuat; mata kuliah urut abjad dan kelas urut A, B, C (juga daftar kelas asisten); "Belum ada kelas di periode ini."; nama mata kuliah panjang 2 baris di dalam kartu; tanda Penuh dan ruangan di kartu kelas; semester dan mata kuliah tetap terbuka setelah kembali dari detail kelas; pesan error bila `GET /class` gagal; tombol Tambah Praktikum utuh di layar 1024px | 20 |
 | `detail-kelas` | Loading... saat memuat; pertemuan yang presensinya dibuka langsung terpilih, tanpa itu pertemuan terakhir; tanda Dibuka di daftar pertemuan; pilihan tetap setelah kembali dari Rekap; Belum ada mahasiswa / Belum ada pertemuan; Tambah Pertemuan: Batal tidak menyimpan, Enter menyimpan, pertemuan baru langsung terpilih; QR: Layar Penuh memperbesar QR, Keluar Layar Penuh, Tutup; Ubah Status Presensi: jarak di layar 720 px dan Batal tanpa mengirim apa pun; layar 1024 px: tombol satu baris, NIM dan nama tidak saling menimpa, nama dosen utuh; pesan error bila `GET /meeting/:classId` gagal | 24 |
 | `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
+| `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 31 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|

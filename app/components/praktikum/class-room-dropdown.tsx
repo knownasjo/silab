@@ -7,41 +7,25 @@ import {
   ListboxOptions,
 } from "@headlessui/react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 
 interface ClassRoomDropdownProps {
   onRoomChange: (value: string) => void;
   value: string;
 }
 
-type room = {
-  title: string;
-  value: string;
-};
+const ROOMS = ["PSI", "SBTI"];
 
 export default function ClassRoomDropdown({
   onRoomChange,
   value,
 }: ClassRoomDropdownProps) {
-  const [selectedRoom, setSelectedRoom] = useState<string>("");
-
-  const rooms: room[] = [
-    { title: "PSI", value: "PSI" },
-    { title: "SBTI", value: "SBTI" },
-  ];
-
-  useEffect(() => setSelectedRoom(value), [value]);
-
   return (
-    <div className="flex h-full w-full flex-col justify-between space-y-3">
+    <div className="flex min-w-[150px] flex-1 flex-col space-y-3">
       <p className="text-base font-semibold text-[#5E6278]">Ruangan</p>
-      <Listbox>
-        <ListboxButton
-          value={value}
-          className={`flex h-full w-full flex-row items-center justify-between rounded-2xl bg-[#f5f5f5] px-[15px] font-semibold text-[#1D1D1D]`}
-        >
-          {selectedRoom === "" ? "Ruangan" : selectedRoom}
-          <div className="relative h-[24px] w-[24px]">
+      <Listbox value={value} onChange={onRoomChange}>
+        <ListboxButton className="flex h-[54px] w-full flex-row items-center justify-between rounded-2xl bg-[#f5f5f5] px-[15px] font-semibold text-[#1D1D1D] disabled:cursor-not-allowed disabled:opacity-60">
+          <p className="truncate">{value || "Ruangan"}</p>
+          <div className="relative h-[24px] w-[24px] shrink-0">
             <Image src={"/down.png"} alt="chevron down" fill />
           </div>
         </ListboxButton>
@@ -49,21 +33,13 @@ export default function ClassRoomDropdown({
           anchor="bottom"
           className={`w-[var(--button-width)] space-y-3 rounded-lg bg-[#f5f5f5]`}
         >
-          {rooms.map((room) => (
+          {ROOMS.map((room) => (
             <ListboxOption
-              value={room.value}
-              key={room.value}
-              className={`text-[#1d1d1d] data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
+              value={room}
+              key={room}
+              className={`cursor-pointer px-[15px] py-2 font-semibold text-[#1d1d1d] data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
             >
-              <button
-                onClick={() => {
-                  setSelectedRoom(room.value);
-                  onRoomChange(room.value);
-                }}
-                className="flex w-full flex-row items-start justify-start px-[15px] py-2 font-semibold"
-              >
-                {room.title}
-              </button>
+              {room}
             </ListboxOption>
           ))}
         </ListboxOptions>

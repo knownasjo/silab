@@ -50,8 +50,3 @@ export interface IDeleteClassResponseBody {
   assistants: number;
   meetings: number;
 }
-
-export type day = {
-  value: string;
-  title: string;
-};
