@@ -9,29 +9,34 @@ interface IClassCardProps {
 }
 
 const ClassCard: React.FC<IClassCardProps> = ({ subjectClass }) => {
+  const isFull = subjectClass.participants >= subjectClass.quota;
+
   return (
     <Link
       href={`praktikum/${subjectClass.id}`}
       key={subjectClass.id}
-      className="flex h-[175px] w-full flex-col justify-between rounded-2xl bg-[#3272CA] p-3"
+      className="flex min-h-[175px] w-full flex-col justify-between space-y-3 rounded-2xl bg-[#3272CA] p-3"
     >
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-row items-start justify-between space-x-2">
         <p className="text-3xl font-bold text-[#FFBF01]">{subjectClass.name}</p>
-        <div className="flex flex-row">
+        <div className="flex flex-col items-end space-y-1">
           <p className="text-3xl font-bold text-[#FFBF01]">
-            {subjectClass.participants}
+            {subjectClass.participants}/{subjectClass.quota}
           </p>
-          <p className="text-3xl font-bold text-[#FFBF01]">/</p>
-          <p className="text-3xl font-bold text-[#FFBF01]">
-            {subjectClass.quota}
-          </p>
+          {isFull && (
+            <span className="rounded-full bg-[#F1416C] px-2 py-0.5 text-xs font-bold text-white">
+              Penuh
+            </span>
+          )}
         </div>
       </div>
       <div className="flex flex-col text-white">
-        <p className="text-lg">{subjectClass.subject_name}</p>
+        <p className="line-clamp-2 text-lg" title={subjectClass.subject_name}>
+          {subjectClass.subject_name}
+        </p>
         <p className="text-sm">
           {formatDay(subjectClass.day)}, {subjectClass.startAt} -{" "}
-          {subjectClass.endAt}
+          {subjectClass.endAt} · {subjectClass.room}
         </p>
       </div>
     </Link>

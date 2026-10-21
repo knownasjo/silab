@@ -657,14 +657,32 @@ Halaman Praktikum laboran dan dosen mengelompokkan mata kuliah per semester
   dengan jumlah mata kuliahnya ("Semester 4 · 2 mata kuliah"). Semester tanpa
   mata kuliah tidak tampil, karena praktikum biasanya tidak ada di semua
   semester. Form mata kuliah tetap menerima semester 1–8.
-- Semua semester tertutup saat halaman dibuka. Bila hanya ada satu semester
-  yang berisi (misalnya dosen dengan satu mata kuliah), semester itu langsung
-  terbuka, termasuk saat mata kuliah pertamanya baru muncul lewat event
-  `subject`. Semester yang sedang terbuka tidak ikut tertutup saat ada mata
-  kuliah baru di semester lain.
-- Di dalam semester, urutan mata kuliah tetap menurut waktu dibuat, dan kartu
-  mata kuliah bekerja seperti sebelumnya: klik nama untuk melihat dosen, kode,
-  dan kelasnya.
+- Semua semester tertutup saat halaman pertama kali dibuka. Bila hanya ada
+  satu semester yang berisi (misalnya dosen dengan satu mata kuliah), semester
+  itu langsung terbuka, termasuk saat mata kuliah pertamanya baru muncul lewat
+  event `subject`. Semester yang sedang terbuka tidak ikut tertutup saat ada
+  mata kuliah baru di semester lain.
+- Semester dan mata kuliah yang sedang terbuka diingat di `sessionStorage`
+  (kunci `praktikum-terbuka`), jadi tetap terbuka setelah membuka detail kelas
+  lalu kembali, atau setelah halaman dimuat ulang, selama tab browser itu
+  belum ditutup. Kartu mata kuliah kini dibuka-tutup dengan tombol biasa
+  (`aria-expanded`), bukan `Disclosure` Headless UI, agar keadaannya bisa
+  disimpan.
+- Di dalam semester, mata kuliah urut abjad (lalu kode), dan kelas di dalam
+  mata kuliah urut nama (A, B, C). Kelas asisten diurutkan menurut mata kuliah
+  lalu nama kelas. Semua diurutkan di browser, tanpa perubahan backend.
+- Mata kuliah tanpa kelas di periode yang sedang dilihat menulis "Belum ada
+  kelas di periode ini.". Selama daftar mata kuliah atau kelas masih dimuat,
+  halaman menulis "Loading...". Bila `GET /class` gagal, pesan errornya tampil
+  di atas daftar (sebelumnya hanya untuk asisten), dan tulisan "Belum ada
+  kelas" tidak muncul karena isinya belum diketahui.
+- Kartu kelas (`class-card.tsx`) menampilkan ruangan setelah jam ("Senin,
+  07.00 - 08.40 · PSI"), tanda merah **Penuh** bila peserta sudah mencapai
+  kuota, dan nama mata kuliah paling banyak 2 baris (sisanya "…", nama lengkap
+  muncul saat disorot). Tinggi kartu minimal 175px dan bertambah bila perlu.
+- Banner Tambah Praktikum tingginya mengikuti isi. Di bawah 1280px tulisannya
+  lebih kecil dan gambarnya lebih sempit, jadi tombol Tambah Praktikum tidak
+  gepeng di layar 1024px.
 
 ### Periode Akademik
 
@@ -844,6 +862,7 @@ node tests/login.mjs        # satu tes saja
 | `hapus-matkul` | tombol Hapus Mata Kuliah di dialog Ubah (dosen tidak punya), letaknya di kiri dan tidak bertumpuk dengan Batal/Simpan, Batal tidak menghapus, Ya, hapus mengirim satu DELETE lalu kartu hilang dengan pesan hijau, halaman dosen di browser kedua ikut berubah tanpa dimuat ulang, penolakan server untuk mata kuliah yang sudah punya kelas tampil di konfirmasi | 21 |
 | `info-kelas` | kotak informasi di detail kelas pada layar 1440 dan 1280 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 14 |
 | `dashboard` | kartu laboran (termasuk Jumlah Kelas) sama dengan data server, sekali memuat hanya satu `GET /activation`, angka ikut berubah saat pembayaran dikonfirmasi di tempat lain; angka 312 / 480 tetap satu baris dan semua tulisan di dalam kartu pada layar 1440, 1366, 1280, dan 1024 px; pop-up Sign Out (Keluar merah di kanan, Batal menutup tanpa keluar); kartu asisten menghitung mata kuliah dari kelas yang ia pegang | 14 |
+| `praktikum` | Loading... saat memuat; mata kuliah urut abjad dan kelas urut A, B, C (juga daftar kelas asisten); "Belum ada kelas di periode ini."; nama mata kuliah panjang 2 baris di dalam kartu; tanda Penuh dan ruangan di kartu kelas; semester dan mata kuliah tetap terbuka setelah kembali dari detail kelas; pesan error bila `GET /class` gagal; tombol Tambah Praktikum utuh di layar 1024px | 20 |
 | `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
 
 | Variabel | Bawaan | Kegunaan |

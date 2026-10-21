@@ -60,11 +60,22 @@ export default function Praktikum() {
       )}
       {userData?.role === "MAHASISWA" && classesData && (
         <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
-          {classesData.map((subjectClass) => (
-            <ClassCard subjectClass={subjectClass} key={subjectClass.id} />
-          ))}
+          {[...classesData]
+            .sort(
+              (a, b) =>
+                a.subject_name.localeCompare(b.subject_name) ||
+                a.name.localeCompare(b.name),
+            )
+            .map((subjectClass) => (
+              <ClassCard subjectClass={subjectClass} key={subjectClass.id} />
+            ))}
         </div>
       )}
+      {userData?.role === "MAHASISWA" &&
+        isLoading &&
+        classesData.length === 0 && (
+          <p className="text-sm font-semibold text-[#5E6278]">Loading...</p>
+        )}
       {userData?.role === "MAHASISWA" && (
         <FeedbackBox
           feedback={loadError ? { ok: false, message: loadError } : null}

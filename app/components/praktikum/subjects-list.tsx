@@ -1,14 +1,9 @@
 "use client";
 
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-} from "@headlessui/react";
 import Image from "next/image";
 import SubjectClassesCard from "../subject-classes";
 import EditSubjectButton from "./edit-subject-button";
-import FeedbackBox from "../feedback-box";
+import FeedbackBox, { Feedback } from "../feedback-box";
 import useSubjectStore from "@/app/store/useSubjectStore";
 import useAuthStore from "@/app/store/useAuthStore";
 import useClassStore from "@/app/store/useClassStore";
@@ -19,6 +14,20 @@ import { useEffect, useState } from "react";
 interface SubjectsListProps {
   emptyMessage?: string;
 }
+
+type OpenState = Record<string, boolean>;
+
+const OPEN_STATE_KEY = "praktikum-terbuka";
+
+const readOpenState = (key: "semesters" | "subjects"): OpenState => {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(OPEN_STATE_KEY) ?? "{}");
+
+    return saved?.[key] ?? {};
+  } catch {
+    return {};
+  }
+};
 
 const groupBySemester = (subjects: IGetSubjectResponseBody[]) => {
   const groups = new Map<string, IGetSubjectResponseBody[]>();
@@ -32,13 +41,24 @@ const groupBySemester = (subjects: IGetSubjectResponseBody[]) => {
 
   return [...groups.entries()]
     .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([semester, subjects]) => ({ semester, subjects }));
+    .map(([semester, subjects]) => ({
+      semester,
+      subjects: [...subjects].sort(
+        (a, b) =>
+          a.subject_name.localeCompare(b.subject_name) ||
+          a.subject_code.localeCompare(b.subject_code),
+      ),
+    }));
 };
 
 const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
   const { subjectsData, getAllSubjects, error } = useSubjectStore();
   const { userData } = useAuthStore();
-  const { classesData, isLoading: isLoadingClasses } = useClassStore();
+  const {
+    classesData,
+    isLoading: isLoadingClasses,
+    loadError,
+  } = useClassStore();
   const { isArchive } = usePeriodView();
   const [isReady, setIsReady] = useState(false);
   const [notice, setNotice] = useState<{
@@ -46,8 +66,11 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
     message: string;
   } | null>(null);
   const [deletedNotice, setDeletedNotice] = useState<string | null>(null);
-  const [openSemesters, setOpenSemesters] = useState<Record<string, boolean>>(
-    {},
+  const [openSemesters, setOpenSemesters] = useState<OpenState>(() =>
+    readOpenState("semesters"),
+  );
+  const [openSubjects, setOpenSubjects] = useState<OpenState>(() =>
+    readOpenState("subjects"),
   );
   const canEdit = userData?.role === "LABORAN" && !isArchive;
   const shownSubjects = isArchive
@@ -57,6 +80,12 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
     : subjectsData;
   const semesters = groupBySemester(shownSubjects);
   const onlySemester = semesters.length === 1 ? semesters[0].semester : null;
+  const problem = error ?? loadError;
+  const feedback: Feedback = problem
+    ? { ok: false, message: problem }
+    : deletedNotice
+      ? { ok: true, message: deletedNotice }
+      : null;
 
   useEffect(() => {
     getAllSubjects().finally(() => setIsReady(true));
@@ -70,26 +99,34 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
     );
   }, [onlySemester]);
 
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        OPEN_STATE_KEY,
+        JSON.stringify({ semesters: openSemesters, subjects: openSubjects }),
+      );
+    } catch {}
+  }, [openSemesters, openSubjects]);
+
   const toggleSemester = (semester: string) =>
     setOpenSemesters((prev) => ({ ...prev, [semester]: !prev[semester] }));
 
+  const toggleSubject = (subjectId: string) =>
+    setOpenSubjects((prev) => ({ ...prev, [subjectId]: !prev[subjectId] }));
+
   return (
     <div className="flex h-full w-full flex-col items-start space-y-4">
-      <FeedbackBox
-        feedback={
-          error
-            ? { ok: false, message: error }
-            : deletedNotice
-              ? { ok: true, message: deletedNotice }
-              : null
-        }
-      />
+      <FeedbackBox feedback={feedback} />
+      {!isReady && subjectsData.length === 0 && (
+        <p className="text-sm font-semibold text-[#5E6278]">Loading...</p>
+      )}
       {emptyMessage && isReady && !error && subjectsData.length === 0 && (
         <p className="text-sm font-semibold text-[#5E6278]">{emptyMessage}</p>
       )}
       {isArchive &&
         isReady &&
         !isLoadingClasses &&
+        !loadError &&
         subjectsData.length > 0 &&
         shownSubjects.length === 0 && (
           <p className="text-sm font-semibold text-[#5E6278]">
@@ -125,56 +162,66 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
             </button>
             {isOpen && (
               <div id={panelId} className="mt-4 flex flex-col space-y-4">
-                {subjects.map((subject) => (
-                  <Disclosure
-                    key={subject.id}
-                    as={`div`}
-                    className={`w-full rounded-2xl border-2 border-[#F1F1F2] p-4`}
-                  >
-                    <div className="flex w-full flex-row items-start justify-between space-x-4">
-                      <DisclosureButton
-                        className={`flex h-fit w-full flex-row flex-wrap items-baseline gap-x-3 text-left`}
-                      >
-                        <p className="text-lg font-bold text-[#1d1d1d]">
-                          {subject.subject_name}
-                        </p>
-                        <p className="text-sm font-semibold text-[#5E6278]">
-                          {subject.subject_code}
-                        </p>
-                      </DisclosureButton>
-                      {canEdit && (
-                        <EditSubjectButton
-                          subject={subject}
-                          onSaved={(message, savedSemester) => {
-                            setDeletedNotice(null);
-                            setNotice({ subjectId: subject.id, message });
-                            setOpenSemesters((prev) => ({
-                              ...prev,
-                              [savedSemester]: true,
-                            }));
-                          }}
-                          onDeleted={(message) => {
-                            setNotice(null);
-                            setDeletedNotice(message);
-                          }}
-                        />
+                {subjects.map((subject) => {
+                  const isSubjectOpen = !!openSubjects[subject.id];
+                  const subjectPanelId = `subject-${subject.id}`;
+
+                  return (
+                    <div
+                      key={subject.id}
+                      className={`w-full rounded-2xl border-2 border-[#F1F1F2] p-4`}
+                    >
+                      <div className="flex w-full flex-row items-start justify-between space-x-4">
+                        <button
+                          type="button"
+                          aria-expanded={isSubjectOpen}
+                          aria-controls={subjectPanelId}
+                          onClick={() => toggleSubject(subject.id)}
+                          className={`flex h-fit w-full flex-row flex-wrap items-baseline gap-x-3 text-left`}
+                        >
+                          <p className="text-lg font-bold text-[#1d1d1d]">
+                            {subject.subject_name}
+                          </p>
+                          <p className="text-sm font-semibold text-[#5E6278]">
+                            {subject.subject_code}
+                          </p>
+                        </button>
+                        {canEdit && (
+                          <EditSubjectButton
+                            subject={subject}
+                            onSaved={(message, savedSemester) => {
+                              setDeletedNotice(null);
+                              setNotice({ subjectId: subject.id, message });
+                              setOpenSemesters((prev) => ({
+                                ...prev,
+                                [savedSemester]: true,
+                              }));
+                            }}
+                            onDeleted={(message) => {
+                              setNotice(null);
+                              setDeletedNotice(message);
+                            }}
+                          />
+                        )}
+                      </div>
+                      {notice?.subjectId === subject.id && (
+                        <div className="mt-3">
+                          <FeedbackBox
+                            feedback={{ ok: true, message: notice.message }}
+                          />
+                        </div>
+                      )}
+                      {isSubjectOpen && (
+                        <div id={subjectPanelId} className="w-full">
+                          <p className="text-base text-[#1d1d1d]/70">
+                            Dosen pengampu: {subject.lecturer}
+                          </p>
+                          <SubjectClassesCard subjectId={subject.id} />
+                        </div>
                       )}
                     </div>
-                    {notice?.subjectId === subject.id && (
-                      <div className="mt-3">
-                        <FeedbackBox
-                          feedback={{ ok: true, message: notice.message }}
-                        />
-                      </div>
-                    )}
-                    <DisclosurePanel className={`w-full`}>
-                      <p className="text-base text-[#1d1d1d]/70">
-                        Dosen pengampu: {subject.lecturer}
-                      </p>
-                      <SubjectClassesCard subjectId={subject.id} />
-                    </DisclosurePanel>
-                  </Disclosure>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>
