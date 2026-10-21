@@ -427,9 +427,9 @@ export default function StudentPaymentDialog({
                           height={20}
                         />
                       </ListboxButton>
-                      <ListboxOptions className="mt-1 w-full rounded-2xl border-2 border-[#BFD9EF] bg-white p-2">
+                      <ListboxOptions className="mt-1 w-full overflow-hidden rounded-2xl border-2 border-[#BFD9EF] bg-white">
                         {editing.available_classes.length === 0 && (
-                          <p className="p-2 text-sm text-[#5E6278]">
+                          <p className="px-3 py-2 text-sm text-[#5E6278]">
                             Belum ada kelas untuk mata kuliah ini.
                           </p>
                         )}
@@ -437,7 +437,7 @@ export default function StudentPaymentDialog({
                           editing.available_classes.length > 0 && (
                             <ListboxOption
                               value={null}
-                              className="cursor-pointer rounded-xl p-2 text-sm font-semibold text-[#5E6278] data-[focus]:bg-[#D2E3F1]"
+                              className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#5E6278] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
                             >
                               Kosongkan (mahasiswa memilih sendiri)
                             </ListboxOption>
@@ -451,7 +451,7 @@ export default function StudentPaymentDialog({
                               key={availableClass.id}
                               value={availableClass}
                               disabled={availableClass.is_full && !isCurrent}
-                              className="cursor-pointer rounded-xl p-2 text-sm font-semibold text-[#1D1D1D] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40 data-[focus]:bg-[#D2E3F1]"
+                              className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#1D1D1D] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40 data-[focus]:bg-[#3272CA] data-[focus]:text-white"
                             >
                               Kelas {availableClass.name} —{" "}
                               {formatDay(availableClass.day)},{" "}

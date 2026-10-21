@@ -173,6 +173,16 @@ await runWebTest("Halaman Tambah Praktikum", data, async (browser) => {
   const listed = await evaluate(
     `[...document.querySelectorAll('[role="option"]')].map((o) => o.innerText.split("\\n").map((line) => line.trim()).filter(Boolean))`,
   );
+  const edges = await evaluate(`(() => {
+    const panel = document.querySelector('[role="listbox"]');
+    const options = [...panel.querySelectorAll('[role="option"]')];
+    const last = options[options.length - 1];
+    return {
+      top: options[0].offsetTop,
+      bottom: panel.scrollHeight - (last.offsetTop + last.offsetHeight),
+      fullWidth: options.every((o) => o.offsetWidth === panel.clientWidth),
+    };
+  })()`);
   await browser.pressEscape();
   const names = listed.map(([name]) => name);
   const ours = names.filter((name) => name.startsWith("Uji Tambah"));
@@ -192,6 +202,11 @@ await runWebTest("Halaman Tambah Praktikum", data, async (browser) => {
       semesters[ZULU] === "Semester 2" &&
       semesters[EMPTY] === "Semester 3",
     JSON.stringify(semesters),
+  );
+  check(
+    "  sorotan biru opsi menempel sampai tepi daftar, seperti Jenis Pengumuman",
+    edges.top === 0 && edges.bottom === 0 && edges.fullWidth,
+    JSON.stringify(edges),
   );
 
   section("Keyboard");

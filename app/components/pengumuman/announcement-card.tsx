@@ -174,10 +174,9 @@ export default function AnnouncementCard({
         <MenuItems
           transition
           anchor="bottom end"
-          className={`flex w-[220px] flex-col space-y-2 rounded-2xl bg-white p-4 shadow-[#1D1D1D]/10 drop-shadow-md`}
+          className={`flex w-[220px] flex-col rounded-2xl bg-white shadow-[#1D1D1D]/10 drop-shadow-md`}
         >
           <AnnouncementSettingsDropdownItem
-            hoverIcon="/details-hovered.png"
             icon="/details.png"
             title="Lihat Detail"
             href={`/dashboard/pengumuman/${announcement.id}`}
@@ -186,14 +185,12 @@ export default function AnnouncementCard({
             <>
               <div className="h-[1px] w-full bg-[#1D1D1D]/10" />
               <AnnouncementSettingsDropdownItem
-                hoverIcon="/edit-hovered.png"
                 icon="/edit.png"
                 title="Edit"
                 onClick={openEdit}
               />
               <div className="h-[1px] w-full bg-[#1D1D1D]/10" />
               <AnnouncementSettingsDropdownItem
-                hoverIcon="/delete-hovered.png"
                 icon="/delete.png"
                 title="Hapus"
                 danger
@@ -249,12 +246,12 @@ export default function AnnouncementCard({
                     height={20}
                   />
                 </ListboxButton>
-                <ListboxOptions className="mt-1 w-[var(--button-width)] rounded-2xl bg-[#F5F5F5] p-2">
+                <ListboxOptions className="mt-1 w-[var(--button-width)] overflow-hidden rounded-2xl bg-[#F5F5F5]">
                   {ANNOUNCEMENT_TYPES.map((option) => (
                     <ListboxOption
                       key={option.value}
                       value={option.value}
-                      className="cursor-pointer rounded-xl px-3 py-2 font-semibold text-[#1D1D1D] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
+                      className="cursor-pointer px-5 py-2 font-semibold text-[#1D1D1D] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
                     >
                       {option.title}
                     </ListboxOption>

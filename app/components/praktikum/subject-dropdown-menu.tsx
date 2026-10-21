@@ -39,7 +39,7 @@ export default function SubjectDropdownMenu({
       </ListboxButton>
       <ListboxOptions
         anchor="bottom"
-        className={`w-[var(--button-width)] rounded-lg bg-white py-2`}
+        className={`w-[var(--button-width)] rounded-lg bg-white`}
       >
         {sortedSubjects.map((subject) => (
           <ListboxOption

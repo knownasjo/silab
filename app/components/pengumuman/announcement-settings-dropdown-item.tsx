@@ -3,10 +3,8 @@
 import { MenuItem } from "@headlessui/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 
 interface AnnouncementSettingsDropdownItemProps {
-  hoverIcon: string;
   icon: string;
   title: string;
   href?: string;
@@ -15,20 +13,17 @@ interface AnnouncementSettingsDropdownItemProps {
 }
 
 export default function AnnouncementSettingsDropdownItem({
-  hoverIcon,
   icon,
   title,
   href,
   onClick,
   danger = false,
 }: AnnouncementSettingsDropdownItemProps) {
-  const [isHovered, setIsHovered] = useState<boolean>(false);
-
   const content = (
     <>
-      <div className="relative h-[20px] w-[20px]">
+      <div className="relative h-[20px] w-[20px] group-data-[focus]:brightness-0 group-data-[focus]:invert">
         <Image
-          src={isHovered ? hoverIcon : icon}
+          src={icon}
           alt="announcement settings"
           className="static"
           style={{ objectFit: "contain" }}
@@ -40,31 +35,18 @@ export default function AnnouncementSettingsDropdownItem({
     </>
   );
 
-  const className = `flex w-full flex-row items-center space-x-3 rounded-lg p-3 text-left align-middle text-[#1D1D1D] ${
-    danger
-      ? "hover:bg-[#FFD9D9] hover:text-[#FF0000]"
-      : "hover:bg-[#D1E7FB] hover:text-[#3272CA]"
+  const className = `group flex w-full flex-row items-center space-x-3 px-4 py-3 text-left align-middle text-[#1D1D1D] data-[focus]:text-white ${
+    danger ? "data-[focus]:bg-[#F1416C]" : "data-[focus]:bg-[#3272CA]"
   }`;
 
   return (
     <MenuItem>
       {href ? (
-        <Link
-          href={href}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className={className}
-        >
+        <Link href={href} className={className}>
           {content}
         </Link>
       ) : (
-        <button
-          type="button"
-          onClick={onClick}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className={className}
-        >
+        <button type="button" onClick={onClick} className={className}>
           {content}
         </button>
       )}

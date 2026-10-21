@@ -489,7 +489,10 @@ bertambah, dan jam sesi tertulis tetap di kode.
     nama lengkap muncul saat disorot. Daftar ikut berubah tanpa refresh lewat
     event `subject` (mata kuliah baru, ganti nama, dihapus). Bila belum ada
     mata kuliah sama sekali muncul "Belum ada mata kuliah. Tambah dulu di
-    Master Data → Tambah Mata Kuliah." beserta tautannya.
+    Master Data → Tambah Mata Kuliah." beserta tautannya. Daftar pilihannya
+    tanpa jarak di atas dan bawah, jadi sorotan biru opsi pertama dan
+    terakhir menempel sampai tepi daftar, sama seperti pilihan Jenis
+    Pengumuman.
   - Mata Kuliah, Hari, Ruangan, dan Sesi Kelas bisa dipilih dengan keyboard:
     panah bawah atau Spasi membuka pilihan, panah atas/bawah berpindah, Enter
     memilih. Dulu Mata Kuliah, Hari, dan Ruangan hanya bisa diklik (Enter
@@ -851,6 +854,34 @@ diperbaiki pada 21 Oktober 2026:
   (3/12) agar tidak menimpa nama. Judul kelas memakai 26 px di bawah
   1280 px.
 
+### Tampilan dropdown
+
+Sejak 22 Oktober 2026 semua dropdown memakai sorotan yang sama dengan pilihan
+Jenis Pengumuman di Buat Pengumuman:
+
+- Opsi yang disorot mouse atau dipilih dengan panah keyboard berlatar biru
+  `#3272CA` dengan tulisan putih (`data-[focus]:`), selebar daftar dan
+  menempel sampai tepi atas dan bawah daftar. Daftar pilihan tidak diberi
+  jarak dalam (padding) dan opsinya tidak berbentuk kapsul, jadi sorotan opsi
+  pertama dan terakhir tidak menyisakan garis putih.
+- Berlaku untuk: Jenis Pengumuman (Buat Pengumuman dan pop-up Edit), Dosen
+  Pengampu, Semester, Mata Kuliah, Hari, Ruangan, Sesi Kelas, Periode, Pilih
+  Pertemuan, Pilih Kelas di pop-up Pembayaran, dan menu titik tiga di kartu
+  pengumuman (Lihat Detail, Edit, Hapus).
+- Di menu titik tiga, ikon ikut menjadi putih saat disorot (filter
+  `brightness-0 invert`), dan **Hapus** berlatar merah `#F1416C`, sama
+  dengan tombol hapus lain. Ikon versi hover lama (`*-hovered.png`) sudah
+  tidak dipakai dan dihapus.
+- Pilihan yang menempel di tombol (prop `anchor`) sudah dipotong sudutnya oleh
+  Headless UI (`overflow: auto`). Daftar yang tidak menempel (Jenis Pengumuman
+  di pop-up Edit, Pilih Kelas) memakai `overflow-hidden` agar sorotan
+  mengikuti sudut melengkung.
+- **Pilih Pertemuan** kini memakai `value`/`onChange` Listbox: panah keyboard
+  menyorot pertemuan dan Enter memilihnya. Dulu sorotannya hanya `hover:`
+  dan Enter tidak memilih apa pun.
+- Menu sidebar saat diciutkan tidak termasuk, karena isinya tautan navigasi
+  dengan gaya tombol sidebar.
+
 ### Tanda HP tidak biasa
 
 Backend mencatat HP yang dipakai scan, dan presensi dari HP yang bukan HP
@@ -959,7 +990,8 @@ node tests/login.mjs        # satu tes saja
 | `praktikum` | Loading... saat memuat; mata kuliah urut abjad dan kelas urut A, B, C (juga daftar kelas asisten); "Belum ada kelas di periode ini."; nama mata kuliah panjang 2 baris di dalam kartu; tanda Penuh dan ruangan di kartu kelas; semester dan mata kuliah tetap terbuka setelah kembali dari detail kelas; pesan error bila `GET /class` gagal; tombol Tambah Praktikum utuh di layar 1024px | 20 |
 | `detail-kelas` | Loading... saat memuat; pertemuan yang presensinya dibuka langsung terpilih, tanpa itu pertemuan terakhir; tanda Dibuka di daftar pertemuan; pilihan tetap setelah kembali dari Rekap; Belum ada mahasiswa / Belum ada pertemuan; Tambah Pertemuan: Batal tidak menyimpan, Enter menyimpan, pertemuan baru langsung terpilih; QR: Layar Penuh memperbesar QR, Keluar Layar Penuh, Tutup; Ubah Status Presensi: jarak di layar 720 px dan Batal tanpa mengirim apa pun; layar 1024 px: tombol satu baris, NIM dan nama tidak saling menimpa, nama dosen utuh; pesan error bila `GET /meeting/:classId` gagal | 24 |
 | `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
-| `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 31 |
+| `dropdown` | sorotan opsi pertama dan terakhir menempel sampai tepi daftar dengan latar biru dan tulisan putih di 12 dropdown: Jenis Pengumuman, Dosen Pengampu, Semester, Mata Kuliah, Hari, Ruangan, Sesi Kelas, Periode, Pilih Pertemuan, menu titik tiga pengumuman (Hapus merah), Jenis Pengumuman di pop-up Edit, Pilih Kelas di Pembayaran; Pilih Pertemuan dengan keyboard: sorotan biru dan Enter memilih | 17 |
+| `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; sorotan biru opsi menempel sampai tepi daftar; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 32 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|

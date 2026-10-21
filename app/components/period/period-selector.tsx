@@ -54,7 +54,7 @@ export default function PeriodSelector() {
         </ListboxButton>
         <ListboxOptions
           anchor="bottom start"
-          className="z-50 mt-2 w-[var(--button-width)] rounded-xl bg-white py-1 shadow-lg"
+          className="z-50 mt-2 w-[var(--button-width)] rounded-xl bg-white shadow-lg"
         >
           {periodsData.map((period) => (
             <ListboxOption

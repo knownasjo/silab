@@ -23,9 +23,8 @@ export default function MeetingsDropDown({
   };
 
   return (
-    <Listbox>
+    <Listbox value={selectedMeeting ?? ""} onChange={handleSelectedMeeting}>
       <ListboxButton
-        value={selectedMeeting}
         className={`flex h-fit flex-row content-center items-center space-x-4 rounded-full bg-[#D2E3F1] p-3 text-sm font-semibold text-[#3272CA]`}
       >
         <p className="whitespace-nowrap">
@@ -50,11 +49,9 @@ export default function MeetingsDropDown({
         {meetingsData &&
           meetingsData.map((meeting) => (
             <ListboxOption
-              as="button"
-              onClick={() => handleSelectedMeeting(meeting.id)}
               key={meeting.id}
               value={meeting.id}
-              className={`w-full p-3 hover:bg-[#3272CA] hover:text-white`}
+              className={`w-full cursor-pointer p-3 data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
             >
               <p className="flex w-full flex-row items-center justify-between space-x-3">
                 <span className="text-left">{meeting.meeting_name}</span>
