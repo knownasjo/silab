@@ -28,7 +28,7 @@ export default function MeetingsDropDown({
         value={selectedMeeting}
         className={`flex h-fit flex-row content-center items-center space-x-4 rounded-full bg-[#D2E3F1] p-3 text-sm font-semibold text-[#3272CA]`}
       >
-        <p>
+        <p className="whitespace-nowrap">
           {selectedMeeting &&
             meetingsData?.find((meeting) => meeting.id === selectedMeeting)
               ?.meeting_name}
@@ -45,7 +45,7 @@ export default function MeetingsDropDown({
       </ListboxButton>
       <ListboxOptions
         anchor="bottom"
-        className={`mt-1 w-[var(--button-width)] rounded-2xl bg-[#D2E3F1] text-sm font-semibold text-[#3272CA]`}
+        className={`mt-1 w-56 min-w-[var(--button-width)] rounded-2xl bg-[#D2E3F1] text-sm font-semibold text-[#3272CA]`}
       >
         {meetingsData &&
           meetingsData.map((meeting) => (
@@ -56,7 +56,14 @@ export default function MeetingsDropDown({
               value={meeting.id}
               className={`w-full p-3 hover:bg-[#3272CA] hover:text-white`}
             >
-              <p className="w-full items-center">{meeting.meeting_name}</p>
+              <p className="flex w-full flex-row items-center justify-between space-x-3">
+                <span className="text-left">{meeting.meeting_name}</span>
+                {meeting.is_open && (
+                  <span className="rounded-md bg-[#E8FFF3] px-2 py-0.5 text-xs text-[#50CD89]">
+                    Dibuka
+                  </span>
+                )}
+              </p>
             </ListboxOption>
           ))}
       </ListboxOptions>

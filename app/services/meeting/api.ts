@@ -12,7 +12,7 @@ import { IBaseResponse } from "@/app/interfaces/global/index.interface";
 
 export const postMeeting = async (
   body: IAddClassMeetingRequestBody,
-): Promise<IBaseResponse> => {
+): Promise<IBaseResponse<{ id: string }>> => {
   const res = await satellite.post("/meeting", body);
 
   return res.data;

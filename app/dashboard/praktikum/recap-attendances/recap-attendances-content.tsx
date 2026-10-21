@@ -19,7 +19,7 @@ export default function RecapAttendancesContent({
   meetingId,
 }: RecapAttendancesContentProps) {
   const { getClassById, refreshClassById, classData } = useClassStore();
-  const { getMeetings, refreshMeetings, meetingsData, error } =
+  const { getMeetings, refreshMeetings, meetingsData, loadError } =
     useMeetingStore();
 
   const [isReady, setIsReady] = useState(false);
@@ -60,7 +60,7 @@ export default function RecapAttendancesContent({
   const showTotal = recap.columns.length > 1;
 
   const emptyMessage = (() => {
-    if (error) return error;
+    if (loadError) return loadError;
     if (meetingsData.length === 0)
       return "Kelas ini belum punya pertemuan. Tambahkan pertemuan dulu sebelum membuat rekap.";
     if (meetings.length === 0) return "Pertemuan tidak ditemukan.";

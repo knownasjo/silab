@@ -152,7 +152,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `/auth` | Login NIM/NIY + password (mahasiswa memakai NIM, dosen dan laboran NIY 8 angka). Kotak "Sesi Anda berakhir" hanya bila baru dikeluarkan, lihat Autentikasi |
 | `/dashboard` | Kartu statistik, lihat "Dashboard". LABORAN: mata kuliah, kelas periode aktif, dan pembayaran. Asisten: mata kuliah dan kelas yang ia pegang. DOSEN: kelas, mahasiswa, pertemuan, dan rata-rata kehadiran mata kuliah yang ia ampu |
 | `/dashboard/praktikum` | LABORAN: semua mata kuliah dikelompokkan per semester dengan tombol Ubah (di dalamnya ada Hapus Mata Kuliah), lihat "Praktikum per Semester", "Ubah Mata Kuliah", dan "Hapus Mata Kuliah". DOSEN: kelompok semester yang sama, hanya mata kuliah yang ia ampu. Asisten (MAHASISWA): kartu kelas yang ia pegang |
-| `/dashboard/praktikum/[classId]` | Detail kelas (hari, jam, ruangan, dosen, asisten, kuota) + panel pertemuan & presensi. LABORAN: tombol Ubah Kelas dan Hapus Kelas, lihat "Ubah dan Hapus Kelas". LABORAN dan asisten: tambah, ubah judul, dan hapus pertemuan, lihat "Tambah, Ubah, dan Hapus Pertemuan". DOSEN hanya melihat |
+| `/dashboard/praktikum/[classId]` | Detail kelas (hari, jam, ruangan, dosen, asisten, kuota) + panel pertemuan & presensi; pertemuan langsung terpilih, lihat "Memilih pertemuan". LABORAN: tombol Ubah Kelas dan Hapus Kelas, lihat "Ubah dan Hapus Kelas". LABORAN dan asisten: tambah, ubah judul, dan hapus pertemuan, lihat "Tambah, Ubah, dan Hapus Pertemuan". DOSEN hanya melihat |
 | `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah (hanya LABORAN), lihat "Ubah Mata Kuliah" |
@@ -515,6 +515,12 @@ Kotak Hari/Jam, Ruangan, Dosen, Asisten Praktikum, dan Kuota di detail kelas
   memanjang.
 - Ikon pensil "Kelola asisten" (khusus laboran) menempel di sebelah tulisan
   Asisten Praktikum, tidak lagi di ujung kanan kolom.
+- Di bawah 1280 px (21 Oktober 2026) kotak menjadi dua baris: Hari/Jam,
+  Ruangan, dan Kuota di atas, lalu Dosen dan Asisten Praktikum di bawah,
+  tanpa garis pemisah. Dulu di layar 1024 px nama dosen dan asisten terpecah
+  per huruf. Kotak juga diberi `shrink-0`, karena `min-h-[150px]`
+  membuatnya boleh menyusut sampai 150 px di halaman yang pendek, sehingga
+  nama asisten keluar dari kotak dan menimpa tombol di bawahnya.
 
 ### Ubah dan Hapus Kelas
 
@@ -766,13 +772,49 @@ periode, misalnya "2026/2027 Ganjil". Aturannya ada di README backend bagian
 - Hapus membuka konfirmasi. Bila sesi presensinya sedang dibuka atau sudah
   ada presensi (dihitung dari `submitted_at` di data pertemuan), dialog
   menjelaskan alasannya dan hanya ada tombol Tutup; penolakan dari server
-  tetap tampil bila data di browser belum terbaru. Setelah dihapus, pilihan
-  kembali ke "Pilih Pertemuan" dengan pesan hijau "Responsi berhasil
-  dihapus".
+  tetap tampil bila data di browser belum terbaru. Setelah dihapus, halaman
+  memilih pertemuan lain menurut aturan di "Memilih pertemuan", dengan pesan
+  hijau "Responsi berhasil dihapus".
 - Dropdown kini mengikuti pilihan dari `class-meetings-content.tsx`.
   Pertemuan yang dipilih dicari ulang di data terbaru, jadi bila laboran lain
-  menghapusnya, halaman ikut kembali ke "Pilih Pertemuan", dan judul yang
+  menghapusnya, halaman ikut berpindah ke pertemuan lain, dan judul yang
   diubah dari tempat lain langsung tampil, keduanya lewat event `meeting`.
+- Dialog Tambah Pertemuan berupa form (21 Oktober 2026): Enter menyimpan,
+  ada tombol Batal, dan dialog tidak bisa ditutup selama menyimpan.
+  `POST /meeting` membalas `data.id`, jadi pertemuan baru langsung terpilih
+  dan bisa langsung dibuka presensinya.
+
+### Memilih pertemuan
+
+Bagian pertemuan di detail kelas (`components/praktikum/class-meetings-content.tsx`)
+diperbaiki pada 21 Oktober 2026:
+
+- Pertemuan langsung terpilih saat halaman dibuka, tanpa tulisan "Pilih
+  Pertemuan untuk Melihat Daftar Presensi!". Urutannya: pilihan terakhir di
+  tab ini, lalu pertemuan yang presensinya sedang dibuka, lalu pertemuan
+  terakhir di daftar. Pilihan disimpan di `sessionStorage` dengan kunci
+  `pertemuan-terpilih:<classId>`, jadi tetap sama setelah membuka Rekap lalu
+  kembali, selama tab itu belum ditutup.
+- Daftar pilihan pertemuan memberi tanda hijau **Dibuka** pada pertemuan yang
+  sesi presensinya sedang dibuka.
+- Kelas tanpa pertemuan menulis "Belum ada pertemuan. Klik Tambah Pertemuan
+  untuk memulai." (dosen: "Belum ada pertemuan."). Pertemuan di kelas tanpa
+  mahasiswa menulis "Belum ada mahasiswa di kelas ini." tanpa judul tabel.
+  Selama kelas atau pertemuan dimuat, halaman menulis "Loading...".
+- Gagal memuat `GET /meeting/:classId` disimpan di `loadError` milik
+  `useMeetingStore` (terpisah dari `error` untuk aksi seperti Buka Presensi),
+  lalu tampil merah di atas daftar. Halaman Rekap Presensi membaca
+  `loadError` yang sama. `getMeetings` mengosongkan daftar saat berganti
+  kelas dan mengabaikan balasan untuk kelas lain, jadi pertemuan kelas
+  sebelumnya tidak sempat terpilih.
+- Pop-up kode QR punya tombol **Layar Penuh** (Fullscreen API pada panel
+  dialog; QR membesar sampai 70% sisi layar yang lebih pendek) dan
+  **Tutup**. Pop-up Ubah Status Presensi punya tombol **Batal**, tingginya
+  mengikuti isi, dan tidak bisa ditutup selama menyimpan.
+- Di bawah 1280 px tombol pertemuan turun ke baris berikutnya alih-alih
+  terlipat, tulisan tabel presensi lebih kecil, dan kolom NIM lebih lebar
+  (3/12) agar tidak menimpa nama. Judul kelas memakai 26 px di bawah
+  1280 px.
 
 ### Tanda HP tidak biasa
 
@@ -860,9 +902,10 @@ node tests/login.mjs        # satu tes saja
 | `pengumuman` | List dan Detail: Loading... saat memuat, label jenis, tanggal jam lokal beserta penulis, Edit tanpa perubahan tidak mengirim apa pun, dosen tanpa menu Edit/Hapus. Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Hapus, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 1000 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, pengumuman panjang dipotong 3 baris di daftar dan tampil utuh dengan paragraf terpisah di detail, dosen melihat pesan hanya laboran. Permintaan simpan dan ubah dicegat, jadi tidak ada pengumuman asli yang terkirim | 34 |
 | `pengumuman-matkul` | pilihan Untuk di Buat Pengumuman: bawaan Semua mahasiswa, hilang untuk jenis pendaftaran, daftar mata kuliah dengan kode dan semester, tanpa centang ditolak tanpa mengirim, `subjectIds` yang terkirim dan tersimpan, pendaftaran tetap terkirim untuk semua; kartu dan detail menyebut tujuan beserta semesternya; Edit terisi tujuan lama, tanpa perubahan tidak mengirim, mengganti mata kuliah dan kembali ke Semua mahasiswa; kotak centang dan pilihan bergaya tema (input asli tersembunyi, biru `#3272CA`, pilihan tanpa garis luar) dan tersusun atas-bawah | 28 |
 | `hapus-matkul` | tombol Hapus Mata Kuliah di dialog Ubah (dosen tidak punya), letaknya di kiri dan tidak bertumpuk dengan Batal/Simpan, Batal tidak menghapus, Ya, hapus mengirim satu DELETE lalu kartu hilang dengan pesan hijau, halaman dosen di browser kedua ikut berubah tanpa dimuat ulang, penolakan server untuk mata kuliah yang sudah punya kelas tampil di konfirmasi | 21 |
-| `info-kelas` | kotak informasi di detail kelas pada layar 1440 dan 1280 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 14 |
+| `info-kelas` | kotak informasi di detail kelas pada layar 1440, 1280, dan 1024 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 19 |
 | `dashboard` | kartu laboran (termasuk Jumlah Kelas) sama dengan data server, sekali memuat hanya satu `GET /activation`, angka ikut berubah saat pembayaran dikonfirmasi di tempat lain; angka 312 / 480 tetap satu baris dan semua tulisan di dalam kartu pada layar 1440, 1366, 1280, dan 1024 px; pop-up Sign Out (Keluar merah di kanan, Batal menutup tanpa keluar); kartu asisten menghitung mata kuliah dari kelas yang ia pegang | 14 |
 | `praktikum` | Loading... saat memuat; mata kuliah urut abjad dan kelas urut A, B, C (juga daftar kelas asisten); "Belum ada kelas di periode ini."; nama mata kuliah panjang 2 baris di dalam kartu; tanda Penuh dan ruangan di kartu kelas; semester dan mata kuliah tetap terbuka setelah kembali dari detail kelas; pesan error bila `GET /class` gagal; tombol Tambah Praktikum utuh di layar 1024px | 20 |
+| `detail-kelas` | Loading... saat memuat; pertemuan yang presensinya dibuka langsung terpilih, tanpa itu pertemuan terakhir; tanda Dibuka di daftar pertemuan; pilihan tetap setelah kembali dari Rekap; Belum ada mahasiswa / Belum ada pertemuan; Tambah Pertemuan: Batal tidak menyimpan, Enter menyimpan, pertemuan baru langsung terpilih; QR: Layar Penuh memperbesar QR, Keluar Layar Penuh, Tutup; Ubah Status Presensi: jarak di layar 720 px dan Batal tanpa mengirim apa pun; layar 1024 px: tombol satu baris, NIM dan nama tidak saling menimpa, nama dosen utuh; pesan error bila `GET /meeting/:classId` gagal | 24 |
 | `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
 
 | Variabel | Bawaan | Kegunaan |

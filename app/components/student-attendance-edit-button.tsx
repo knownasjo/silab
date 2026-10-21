@@ -57,6 +57,10 @@ export default function StudentAttendanceEditButton({
     setIsDialogOpen(false);
   };
 
+  const closeDialog = () => {
+    if (!isLoading) setIsDialogOpen(false);
+  };
+
   const handleReset = async () => {
     await resetStudentAttendance(meetingId, student.student_id, classId);
 
@@ -74,6 +78,7 @@ export default function StudentAttendanceEditButton({
     <>
       <button
         onClick={() => setIsDialogOpen(true)}
+        aria-label={`Ubah presensi ${student.student_name}`}
         className="relative flex h-6 w-2/12 items-center justify-center"
       >
         <Image
@@ -84,18 +89,18 @@ export default function StudentAttendanceEditButton({
         />
       </button>
       <Dialog
-        onClose={() => setIsDialogOpen(false)}
+        onClose={closeDialog}
         open={isDialogOpen}
         className={"relative z-50 h-full w-full"}
       >
         <DialogBackdrop className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 flex h-full w-screen items-center justify-center p-4">
-          <DialogPanel className="flex h-3/5 w-[500px] flex-col space-y-4 rounded-2xl bg-white p-10">
+          <DialogPanel className="flex max-h-[90vh] w-[500px] max-w-[95vw] flex-col space-y-6 overflow-y-auto rounded-2xl bg-white p-10">
             <DialogTitle className="font-bold text-[#1d1d1d]">
               Ubah Status Presensi Mahasiswa
             </DialogTitle>
-            <div className="flex h-full w-full flex-col justify-between">
-              <div className="flex h-full w-full flex-col space-y-8">
+            <div className="flex w-full flex-col space-y-8">
+              <div className="flex w-full flex-col space-y-6">
                 <div className="flex flex-col">
                   <p className="text-xs font-semibold text-[#5E6278]">NIM</p>
                   <p className="text-sm font-bold text-[#1D1D1D]">
@@ -154,6 +159,14 @@ export default function StudentAttendanceEditButton({
                     Kembalikan ke Belum Presensi
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={closeDialog}
+                  disabled={isLoading}
+                  className="w-full rounded-full border-2 border-[#F1F1F2] p-4 font-semibold text-[#5E6278] disabled:opacity-50"
+                >
+                  Batal
+                </button>
               </div>
             </div>
           </DialogPanel>

@@ -49,7 +49,7 @@ export default function OpenAttendancesButton({
       <button
         onClick={handleToggleAttendance}
         disabled={isDisabled}
-        className={`h-fit content-center rounded-full p-3 text-sm font-semibold text-white ${
+        className={`h-fit content-center whitespace-nowrap rounded-full p-3 text-sm font-semibold text-white ${
           isDisabled
             ? "cursor-not-allowed bg-[#B5B5C3]"
             : isOpen

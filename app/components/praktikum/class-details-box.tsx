@@ -10,7 +10,7 @@ interface IClassDetailBox {
 }
 
 const Divider = () => (
-  <div className="w-[0.3px] shrink-0 self-stretch rounded-full border border-dashed border-[#1d1d1d]/30"></div>
+  <div className="hidden w-[0.3px] shrink-0 self-stretch rounded-full border border-dashed border-[#1d1d1d]/30 xl:block"></div>
 );
 
 const ClassDetailsBox: React.FC<IClassDetailBox> = ({
@@ -21,7 +21,7 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
   const { userData } = useAuthStore();
 
   return (
-    <div className="flex min-h-[150px] w-full flex-row space-x-6 rounded-[20px] bg-white p-5">
+    <div className="grid min-h-[150px] w-full shrink-0 grid-cols-3 gap-x-6 gap-y-5 rounded-[20px] bg-white p-5 xl:flex xl:flex-row xl:gap-0 xl:space-x-6">
       <div className="flex shrink-0 flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Hari, Jam</p>
         <p className="text-[18px] font-semibold text-black">
@@ -39,14 +39,14 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
         </p>
       </div>
       <Divider />
-      <div className="flex min-w-0 flex-1 flex-col space-y-4">
+      <div className="col-start-1 row-start-2 flex min-w-0 flex-1 flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Dosen</p>
         <p className="break-words text-[18px] font-semibold text-black">
           {data.lecturer}
         </p>
       </div>
       <Divider />
-      <div className="flex min-w-0 flex-[2] flex-col space-y-4">
+      <div className="col-span-2 col-start-2 row-start-2 flex min-w-0 flex-[2] flex-col space-y-4">
         <div className="flex flex-row items-center space-x-2">
           <p className="text-[16px] font-semibold text-[#5E6278]">
             Asisten Praktikum
@@ -78,7 +78,7 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
         </div>
       </div>
       <Divider />
-      <div className="flex shrink-0 flex-col space-y-4">
+      <div className="col-start-3 row-start-1 flex shrink-0 flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Kuota</p>
         <p className="whitespace-nowrap text-[18px] font-semibold text-black">
           {data.participants} / {data.quota}

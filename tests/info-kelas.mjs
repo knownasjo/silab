@@ -48,7 +48,7 @@ await runWebTest("Kotak informasi kelas", data, async (browser) => {
     })()`);
 
   check("login laboran", await browser.login(data.laboran, data.password));
-  for (const width of [1440, 1280]) {
+  for (const width of [1440, 1280, 1024]) {
     section(`Layar ${width} px`);
     await browser.send("Emulation.setDeviceMetricsOverride", {
       width,

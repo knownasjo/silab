@@ -63,14 +63,10 @@ await runWebTest("Tanda HP tidak biasa di web", data, async (browser) => {
     });
   const openMeeting = async (page) => {
     await page.navigate(`/dashboard/praktikum/${cls.id}`);
-    await page.waitFor(
-      `${bodyHas("Uji HP Web")} && ${bodyHas("Pilih Pertemuan")}`,
+    return page.waitFor(
+      `${bodyHas("Uji HP Web")} && ${bodyHas("Jumlah hadir")} && !!(${page.visibleButton("Pertemuan 1")})`,
       20000,
     );
-    await page.clickText("Pilih Pertemuan");
-    await page.waitFor(`!!(${page.visibleButton("Pertemuan 1")})`, 5000);
-    await page.clickText("Pertemuan 1");
-    return page.waitFor(bodyHas("Jumlah hadir"), 10000);
   };
 
   const lecturer = await openBrowser();

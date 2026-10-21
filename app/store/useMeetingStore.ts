@@ -26,6 +26,7 @@ type MeetingQrToken = {
 type MeetingState = GlobalState & {
   meetingsData: IGetAllClassMeetingResponseBody[];
   meetingsClassId: string | null;
+  loadError: string | null;
   message: string | null;
   qrToken: MeetingQrToken | null;
   qrError: string | null;
@@ -36,7 +37,7 @@ type MeetingActions = {
   refreshMeetings: (classId: string) => Promise<void>;
   getQrToken: (meetingId: string) => Promise<void>;
   clearQrToken: () => void;
-  addMeeting: (body: IAddClassMeetingRequestBody) => Promise<void>;
+  addMeeting: (body: IAddClassMeetingRequestBody) => Promise<string | null>;
   updateMeeting: (
     meetingId: string,
     meetingName: string,
@@ -75,6 +76,7 @@ const initialState = {
   error: null,
   meetingsData: [],
   meetingsClassId: null,
+  loadError: null,
   message: null,
   qrToken: null,
   qrError: null,
@@ -84,18 +86,22 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
   ...initialState,
 
   getMeetings: async (classId) => {
-    set({ isLoading: true, error: null, meetingsClassId: classId });
+    if (classId !== get().meetingsClassId) set({ meetingsData: [] });
+    set({ isLoading: true, loadError: null, meetingsClassId: classId });
 
     try {
       const res = await getMeetings(classId);
 
+      if (get().meetingsClassId !== classId) return;
+
       if (res.status && res.data) {
         set({ meetingsData: res.data });
       } else {
-        set({ error: res.message });
+        set({ loadError: res.message });
       }
     } catch (error: any) {
-      set({ error: error?.message ?? "Terjadi kesalahan" });
+      if (get().meetingsClassId === classId)
+        set({ loadError: error?.message ?? "Terjadi kesalahan" });
     } finally {
       set({ isLoading: false });
     }
@@ -105,7 +111,7 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
     const res = await getMeetings(classId);
 
     if (get().meetingsClassId === classId && res.status && res.data) {
-      set({ meetingsData: res.data });
+      set({ meetingsData: res.data, loadError: null });
     }
   }),
 
@@ -144,11 +150,14 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
       if (res.status) {
         set({ message: res.message });
         await get().getMeetings(body.classId);
-      } else {
-        set({ error: res.message });
+        return res.data?.id ?? null;
       }
+
+      set({ error: res.message });
+      return null;
     } catch (error: any) {
       set({ error: error?.message ?? "Terjadi kesalahan" });
+      return null;
     } finally {
       set({ isLoading: false });
     }

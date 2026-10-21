@@ -81,6 +81,9 @@ const ClassDetails: React.FC = () => {
 
   return (
     <div className="flex h-full w-full flex-col space-y-10 overflow-auto overscroll-contain">
+      {isLoading && !classData && (
+        <p className="text-sm font-semibold text-[#5E6278]">Loading...</p>
+      )}
       {!isLoading && classData && (
         <>
           <ClassTitleHeader data={classData}>
