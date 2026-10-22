@@ -18,17 +18,41 @@ import { DAY_GROUP_LABELS, DAY_LABELS, formatDay } from "@/app/utils/day";
 const DAY_GROUPS: SessionDayGroup[] = ["WEEKDAY", "FRIDAY"];
 
 const inputClassName =
-  "h-[44px] w-full rounded-xl bg-[#f5f5f5] px-3 font-semibold text-[#1D1D1D] focus:outline-[#3272CA]";
+  "h-[44px] w-full rounded-xl bg-[#f5f5f5] px-3 font-semibold text-[#1D1D1D] focus:outline-[#3272CA] disabled:cursor-not-allowed disabled:opacity-60";
 
 const buttonClassName =
-  "rounded-full px-[14px] py-[6px] text-sm font-semibold disabled:opacity-60";
+  "rounded-full px-[14px] py-[6px] text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60";
+
+const ROW_GRID =
+  "grid grid-cols-[90px_130px_96px_minmax(0,1fr)] items-center gap-x-3 gap-y-2 xl:grid-cols-[90px_130px_96px_minmax(0,1fr)_320px]";
 
 const toMinutes = (time: string) => {
   const [hours, minutes] = time.split(".").map(Number);
   return hours * 60 + minutes;
 };
 
-const cleanTime = (value: string) => value.replace(/[^\d.]/g, "").slice(0, 5);
+const typedTime = (value: string) =>
+  value
+    .replace(/:/g, ".")
+    .replace(/[^\d.]/g, "")
+    .slice(0, 5);
+
+const tidyTime = (value: string) => {
+  const text = value.trim();
+  const parts =
+    /^(\d{1,2})\.(\d{2})$/.exec(text) ??
+    /^(\d{1,2})(\d{2})$/.exec(text) ??
+    /^(\d{1,2})$/.exec(text);
+
+  if (!parts) return text;
+
+  const hours = Number(parts[1]);
+  const minutes = Number(parts[2] ?? "0");
+
+  if (hours > 23 || minutes > 59) return text;
+
+  return `${String(hours).padStart(2, "0")}.${String(minutes).padStart(2, "0")}`;
+};
 
 const checkTimes = (startAt: string, endAt: string) => {
   const format = /^([01]\d|2[0-3])\.[0-5]\d$/;
@@ -52,6 +76,15 @@ type Draft = { number: string; startAt: string; endAt: string };
 
 const emptyDraft: Draft = { number: "", startAt: "", endAt: "" };
 
+const tidyDraft = (draft: Draft): Draft => ({
+  ...draft,
+  startAt: tidyTime(draft.startAt),
+  endAt: tidyTime(draft.endAt),
+});
+
+const checkDraft = (draft: Draft) =>
+  checkNumber(draft.number) ?? checkTimes(draft.startAt, draft.endAt);
+
 const DAY_ORDER = Object.keys(DAY_LABELS);
 
 const byDayThenRoom = (a: IGetClassResponseBody, b: IGetClassResponseBody) =>
@@ -59,14 +92,44 @@ const byDayThenRoom = (a: IGetClassResponseBody, b: IGetClassResponseBody) =>
   a.room.localeCompare(b.room) ||
   a.subject_name.localeCompare(b.subject_name);
 
+function TimeInput({
+  label,
+  placeholder,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  value: string;
+  disabled: boolean;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <input
+      aria-label={label}
+      className={inputClassName}
+      placeholder={placeholder}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => onChange(typedTime(event.target.value))}
+      onBlur={() => onChange(tidyTime(value))}
+    />
+  );
+}
+
 function SessionRow({
   session,
   classes,
+  feedback,
   onFeedback,
+  onDeleted,
 }: {
   session: ISessionResponseBody;
   classes: IGetClassResponseBody[];
+  feedback: Feedback;
   onFeedback: (feedback: Feedback) => void;
+  onDeleted: (message: string) => void;
 }) {
   const { updateSession, removeSession } = useSessionStore();
   const [isEditing, setIsEditing] = useState(false);
@@ -104,8 +167,10 @@ function SessionRow({
   const save = async (event: FormEvent) => {
     event.preventDefault();
 
-    const problem =
-      checkNumber(draft.number) ?? checkTimes(draft.startAt, draft.endAt);
+    const tidy = tidyDraft(draft);
+    setDraft(tidy);
+
+    const problem = checkDraft(tidy);
 
     if (problem) {
       onFeedback({ ok: false, message: problem });
@@ -114,13 +179,23 @@ function SessionRow({
 
     const result = await run(() =>
       updateSession(session.id, {
-        number: Number(draft.number),
-        startAt: draft.startAt,
-        endAt: draft.endAt,
+        number: Number(tidy.number),
+        startAt: tidy.startAt,
+        endAt: tidy.endAt,
       }),
     );
 
     if (result?.ok) setIsEditing(false);
+  };
+
+  const remove = async () => {
+    setIsBusy(true);
+    onFeedback(null);
+    const result = await removeSession(session.id);
+    setIsBusy(false);
+
+    if (result.ok) onDeleted(result.message);
+    else onFeedback(result);
   };
 
   if (isEditing) {
@@ -136,6 +211,7 @@ function SessionRow({
             className={inputClassName}
             inputMode="numeric"
             value={draft.number}
+            disabled={isBusy}
             onChange={(event) =>
               setDraft({
                 ...draft,
@@ -143,23 +219,19 @@ function SessionRow({
               })
             }
           />
-          <input
-            aria-label={`Jam mulai ${label}`}
-            className={inputClassName}
+          <TimeInput
+            label={`Jam mulai ${label}`}
             placeholder="07.00"
             value={draft.startAt}
-            onChange={(event) =>
-              setDraft({ ...draft, startAt: cleanTime(event.target.value) })
-            }
+            disabled={isBusy}
+            onChange={(startAt) => setDraft((prev) => ({ ...prev, startAt }))}
           />
-          <input
-            aria-label={`Jam selesai ${label}`}
-            className={inputClassName}
+          <TimeInput
+            label={`Jam selesai ${label}`}
             placeholder="08.40"
             value={draft.endAt}
-            onChange={(event) =>
-              setDraft({ ...draft, endAt: cleanTime(event.target.value) })
-            }
+            disabled={isBusy}
+            onChange={(endAt) => setDraft((prev) => ({ ...prev, endAt }))}
           />
           <div className="flex flex-row space-x-2">
             <button
@@ -171,7 +243,11 @@ function SessionRow({
             </button>
             <button
               type="button"
-              onClick={() => setIsEditing(false)}
+              disabled={isBusy}
+              onClick={() => {
+                setIsEditing(false);
+                onFeedback(null);
+              }}
               className={`${buttonClassName} bg-[#F1F1F2] text-[#5E6278]`}
             >
               Batal
@@ -183,17 +259,18 @@ function SessionRow({
             Jam {session.classes} kelas di sesi ini ikut berubah.
           </p>
         )}
+        <FeedbackBox feedback={feedback} />
       </form>
     );
   }
 
   return (
     <div className="border-t border-[#F1F1F2]">
-      <div className="grid grid-cols-[90px_1fr_110px_110px_340px] items-center gap-3 py-3 text-sm font-semibold text-[#5E6278]">
+      <div className={`${ROW_GRID} py-3 text-sm font-semibold text-[#5E6278]`}>
         <p className="text-base font-bold text-[#1D1D1D]">
           Sesi {session.number}
         </p>
-        <p className="text-base text-[#1D1D1D]">
+        <p className="whitespace-nowrap text-base text-[#1D1D1D]">
           {session.startAt} – {session.endAt}
         </p>
         <p>
@@ -224,20 +301,21 @@ function SessionRow({
         ) : (
           <p>0 kelas</p>
         )}
-        <div className="flex flex-row justify-end space-x-2">
+        <div className="col-span-3 col-start-2 flex flex-row items-center space-x-2 xl:col-span-1 xl:col-start-auto xl:justify-end">
           {isConfirmingDelete ? (
             <>
-              <span className="self-center text-xs">Hapus {label}?</span>
+              <span className="text-xs">Hapus {label}?</span>
               <button
                 type="button"
                 disabled={isBusy}
-                onClick={() => run(() => removeSession(session.id))}
+                onClick={remove}
                 className={`${buttonClassName} bg-[#FFD9D9] text-[#FE2F60]`}
               >
                 Ya, hapus
               </button>
               <button
                 type="button"
+                disabled={isBusy}
                 onClick={() => setIsConfirmingDelete(false)}
                 className={`${buttonClassName} bg-[#F1F1F2] text-[#5E6278]`}
               >
@@ -249,8 +327,9 @@ function SessionRow({
               <button
                 type="button"
                 aria-label={`Ubah ${label}`}
+                disabled={isBusy}
                 onClick={startEditing}
-                className={`${buttonClassName} bg-[#D2E3F1] text-[#3272CA]`}
+                className={`${buttonClassName} w-[64px] bg-[#D2E3F1] text-[#3272CA]`}
               >
                 Ubah
               </button>
@@ -265,35 +344,41 @@ function SessionRow({
                     }),
                   )
                 }
-                className={`${buttonClassName} bg-[#F1F1F2] text-[#5E6278]`}
+                className={`${buttonClassName} w-[110px] bg-[#F1F1F2] text-[#5E6278]`}
               >
                 {session.is_active ? "Nonaktifkan" : "Aktifkan"}
               </button>
-              {session.classes === 0 && (
+              {session.classes === 0 ? (
                 <button
                   type="button"
                   aria-label={`Hapus ${label}`}
+                  disabled={isBusy}
                   onClick={() => {
                     setIsConfirmingDelete(true);
                     onFeedback(null);
                   }}
-                  className={`${buttonClassName} bg-[#FFD9D9] text-[#FE2F60]`}
+                  className={`${buttonClassName} w-[72px] bg-[#FFD9D9] text-[#FE2F60]`}
                 >
                   Hapus
                 </button>
+              ) : (
+                <span aria-hidden className="w-[72px] shrink-0" />
               )}
             </>
           )}
         </div>
       </div>
+      {feedback && (
+        <div className="pb-3">
+          <FeedbackBox feedback={feedback} />
+        </div>
+      )}
       {isShowingClasses && session.classes > 0 && (
         <ul
           id={listId}
           className="list-disc space-y-1 pb-3 pl-[120px] text-sm font-semibold text-[#5E6278]"
         >
-          {classes.length === 0 && (
-            <li className="list-none">Memuat daftar kelas...</li>
-          )}
+          {classes.length === 0 && <li className="list-none">Loading...</li>}
           {classes.map((subjectClass) => (
             <li key={subjectClass.id}>
               <Link
@@ -312,37 +397,46 @@ function SessionRow({
 }
 
 function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
-  const { sessionsData, addSession } = useSessionStore();
+  const { sessionsData, addSession, isLoaded, error } = useSessionStore();
   const { classesData } = useClassStore();
   const [draft, setDraft] = useState<Draft>(emptyDraft);
-  const [feedback, setFeedback] = useState<Feedback>(null);
+  const [placed, setPlaced] = useState<{ at: string; feedback: Feedback }>({
+    at: "",
+    feedback: null,
+  });
   const [isSaving, setIsSaving] = useState(false);
   const sessions = sessionsData.filter(
     (session) => session.day_group === dayGroup,
   );
   const groupLabel = DAY_GROUP_LABELS[dayGroup];
+  const feedbackAt = (at: string) =>
+    placed.at === at ? placed.feedback : null;
+  const place = (at: string) => (feedback: Feedback) =>
+    setPlaced({ at, feedback });
 
   const add = async (event: FormEvent) => {
     event.preventDefault();
 
-    const problem =
-      checkNumber(draft.number) ?? checkTimes(draft.startAt, draft.endAt);
+    const tidy = tidyDraft(draft);
+    setDraft(tidy);
+
+    const problem = checkDraft(tidy);
 
     if (problem) {
-      setFeedback({ ok: false, message: problem });
+      place("add")({ ok: false, message: problem });
       return;
     }
 
     setIsSaving(true);
-    setFeedback(null);
+    place("add")(null);
     const result = await addSession({
       day_group: dayGroup,
-      number: Number(draft.number),
-      startAt: draft.startAt,
-      endAt: draft.endAt,
+      number: Number(tidy.number),
+      startAt: tidy.startAt,
+      endAt: tidy.endAt,
     });
     setIsSaving(false);
-    setFeedback(result);
+    place("add")(result);
 
     if (result.ok) setDraft(emptyDraft);
   };
@@ -353,7 +447,11 @@ function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
       className="flex w-full flex-col space-y-3 rounded-2xl bg-white p-5"
     >
       <p className="text-xl font-bold text-[#1D1D1D]">{groupLabel}</p>
-      {sessions.length === 0 && (
+      <FeedbackBox feedback={feedbackAt("top")} />
+      {!isLoaded && !error && (
+        <p className="text-sm font-semibold text-[#5E6278]">Loading...</p>
+      )}
+      {isLoaded && !error && sessions.length === 0 && (
         <p className="text-sm font-semibold text-[#5E6278]">
           Belum ada sesi. Kelas{" "}
           {dayGroup === "FRIDAY" ? "hari Jumat" : "Senin–Kamis"} belum bisa
@@ -368,7 +466,9 @@ function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
             classes={classesData
               .filter((subjectClass) => subjectClass.sessionId === session.id)
               .sort(byDayThenRoom)}
-            onFeedback={setFeedback}
+            feedback={feedbackAt(session.id)}
+            onFeedback={place(session.id)}
+            onDeleted={(message) => place("top")({ ok: true, message })}
           />
         ))}
       </div>
@@ -385,6 +485,7 @@ function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
             inputMode="numeric"
             placeholder="1"
             value={draft.number}
+            disabled={isSaving}
             onChange={(event) =>
               setDraft({
                 ...draft,
@@ -395,26 +496,22 @@ function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
         </label>
         <label className="flex flex-col space-y-1 text-xs font-semibold text-[#5E6278]">
           <span>Jam mulai</span>
-          <input
-            aria-label={`Jam mulai sesi baru ${groupLabel}`}
-            className={inputClassName}
+          <TimeInput
+            label={`Jam mulai sesi baru ${groupLabel}`}
             placeholder="07.00"
             value={draft.startAt}
-            onChange={(event) =>
-              setDraft({ ...draft, startAt: cleanTime(event.target.value) })
-            }
+            disabled={isSaving}
+            onChange={(startAt) => setDraft((prev) => ({ ...prev, startAt }))}
           />
         </label>
         <label className="flex flex-col space-y-1 text-xs font-semibold text-[#5E6278]">
           <span>Jam selesai</span>
-          <input
-            aria-label={`Jam selesai sesi baru ${groupLabel}`}
-            className={inputClassName}
+          <TimeInput
+            label={`Jam selesai sesi baru ${groupLabel}`}
             placeholder="08.40"
             value={draft.endAt}
-            onChange={(event) =>
-              setDraft({ ...draft, endAt: cleanTime(event.target.value) })
-            }
+            disabled={isSaving}
+            onChange={(endAt) => setDraft((prev) => ({ ...prev, endAt }))}
           />
         </label>
         <button
@@ -425,7 +522,7 @@ function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
           Tambah Sesi
         </button>
       </form>
-      <FeedbackBox feedback={feedback} />
+      <FeedbackBox feedback={feedbackAt("add")} />
     </section>
   );
 }

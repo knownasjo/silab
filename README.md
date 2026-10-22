@@ -530,6 +530,41 @@ bertambah, dan jam sesi tertulis tetap di kode.
   refresh saat kelas ditambah, diubah, atau dihapus, dan tertutup sendiri bila
   sesinya tidak lagi punya kelas. Datanya dari `GET /class` (`sessionId` tiap
   kelas).
+- Perbaikan halaman Jam Sesi, 23 Oktober 2026:
+  - **Tata letak.** Baris sesi memakai grid berlebar tetap: Sesi 90 px, jam
+    130 px (selalu satu baris), status 96 px, jumlah kelas, dan kolom tombol
+    320 px di layar 1280 px ke atas.
+    - Tombol Ubah, Nonaktifkan/Aktifkan, dan Hapus berlebar tetap (64, 110,
+      72 px), dan sesi tanpa tombol Hapus diberi ruang kosong selebar Hapus,
+      jadi tombol Ubah sejajar di semua baris.
+    - Di bawah 1280 px tombol pindah ke baris kedua, tepat di bawah jam.
+    - Dulu di layar 1024 px baris lebih lebar dari kartunya: tombol terpotong
+      di luar kartu, jam turun 3 baris, dan halaman bisa digeser ke samping.
+  - **Letak pesan.** Pesan ubah, nonaktifkan, dan hapus yang gagal tampil
+    tepat di bawah baris sesinya, begitu juga pesan berhasil mengubah. Pesan
+    berhasil menghapus tampil di bawah judul kartu karena barisnya sudah
+    hilang, dan pesan Tambah Sesi tetap di bawah form tambah.
+    - Satu kartu hanya menampilkan satu pesan, dan pesan lama hilang saat ada
+      aksi baru.
+    - Dulu semua pesan tampil di bagian bawah kartu. Saat mengubah sesi paling
+      atas di layar setinggi 768 px, pesannya berada di luar layar.
+  - **Memuat dan gagal.** Saat memuat, kedua kartu menulis "Loading..."
+    (begitu juga daftar kelas per sesi). Saat `GET /session` gagal,
+    keterangan "Belum ada sesi..." tidak ditampilkan. `refreshSessions` kini
+    menghapus pesan gagal begitu data berhasil dimuat lagi, misalnya lewat
+    event `ready` atau `session`; dulu pesan itu tertinggal.
+  - **Format jam.** Kotak jam menerima "7.00", "07:00", "0700", "730", dan
+    "7". Titik dua langsung diganti titik, dan isinya dirapikan menjadi
+    "07.00"/"07.30" saat kotak ditinggalkan atau saat form dikirim (termasuk
+    Enter langsung dari kotak jam). Dulu ketiganya ditolak dan titik dua
+    dibuang diam-diam.
+  - **Kunci saat menyimpan.** Isian dan tombol Batal di form Ubah, isian
+    Tambah Sesi, serta tombol Batal di konfirmasi hapus terkunci selama
+    menyimpan.
+  - Sesi yang semua kelasnya sudah dihapus kini benar-benar bisa dihapus, dan
+    pesan ubah jam hanya menghitung kelas yang masih ada. Penyimpanan
+    bersamaan diantrekan di server. Keduanya dijelaskan di "Tambah kelas dan
+    jam sesi" di README backend.
 - Selain laboran, kedua halaman hanya menampilkan pesan bahwa halaman itu untuk
   laboran.
 - Isian kelas (Kelas, Kuota, Hari, Ruangan, Sesi Kelas), pemeriksaannya, dan
@@ -1188,6 +1223,7 @@ node tests/login.mjs        # satu tes saja
 | `sesi-pulih` | token kedaluwarsa diperbarui diam-diam, server mati memunculkan pemberitahuan tanpa melempar ke login, halaman pulih sendiri saat server hidup, tombol Coba lagi, token rusak kembali ke login dan cookie dihapus | 15 |
 | `server-mati` | 13 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 29 |
 | `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi. Hapus pendaftaran: tombol hanya di mata kuliah Belum Bayar, tidak menimpa kotak status, dan Ubah sejajar di semua baris, Batal tidak menghapus, Ya, hapus mengirim satu DELETE, penolakan server tampil di konfirmasi, pendaftaran terakhir menutup pop-up dengan pesan di halaman | 67 |
+| `jam-sesi` | 1366 px: tombol di dalam kartu, jam satu baris, Ubah sejajar di semua baris; 1024 px: tombol di baris kedua tepat di bawah jam, tidak keluar kartu, halaman tidak bergeser ke samping; sesi yang kelasnya sudah dihapus (0 kelas) benar-benar terhapus dengan pesan di bawah judul kartu; jam bertabrakan saat mengubah sesi paling atas: pesan merah di bawah form itu dan terlihat di layar, pesan berhasil di bawah barisnya; jam 7.00, 07:00, 0700, 730 dirapikan, Enter dari kotak jam mengirim 22.30–22.40; isian Tambah Sesi dan form Ubah terkunci selama menyimpan; Loading... saat memuat; saat `GET /session` gagal tanpa "Belum ada sesi" dan pesan gagal hilang sendiri setelah data termuat lagi | 15 |
 | `daftar-pembayaran` | daftar urut NIM, mata kuliah di pop-up urut semester lalu abjad; cari NIM dan sebagian nama tanpa peduli huruf besar dan spasi; kartu tetap total periode saat mencari; mengetik tidak mengirim permintaan ke server; pesan tidak ketemu menyebut kata dan pilihannya; kembali lewat sidebar mulai dari kotak cari kosong dan Show All; keterangan untuk periode tanpa pendaftar, semua lunas, dan belum ada yang lunas; Loading... saat memuat; di 1366 × 768 kartu paling tinggi 160 px, tombol pilihan sebaris dengan kotak cari, baris pertama paling jauh 360 px dari atas, jarak antarbaris paling banyak 56 px, judul kolom tetap di atas saat digulir; di 1024 px judul satu baris dan sejajar isinya, NIM di bawah nama, kolom nama minimal 180 px; tombol geser bernama Status pembayaran dan terkunci bersama pilihan kelas dan Kembali selama menyimpan | 23 |
 | `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
 | `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah dan hapus tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus) | 32 |

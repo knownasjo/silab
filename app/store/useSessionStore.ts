@@ -62,7 +62,7 @@ const useSessionStore = create<SessionState & SessionActions>((set, get) => ({
   refreshSessions: coalesce(async () => {
     const res = await getSessions();
 
-    if (res.data) set({ sessionsData: res.data, isLoaded: true });
+    if (res.data) set({ sessionsData: res.data, isLoaded: true, error: null });
   }),
 
   addSession: async (body) => {
