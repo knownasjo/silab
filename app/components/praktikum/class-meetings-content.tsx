@@ -163,14 +163,11 @@ export default function ClassMeetingsContent({
                     meetingId: selectedMeeting,
                   },
                 }}
+                title={`Rekap ${currentMeeting.meeting_name}`}
+                aria-label={`Rekap ${currentMeeting.meeting_name}`}
                 className="flex flex-row items-center space-x-3 rounded-2xl bg-[#3272CA] p-3"
               >
-                <Image
-                  alt="QR Code Icon"
-                  src={"/pdf.png"}
-                  width={32}
-                  height={32}
-                />
+                <Image alt="" src={"/pdf.png"} width={32} height={32} />
               </Link>
               <p className="text-base font-bold">
                 {currentMeeting.meeting_name}

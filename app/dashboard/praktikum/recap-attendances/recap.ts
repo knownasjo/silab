@@ -5,6 +5,7 @@ export interface RecapColumn {
   meetingId: string;
   label: string;
   meetingName: string;
+  attendedCount: number;
 }
 
 export interface RecapRow {
@@ -39,12 +40,6 @@ const toColumnLabel = (meetingName: string): string => {
 export const buildRecap = (
   meetings: IGetAllClassMeetingResponseBody[],
 ): Recap => {
-  const columns = meetings.map((meeting) => ({
-    meetingId: meeting.id,
-    label: toColumnLabel(meeting.meeting_name),
-    meetingName: meeting.meeting_name,
-  }));
-
   const students = [...(meetings[0]?.students ?? [])].sort((a, b) =>
     a.nim.localeCompare(b.nim),
   );
@@ -66,6 +61,13 @@ export const buildRecap = (
       attendedCount: statuses.filter((status) => status === "Hadir").length,
     };
   });
+
+  const columns = meetings.map((meeting, index) => ({
+    meetingId: meeting.id,
+    label: toColumnLabel(meeting.meeting_name),
+    meetingName: meeting.meeting_name,
+    attendedCount: rows.filter((row) => row.statuses[index] === "Hadir").length,
+  }));
 
   return { columns, rows };
 };

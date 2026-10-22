@@ -882,6 +882,99 @@ Jenis Pengumuman di Buat Pengumuman:
 - Menu sidebar saat diciutkan tidak termasuk, karena isinya tautan navigasi
   dengan gaya tombol sidebar.
 
+### Rekap Presensi
+
+Halaman Rekap Presensi (`dashboard/praktikum/recap-attendances/`) diperbaiki
+pada 22 Oktober 2026:
+
+```
+┌──────────────────────────────────────────────────────┐
+│ No  NIM         Nama            │ P6  P7  P8 │ Hadir │ ← judul kolom tetap di atas
+│ 1   2999970003  Mahasiswa Uji 3 │ A   H   H  │ 4/15  │
+│ 4   2999970006  Muhammad Fadhil │ -   A   H  │ 5/15  │
+│                 Ramadhan Saputra│            │       │
+│                 Jumlah hadir    │ 4/8 4/8 4/8│       │ ← tetap di bawah
+│ ═══════════════▬▬▬▬▬▬▬═══════════════════════════    │ ← scrollbar tipis
+│ Keterangan: H = Hadir, A = Tidak Hadir, - = Belum …  │
+└──────────────────────────────────────────────────────┘
+```
+
+- Tabel berperilaku seperti lembar kerja: judul kolom tetap di atas saat
+  daftar digulir, baris **Jumlah hadir** tetap di bawah, kolom **Hadir** tetap
+  di kanan, dan kolom **No**, **NIM**, serta **Nama** tetap di kiri di semua
+  lebar layar, jadi yang bergeser ke samping hanya kolom pertemuan. Kolom yang
+  diam memakan 444 dari 544 px lebar tabel di layar 1024 px dengan sidebar
+  terbuka, sehingga sekitar 2 kolom pertemuan terlihat sekaligus. Dengan
+  sidebar diciutkan terlihat 6 kolom, di layar 1280 px 7 kolom, dan di
+  1366 px 10 kolom.
+- Caranya: sel `position: sticky` di dalam satu area gulir (`overflow-auto`),
+  tabel `border-separate border-spacing-0`, dan garis baris di sel
+  (`border-t`) karena garis pada `<tr>` tidak tampil di mode itu. Lebar No
+  48 px dan NIM 120 px dijaga div `min-w-[32px]` dan `min-w-[104px]` di
+  dalam selnya. Tanpa itu, tabel yang lebih lebar dari kotaknya menyempitkan
+  kolom sampai lebar isinya (di bawah `width`), sehingga posisi `left` kolom
+  berikutnya meleset dan kolom NIM serta Nama menutupi sebagian kolom P1.
+- Scrollbar samping abu-abu `#A1A5B7` setebal 6 px hanya ada di bawah kolom
+  pertemuan, dan hanya tampil saat tabel digeser ke samping. Satu detik
+  setelah geseran terakhir, scrollbar hilang lagi. Perilakunya meniru
+  scrollbar macOS, tetapi berlaku sama di semua sistem operasi (class
+  `scrollbar-pertemuan` di `globals.css`). Ini satu-satunya scrollbar yang
+  tampil; bagian lain tetap disembunyikan. Dulu kolom pertemuan terakhir dan
+  kolom Hadir terpotong di kanan tanpa tanda apa pun.
+  - Jalurnya dipendekkan dengan `margin-left` dan `margin-right` pada
+    `::-webkit-scrollbar-track`, dari variabel `--kolom-kiri` (tepi kanan
+    kolom Nama) dan `--kolom-kanan` (lebar kolom Hadir). Keduanya diukur
+    `ResizeObserver` di ref `setupScroller` (`recap-attendances-content.tsx`).
+  - Ref yang sama memasang atribut `data-bergeser` pada area gulir setiap kali
+    `scrollLeft` berubah dan mencabutnya 1 detik setelah geseran terakhir.
+    Hanya `[data-bergeser]::-webkit-scrollbar-thumb` yang diberi warna, jadi
+    menggulir ke bawah saja tidak memunculkan scrollbar. Scrollbar tegak tidak
+    ditampilkan (lebarnya 0).
+  - Jalur 6 px di bawah tabel tetap memakan tempat walau kosong, karena
+    scrollbar yang digaya lewat `::-webkit-scrollbar` tidak bisa menumpang di
+    atas isi seperti scrollbar bawaan macOS.
+  - Class itu mengembalikan `scrollbar-width` dan `scrollbar-color` ke `auto`.
+    Chrome mengabaikan gaya `::-webkit-scrollbar` bila salah satunya diisi,
+    padahal `globals.css` mengisi `scrollbar-width: none` dan gaya dasar
+    DaisyUI mengisi `scrollbar-color` untuk semua elemen. Tanpa itu yang
+    tampil scrollbar bawaan selebar tabel.
+  - Firefox tidak mengenal `::-webkit-scrollbar`, jadi di sana scrollbar tipis
+    selebar tabel, berwarna transparan sampai tabel digeser
+    (`@supports not selector(::-webkit-scrollbar)`).
+  - Klik di jalur kosong di bawah kolom No–Nama atau Hadir tetap menggeser
+    tabel satu halaman, karena bagian itu masih milik scrollbar bawaan.
+- Kolom Nama minimal 200 px, jadi nama panjang paling banyak sekitar 3 baris.
+  Dulu kolom ini menyempit sampai 112 px dan nama terpecah satu kata per baris.
+- Baris Jumlah hadir menghitung mahasiswa yang hadir di tiap pertemuan
+  (`attendedCount` pada setiap kolom hasil `buildRecap`). Keterangan H/A/-
+  berada di luar area gulir, jadi selalu terlihat.
+- Di bawah judul tampil "Periode 2026/2027 Ganjil · Dosen pengampu: ...",
+  dari `period.name` dan `lecturer` di `GET /class/:id`.
+- Tombol Kembali dan Unduh PDF tidak ikut menyempit
+  (`shrink-0 whitespace-nowrap`); nama mata kuliah panjang yang turun baris.
+- Kelas yang dihapus saat halaman terbuka (event `class` dengan
+  `action: "deleted"`) menampilkan "Kelas ini sudah dihapus." dan tautan
+  Kembali ke Praktikum, sama seperti detail kelas. Bila data kelas gagal
+  dimuat, pesan errornya tampil tanpa tabel dan Kembali menuju daftar
+  Praktikum. Data kelas dimuat ulang saat koneksi real-time tersambung lagi
+  atau ada event `class` untuk kelas itu.
+- PDF (`recap-pdf.ts`):
+  - Nama panjang turun baris dan baris tabelnya meninggi, tidak lagi dipotong
+    "...". Kolom Nama selebar nama terpanjang bila kertas masih cukup
+    (minimal 90 mm).
+  - Subjudul serta baris periode dan dosen turun baris bila tidak muat.
+  - Judul kolom pertemuan pindah baris per kata. Huruf mengecil sampai 5,5 pt
+    bila satu kata tidak muat, dan kata baru dipotong bila tetap tidak muat
+    (kata 11 huruf ke atas di kolom ±11 mm). Rekap satu pertemuan memberi
+    kolom pertemuannya lebar sesuai judul (paling lebar 60 mm).
+  - Baris Jumlah hadir di akhir tabel.
+  - jsPDF memakai warna isi yang sama untuk teks dan kotak berlatar, jadi
+    `setFillColor` dipanggil ulang sebelum setiap kotak berlatar.
+- Detail Kelas: ikon PDF untuk rekap per pertemuan punya keterangan "Rekap
+  Pertemuan 2" saat disorot (`title` dan `aria-label`). Daftar mahasiswanya
+  kini urut NIM karena `GET /meeting/:classId` mengurutkan peserta menurut
+  NIM; dulu menurut urutan masuk kelas.
+
 ### Tanda HP tidak biasa
 
 Backend mencatat HP yang dipakai scan, dan presensi dari HP yang bukan HP
@@ -967,7 +1060,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 8 menit
+npm test                    # semua tes browser, sekitar 16 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
@@ -992,6 +1085,7 @@ node tests/login.mjs        # satu tes saja
 | `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
 | `dropdown` | sorotan opsi pertama dan terakhir menempel sampai tepi daftar dengan latar biru dan tulisan putih di 12 dropdown: Jenis Pengumuman, Dosen Pengampu, Semester, Mata Kuliah, Hari, Ruangan, Sesi Kelas, Periode, Pilih Pertemuan, menu titik tiga pengumuman (Hapus merah), Jenis Pengumuman di pop-up Edit, Pilih Kelas di Pembayaran; Pilih Pertemuan dengan keyboard: sorotan biru dan Enter memilih | 17 |
 | `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; sorotan biru opsi menempel sampai tepi daftar; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 32 |
+| `rekap-presensi` | layar 1024 px dengan 15 pertemuan: kolom Hadir terlihat tanpa menggeser, No, NIM, dan Nama tetap di kiri setelah digeser ke ujung (hanya kolom pertemuan yang bergeser), scrollbar 6 px hanya di bawah kolom pertemuan, hanya tampil saat digeser dan hilang lagi setelah diam (dicek dari piksel screenshot), kolom Nama minimal 200 px, tombol Unduh PDF satu baris; layar 1366 px: No, NIM, dan Nama tetap di kiri, baris Jumlah hadir, periode dan dosen pengampu; kelas 40 mahasiswa: keterangan dan Jumlah hadir terlihat tanpa menggulir, judul kolom tetap di atas setelah digulir; PDF: nama panjang utuh, judul kolom Responsi Akhir per kata, Jumlah hadir, periode dan dosen, semua tulisan rekap satu pertemuan berjudul panjang muat di kertas; data kelas gagal dimuat lalu pulih lewat event; kelas dihapus saat terbuka; Detail Kelas urut NIM dan keterangan ikon rekap | 29 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|

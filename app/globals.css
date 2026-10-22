@@ -28,3 +28,43 @@
     display: none;
   }
 }
+
+@layer utilities {
+  .scrollbar-pertemuan,
+  .scrollbar-pertemuan:hover {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
+  .scrollbar-pertemuan::-webkit-scrollbar {
+    display: block;
+    width: 0;
+    height: 6px;
+  }
+
+  .scrollbar-pertemuan::-webkit-scrollbar-track {
+    margin-left: var(--kolom-kiri, 0px);
+    margin-right: var(--kolom-kanan, 0px);
+  }
+
+  .scrollbar-pertemuan::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: transparent;
+  }
+
+  .scrollbar-pertemuan[data-bergeser]::-webkit-scrollbar-thumb {
+    background: #a1a5b7;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    .scrollbar-pertemuan,
+    .scrollbar-pertemuan:hover {
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+    }
+
+    .scrollbar-pertemuan[data-bergeser] {
+      scrollbar-color: #a1a5b7 transparent;
+    }
+  }
+}
