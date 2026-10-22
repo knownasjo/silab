@@ -39,7 +39,7 @@ export const validateSubjectForm = (form: SubjectForm) => {
 };
 
 const inputClassName =
-  "h-[54px] w-full rounded-2xl bg-[#f5f5f5] p-5 font-semibold text-[#1D1D1D] focus:outline-[#3272CA]";
+  "h-[54px] w-full rounded-2xl bg-[#f5f5f5] p-5 font-semibold text-[#1D1D1D] focus:outline-[#3272CA] disabled:cursor-not-allowed disabled:opacity-60";
 
 interface SubjectFormFieldsProps {
   form: SubjectForm;

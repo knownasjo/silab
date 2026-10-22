@@ -43,8 +43,8 @@ export default function MeetingsDropDown({
         </div>
       </ListboxButton>
       <ListboxOptions
-        anchor="bottom"
-        className={`mt-1 w-56 min-w-[var(--button-width)] rounded-2xl bg-[#D2E3F1] text-sm font-semibold text-[#3272CA]`}
+        anchor={{ to: "bottom", gap: 4, padding: 16 }}
+        className={`w-56 min-w-[var(--button-width)] rounded-2xl bg-[#D2E3F1] text-sm font-semibold text-[#3272CA]`}
       >
         {meetingsData &&
           meetingsData.map((meeting) => (

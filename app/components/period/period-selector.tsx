@@ -53,8 +53,8 @@ export default function PeriodSelector() {
           </span>
         </ListboxButton>
         <ListboxOptions
-          anchor="bottom start"
-          className="z-50 mt-2 w-[var(--button-width)] rounded-xl bg-white shadow-lg"
+          anchor={{ to: "bottom start", gap: 8, padding: 16 }}
+          className="z-50 w-[var(--button-width)] rounded-xl bg-white shadow-lg"
         >
           {periodsData.map((period) => (
             <ListboxOption

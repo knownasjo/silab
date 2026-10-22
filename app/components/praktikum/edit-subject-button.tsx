@@ -175,7 +175,9 @@ export default function EditSubjectButton({
                   onSubmit={handleSubmit}
                   className="flex flex-col space-y-5"
                 >
-                  <SubjectFormFields form={form} onChange={updateForm} />
+                  <fieldset disabled={isSaving} className="min-w-0">
+                    <SubjectFormFields form={form} onChange={updateForm} />
+                  </fieldset>
                   {form.lecturer_id !== initial.lecturer_id && (
                     <p className="text-sm font-semibold text-[#5E6278]">
                       Dosen baru langsung bisa melihat semua kelas, pertemuan,

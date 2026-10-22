@@ -44,7 +44,7 @@ export default function LecturerListBox({
   }, [value, dosenData]);
 
   return (
-    <fieldset className="flex h-fit w-full flex-col space-y-3">
+    <fieldset className="flex h-fit w-full min-w-0 flex-col space-y-3">
       <label className="text-base font-semibold text-[#5E6278]">
         Dosen Pengampu
       </label>
@@ -55,29 +55,27 @@ export default function LecturerListBox({
           onLecturerChange(value!.id);
         }}
       >
-        <ListboxButton
-          className={`relative flex h-[54px] w-full flex-row items-center justify-between rounded-2xl bg-[#f5f5f5] px-[15px]`}
-        >
-          <p>
-            {selectedLecturer ? selectedLecturer.fullname : "Dosen Pengampu"}
+        <ListboxButton className="flex h-[54px] w-full flex-row items-center justify-between space-x-3 rounded-2xl bg-[#f5f5f5] px-[15px] text-left font-semibold text-[#1D1D1D] disabled:cursor-not-allowed disabled:opacity-60">
+          <p className="truncate" title={selectedLecturer?.fullname}>
+            {selectedLecturer
+              ? selectedLecturer.fullname
+              : "Pilih dosen pengampu"}
           </p>
-          <div className="relative h-[24px] w-[24px]">
+          <div className="relative h-[24px] w-[24px] shrink-0">
             <Image src={"/down.png"} alt="chevron down" fill />
           </div>
         </ListboxButton>
         <ListboxOptions
-          anchor="bottom"
-          className={`mt-2 h-fit w-[var(--button-width)] rounded-lg bg-[#f5f5f5]`}
+          anchor={{ to: "bottom", gap: 8, padding: 16 }}
+          className="w-[var(--button-width)] rounded-lg bg-[#f5f5f5]"
         >
           {dosenData.map((lecturer) => (
             <ListboxOption
-              className={`flex h-[54px] w-full items-center justify-center data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
+              className="cursor-pointer px-[15px] py-3 font-semibold text-[#1D1D1D] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
               key={lecturer.id}
               value={lecturer}
             >
-              <button className="h-full w-full pl-4 text-start">
-                {lecturer.fullname}
-              </button>
+              {lecturer.fullname}
             </ListboxOption>
           ))}
         </ListboxOptions>

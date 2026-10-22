@@ -24,7 +24,7 @@ export default function ClassRoomDropdown({
       <p className="text-base font-semibold text-[#5E6278]">Ruangan</p>
       <Listbox value={value} onChange={onRoomChange}>
         <ListboxButton className="flex h-[54px] w-full flex-row items-center justify-between rounded-2xl bg-[#f5f5f5] px-[15px] font-semibold text-[#1D1D1D] disabled:cursor-not-allowed disabled:opacity-60">
-          <p className="truncate">{value || "Ruangan"}</p>
+          <p className="truncate">{value || "Pilih ruangan"}</p>
           <div className="relative h-[24px] w-[24px] shrink-0">
             <Image src={"/down.png"} alt="chevron down" fill />
           </div>

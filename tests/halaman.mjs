@@ -60,7 +60,7 @@ await runWebTest(
       "halaman tampil",
       await visit("/dashboard/master-data/add-subject", "Dosen Pengampu"),
     );
-    const lecturers = await optionsOf(popup("Dosen Pengampu"));
+    const lecturers = await optionsOf(popup("Pilih dosen pengampu"));
     check(
       "  pilihan dosen pengampu memuat dosen uji",
       lecturers.some((o) => o.includes(data.lecturer.fullname)),
@@ -87,9 +87,9 @@ await runWebTest(
     );
     check(
       "  form kelas muncul setelah mata kuliah dipilih",
-      await waitFor(`!!(${browser.visibleButton("Hari")})`, 5000),
+      await waitFor(`!!(${browser.visibleButton("Pilih hari")})`, 5000),
     );
-    const days = await optionsOf(browser.visibleButton("Hari"));
+    const days = await optionsOf(browser.visibleButton("Pilih hari"));
     check(
       "  pilihan hari Senin sampai Jumat",
       ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"].every((day) =>
@@ -104,7 +104,7 @@ await runWebTest(
       "  hari Senin terpilih",
       await waitFor(`!!(${browser.visibleButton("Senin")})`, 3000),
     );
-    const rooms = await optionsOf(browser.visibleButton("Ruangan"));
+    const rooms = await optionsOf(browser.visibleButton("Pilih ruangan"));
     check("  pilihan ruangan terisi", rooms.length > 0, JSON.stringify(rooms));
     await browser.pressEscape();
     noErrors("tambah praktikum");

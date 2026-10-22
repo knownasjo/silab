@@ -975,6 +975,64 @@ pada 22 Oktober 2026:
   kini urut NIM karena `GET /meeting/:classId` mengurutkan peserta menurut
   NIM; dulu menurut urutan masuk kelas.
 
+### Tambah Mata Kuliah
+
+Halaman Tambah Mata Kuliah (`dashboard/master-data/add-subject`) diperbaiki
+pada 22 Oktober 2026:
+
+- Judul "Tambah Mata Kuliah", sama seperti Jam Sesi, Periode Akademik, dan
+  Tambah Praktikum.
+- Di bawah form ada daftar **Mata kuliah yang sudah ada (n)**
+  (`components/master-data/existing-subjects.tsx`) dari `GET /subject`:
+  dikelompokkan per semester (naik), di dalamnya urut abjad, berisi nama,
+  kode, dan dosen pengampu. Daftar ini hanya untuk dilihat; ubah dan hapus
+  tetap lewat Ubah Mata Kuliah di halaman Praktikum. Mata kuliah baru
+  langsung muncul setelah Simpan (`addSubject` memuat ulang daftar), dan
+  daftar ikut berubah lewat event `subject` atau saat koneksi real-time
+  tersambung lagi. Selama memuat tertulis "Loading...", dan bila gagal
+  "Daftar mata kuliah gagal dimuat. ...".
+- Daftar itu dilipat per semester supaya halaman tidak memanjang saat mata
+  kuliahnya banyak. Awalnya semua semester tertutup dan hanya menampilkan
+  judul serta jumlahnya ("Semester 3" dan "5 mata kuliah"). Klik judul untuk
+  membuka atau menutup, seperti di halaman Praktikum.
+  - Semester yang dipilih di form terbuka sendiri. Bila pilihan diganti,
+    semester tadi ditutup lagi.
+  - Semester yang dibuka atau ditutup sendiri oleh laboran tidak diubah.
+  - Setelah Simpan, semester mata kuliah baru tetap terbuka walaupun form
+    sudah kosong.
+  - Kosongkan mengembalikan daftar seperti saat halaman baru dibuka, jadi
+    semua semester tertutup lagi. Halaman menaikkan `key` milik
+    `ExistingSubjects`, sehingga keadaan buka-tutupnya mulai dari awal.
+  - Bila hanya ada satu semester, semester itu langsung terbuka.
+  - Mata kuliah yang ditambah laboran lain tidak membuka semester apa pun.
+  - Keadaan buka-tutup tidak disimpan; membuka halaman lagi mulai dari semua
+    tertutup.
+- Isian dan tombol Kosongkan terkunci selama menyimpan
+  (`<fieldset disabled>`), begitu juga isian di pop-up Ubah Mata Kuliah.
+  Dulu ketikan selama menyimpan hilang begitu form dikosongkan.
+- Pilihan Dosen Pengampu menampilkan nama panjang dalam satu baris rata kiri
+  dengan "...", dan nama lengkapnya muncul saat disorot (`title`). Dulu nama
+  panjang turun 2 baris rata tengah di layar 1024 px.
+- Daftar pilihan memakai `anchor={{ to: "bottom", gap, padding: 16 }}` sebagai
+  pengganti `mt-*`. Headless UI membatasi tinggi daftar ke ruang yang tersisa,
+  tetapi tidak menghitung margin, sehingga daftar 22 dosen di layar 768 px
+  keluar 8 px dari bawah layar dan dosen terakhir terpotong. Sekarang daftar
+  berhenti 16 px dari tepi layar. Hal yang sama diterapkan ke Semester, Pilih
+  Pertemuan (dulu keluar 4 px di layar 1024 dan 1440 px, dan menutupi 4 px
+  tombolnya saat membuka ke atas di 1366 px), dan pilihan Periode.
+- Opsi Semester dan Dosen Pengampu tidak lagi berisi `<button>` di dalam
+  `ListboxOption`. Gayanya sama dengan pilihan di Tambah Praktikum: rata kiri,
+  tebal, dan tingginya mengikuti isi.
+- Tulisan bawaan pilihan kini "Pilih semester" dan "Pilih dosen pengampu",
+  serta "Pilih hari" dan "Pilih ruangan" di Tambah Praktikum dan Ubah Kelas.
+  Dulu sama persis dengan judul kolomnya, jadi tidak kelihatan sudah dipilih
+  atau belum.
+- Server kini mengantrekan tambah dan ubah mata kuliah (lihat "Tambah dan ubah
+  mata kuliah" di README backend). Dulu dua laboran yang menyimpan kode atau
+  nama yang sama pada saat bersamaan menghasilkan mata kuliah kembar. Klik
+  ganda dan Enter dua kali di satu browser sudah aman sejak sebelumnya, karena
+  tombol Simpan langsung nonaktif.
+
 ### Tanda HP tidak biasa
 
 Backend mencatat HP yang dipakai scan, dan presensi dari HP yang bukan HP
@@ -1060,7 +1118,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 16 menit
+npm test                    # semua tes browser, sekitar 17 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
@@ -1086,6 +1144,7 @@ node tests/login.mjs        # satu tes saja
 | `dropdown` | sorotan opsi pertama dan terakhir menempel sampai tepi daftar dengan latar biru dan tulisan putih di 12 dropdown: Jenis Pengumuman, Dosen Pengampu, Semester, Mata Kuliah, Hari, Ruangan, Sesi Kelas, Periode, Pilih Pertemuan, menu titik tiga pengumuman (Hapus merah), Jenis Pengumuman di pop-up Edit, Pilih Kelas di Pembayaran; Pilih Pertemuan dengan keyboard: sorotan biru dan Enter memilih | 17 |
 | `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; sorotan biru opsi menempel sampai tepi daftar; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 32 |
 | `rekap-presensi` | layar 1024 px dengan 15 pertemuan: kolom Hadir terlihat tanpa menggeser, No, NIM, dan Nama tetap di kiri setelah digeser ke ujung (hanya kolom pertemuan yang bergeser), scrollbar 6 px hanya di bawah kolom pertemuan, hanya tampil saat digeser dan hilang lagi setelah diam (dicek dari piksel screenshot), kolom Nama minimal 200 px, tombol Unduh PDF satu baris; layar 1366 px: No, NIM, dan Nama tetap di kiri, baris Jumlah hadir, periode dan dosen pengampu; kelas 40 mahasiswa: keterangan dan Jumlah hadir terlihat tanpa menggulir, judul kolom tetap di atas setelah digulir; PDF: nama panjang utuh, judul kolom Responsi Akhir per kata, Jumlah hadir, periode dan dosen, semua tulisan rekap satu pertemuan berjudul panjang muat di kertas; data kelas gagal dimuat lalu pulih lewat event; kelas dihapus saat terbuka; Detail Kelas urut NIM dan keterangan ikon rekap | 29 |
+| `tambah-matkul` | judul; tulisan Pilih semester dan Pilih dosen pengampu; daftar Mata kuliah yang sudah ada awalnya tertutup per semester (urut, dengan jumlahnya), klik judul membuka isinya (urut abjad, kode dan dosen) dan menutupnya lagi; semester yang dipilih di form terbuka sendiri dan tertutup lagi saat pilihan diganti, semester yang dibuka sendiri tetap terbuka; Kosongkan menutup semua semester; satu-satunya semester langsung terbuka; daftar 22 dosen berhenti 16 px dari bawah layar dan dosen terakhir utuh; opsi tanpa tombol di dalamnya; nama dosen panjang satu baris dengan ... dan nama lengkap saat disorot di layar 1024 px; pilih semester dan dosen dengan keyboard; isian dan Kosongkan terkunci selama menyimpan; setelah Simpan semesternya tetap terbuka dan mata kuliah baru ada di sana; daftar ikut berubah saat laboran lain menambah dan mengganti nama, tanpa membuka semester sendiri; isian pop-up Ubah Mata Kuliah terkunci selama menyimpan; Pilih hari dan Pilih ruangan di Tambah Praktikum; daftar Pilih Pertemuan 20 pertemuan di layar 1024 px berhenti 16 px dari bawah layar tanpa menutupi tombolnya | 25 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|
