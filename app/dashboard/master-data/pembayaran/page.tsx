@@ -5,21 +5,34 @@ import useActivationStore from "@/app/store/useActivationStore";
 import {
   groupActivationsByStudent,
   isFullyPaid,
+  matchesStudent,
   summarizePayment,
 } from "@/app/utils/payment";
 import { Field, Input } from "@headlessui/react";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { debounce } from "lodash";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
 import PeriodSelector from "@/app/components/period/period-selector";
 import ArchiveNotice from "@/app/components/period/archive-notice";
 import { usePeriodView } from "@/app/store/usePeriodStore";
 
+type PaymentFilter = "all" | "paid" | "unpaid";
+
+const FILTERS: { value: PaymentFilter; label: string }[] = [
+  { value: "all", label: "Show All" },
+  { value: "paid", label: "Sudah Bayar" },
+  { value: "unpaid", label: "Belum Bayar" },
+];
+
+const ROW_GRID =
+  "grid grid-cols-[minmax(0,1fr)_104px_144px_72px] items-center gap-x-3 xl:grid-cols-[112px_minmax(0,1fr)_104px_144px_72px]";
+
 export default function Pembayaran() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<PaymentFilter>("all");
 
   const {
     activationData,
@@ -27,9 +40,6 @@ export default function Pembayaran() {
     refreshActivations,
     isLoading,
     loadError,
-    status,
-    setStatusQuery,
-    setNameQuery,
     setPeriodQuery,
   } = useActivationStore();
   const { viewedPeriod, viewedPeriodId, isArchive } = usePeriodView();
@@ -45,48 +55,52 @@ export default function Pembayaran() {
       refreshActivations();
   });
 
-  const debouncedSetQuery = useMemo(() => {
-    return debounce((val: string) => {
-      setNameQuery(val);
-    }, 400);
-  }, [setNameQuery]);
-
-  useEffect(() => {
-    return () => {
-      debouncedSetQuery.cancel();
-    };
-  }, [debouncedSetQuery]);
-
   const students = useMemo(
     () => groupActivationsByStudent(activationData),
     [activationData],
   );
 
-  const visibleStudents = students.filter((student) => {
-    if (status === "true") return isFullyPaid(student);
-    if (status === "false") return !isFullyPaid(student);
-    return true;
-  });
-
-  const countByStatus = (paid: boolean) =>
-    loadError && activationData.length === 0
-      ? "–"
-      : activationData.filter((student) => student.status === paid).length;
+  const visibleStudents = students.filter(
+    (student) =>
+      matchesStudent(student, search) &&
+      (filter === "all" || (filter === "paid") === isFullyPaid(student)),
+  );
 
   const selectedStudent = students.find(
     (student) => student.user_id === selectedUserId,
   );
 
+  const countByStatus = (paid: boolean) =>
+    loadError && activationData.length === 0
+      ? "–"
+      : activationData.filter((activation) => activation.status === paid)
+          .length;
+
+  const emptyMessage = () => {
+    if (students.length === 0)
+      return "Belum ada mahasiswa yang mendaftar praktikum di periode ini.";
+
+    if (search.trim()) {
+      const label = FILTERS.find((item) => item.value === filter)?.label;
+
+      return `Tidak ada mahasiswa yang cocok dengan "${search.trim()}"${filter === "all" ? "" : ` di pilihan ${label}`}.`;
+    }
+
+    return filter === "unpaid"
+      ? "Semua mahasiswa sudah bayar."
+      : "Belum ada mahasiswa yang lunas.";
+  };
+
   return (
-    <div className="flex h-full w-full flex-col space-y-[38px] overflow-auto overscroll-contain">
+    <div className="flex h-full w-full flex-col space-y-5 overflow-auto overscroll-contain">
       <PeriodSelector />
       {isArchive && viewedPeriod && <ArchiveNotice name={viewedPeriod.name} />}
       <FeedbackBox
         feedback={loadError ? { ok: false, message: loadError } : feedback}
       />
-      <div className="flex h-fit w-full flex-row space-x-9">
-        <div className="flex h-[200px] w-[300px] flex-col justify-between rounded-3xl bg-[#3272CA] p-5">
-          <h1 className="text-6xl font-bold text-[#FFBF01]">
+      <div className="flex h-fit w-full flex-row space-x-6">
+        <div className="flex w-[300px] min-w-0 flex-col space-y-3 rounded-3xl bg-[#3272CA] p-5">
+          <h1 className="text-5xl font-bold leading-none text-[#FFBF01]">
             {countByStatus(false)}
           </h1>
           <p className="text-base font-semibold text-white">
@@ -94,8 +108,8 @@ export default function Pembayaran() {
             <span className="font-extrabold text-[#FFBF01]">belum bayar</span>
           </p>
         </div>
-        <div className="flex h-[200px] w-[300px] flex-col justify-between rounded-3xl bg-[#3272CA] p-5">
-          <h1 className="text-6xl font-bold text-[#FFBF01]">
+        <div className="flex w-[300px] min-w-0 flex-col space-y-3 rounded-3xl bg-[#3272CA] p-5">
+          <h1 className="text-5xl font-bold leading-none text-[#FFBF01]">
             {countByStatus(true)}
           </h1>
           <p className="text-base font-semibold text-white">
@@ -104,94 +118,93 @@ export default function Pembayaran() {
           </p>
         </div>
       </div>
-      <div className="relative h-fit w-full">
-        <Field className={"h-12 w-full"}>
-          <div className="absolute z-10 size-[24px] translate-x-2 translate-y-1/2">
+      <div className="flex w-full flex-row items-center space-x-3">
+        <Field className="relative h-12 min-w-0 flex-1">
+          <div className="pointer-events-none absolute left-2 top-1/2 z-10 size-[24px] -translate-y-1/2">
             <Image
               src={"/search.png"}
-              alt="search"
+              alt=""
               fill
               style={{ objectFit: "contain" }}
             />
           </div>
           <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cari nama atau NIM"
             className={
               "h-full w-full rounded-2xl pl-10 data-[focus]:outline-[#3272CA]"
             }
-            placeholder="Cari Mahasiswa"
-            onChange={(e) => debouncedSetQuery(e.target.value)}
           />
         </Field>
+        {FILTERS.map((item) => (
+          <button
+            key={item.value}
+            type="button"
+            aria-pressed={filter === item.value}
+            onClick={() => setFilter(item.value)}
+            className={`h-fit w-fit shrink-0 rounded-full border-2 p-3 text-xs font-semibold ${filter === item.value ? "border-[#3272CA] bg-[#3272CA] text-white" : "border-[#BFD9EF] bg-white text-[#3272CA]"}`}
+          >
+            {item.label}
+          </button>
+        ))}
       </div>
-      <div className="flex h-fit w-full flex-col space-y-14 rounded-2xl bg-white p-7">
-        <div className="flex w-full flex-row space-x-3">
-          <button
-            onClick={() => setStatusQuery("")}
-            className={`h-fit w-fit rounded-full border-2 p-3 text-xs font-semibold ${status === "" ? "border-[#3272CA] bg-[#3272CA] text-white" : "border-[#BFD9EF] text-[#3272CA]"}`}
-          >
-            Show All
-          </button>
-          <button
-            onClick={() => setStatusQuery("true")}
-            className={`h-fit w-fit rounded-full border-2 p-3 text-xs font-semibold ${status === "true" ? "border-[#3272CA] bg-[#3272CA] text-white" : "border-[#BFD9EF] text-[#3272CA]"}`}
-          >
-            Sudah Bayar
-          </button>
-          <button
-            onClick={() => setStatusQuery("false")}
-            className={`h-fit w-fit rounded-full border-2 p-3 text-xs font-semibold ${status === "false" ? "border-[#3272CA] bg-[#3272CA] text-white" : "border-[#BFD9EF] text-[#3272CA]"}`}
-          >
-            Belum Bayar
-          </button>
+      <div className="flex h-fit w-full flex-col rounded-2xl bg-white px-5 pb-3 pt-2">
+        <div
+          className={`${ROW_GRID} sticky top-0 z-10 border-b border-[#F1F1F2] bg-white py-3 text-sm font-bold text-[#5E6278]`}
+        >
+          <p className="hidden xl:block">NIM</p>
+          <p>
+            <span className="xl:hidden">Mahasiswa</span>
+            <span className="hidden xl:inline">Nama</span>
+          </p>
+          <p>Mata Kuliah</p>
+          <p>Status Pembayaran</p>
+          <p></p>
         </div>
-        <div className="flex w-full flex-col space-y-9">
-          <div className="flex flex-row text-sm font-bold text-[#5E6278]">
-            <p className="flex w-2/12 justify-center">NIM</p>
-            <p className="flex w-3/12 justify-center">Nama</p>
-            <p className="flex w-2/12 justify-center">Mata Kuliah</p>
-            <p className="flex w-3/12 justify-center">Status Pembayaran</p>
-            <p className="flex w-2/12 justify-center"></p>
-          </div>
-          {isLoading && activationData.length === 0 && (
-            <p className="text-sm text-[#5E6278]">Memuat data...</p>
-          )}
-          {!isLoading && !loadError && visibleStudents.length === 0 && (
-            <p className="text-sm text-[#5E6278]">Tidak ada data.</p>
-          )}
-          {visibleStudents.map((student) => {
-            const summary = summarizePayment(student);
+        {isLoading && activationData.length === 0 && (
+          <p className="py-4 text-sm font-semibold text-[#5E6278]">
+            Loading...
+          </p>
+        )}
+        {!isLoading && !loadError && visibleStudents.length === 0 && (
+          <p className="py-4 text-sm font-semibold text-[#5E6278]">
+            {emptyMessage()}
+          </p>
+        )}
+        {visibleStudents.map((student) => {
+          const summary = summarizePayment(student);
 
-            return (
-              <div
-                key={student.user_id}
-                onClick={() => {
-                  setFeedback(null);
-                  setSelectedUserId(student.user_id);
-                }}
-                className="flex cursor-pointer flex-row items-center rounded-xl py-2 text-sm font-semibold text-[#5E6278] hover:bg-[#F5F8FA]"
-              >
-                <p className="flex w-2/12 justify-center">{student.nim}</p>
-                <p className="flex w-3/12 justify-center">{student.student}</p>
-                <p className="flex w-2/12 justify-center">
-                  {student.activations.length} mata kuliah
-                </p>
-                <p
-                  className={`flex h-fit w-3/12 justify-center rounded-md p-2 font-semibold ${summary.className}`}
-                >
-                  {summary.label}
-                </p>
-                <div className="flex w-2/12 justify-center">
-                  <button
-                    aria-label={`Lihat pembayaran ${student.student}`}
-                    className="h-fit w-fit rounded-full border-2 border-[#BFD9EF] px-4 py-2 text-xs font-semibold text-[#3272CA]"
-                  >
-                    Lihat
-                  </button>
-                </div>
+          return (
+            <div
+              key={student.user_id}
+              onClick={() => {
+                setFeedback(null);
+                setSelectedUserId(student.user_id);
+              }}
+              className={`${ROW_GRID} cursor-pointer border-b border-[#F1F1F2] py-2 text-sm font-semibold text-[#5E6278] last:border-b-0 hover:bg-[#F5F8FA]`}
+            >
+              <p className="hidden xl:block">{student.nim}</p>
+              <div className="flex min-w-0 flex-col">
+                <p className="break-words">{student.student}</p>
+                <p className="text-xs xl:hidden">{student.nim}</p>
               </div>
-            );
-          })}
-        </div>
+              <p>{student.activations.length} mata kuliah</p>
+              <p className={`rounded-md p-2 text-center ${summary.className}`}>
+                {summary.label}
+              </p>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  aria-label={`Lihat pembayaran ${student.student}`}
+                  className="h-fit w-fit rounded-full border-2 border-[#BFD9EF] px-4 py-2 text-xs font-semibold text-[#3272CA]"
+                >
+                  Lihat
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
       <StudentPaymentDialog
         key={selectedUserId ?? ""}

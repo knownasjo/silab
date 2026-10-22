@@ -3,11 +3,10 @@ import satellite from "../satellite";
 import { IGetActivationResponseBody } from "@/app/interfaces/activation/activation.interface";
 
 export const getAllActivation = async (
-  name?: string,
   periodId?: string,
 ): Promise<IBaseResponse<IGetActivationResponseBody[]>> => {
   const res = await satellite.get(
-    `/activation/?name=${name ?? ""}${periodId ? `&periodId=${periodId}` : ""}`,
+    `/activation/${periodId ? `?periodId=${periodId}` : ""}`,
   );
 
   return res.data;

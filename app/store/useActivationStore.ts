@@ -10,8 +10,6 @@ import { coalesce } from "../utils/coalesce";
 
 type ActivationState = GlobalState & {
   activationData: IGetActivationResponseBody[];
-  status: string;
-  name: string;
   message: string | null;
   loadError: string | null;
   periodId?: string;
@@ -27,8 +25,6 @@ type ActivationActions = {
   ) => Promise<void>;
   updateStudentClass: (id: string, classId: string) => Promise<void>;
   removeActivation: (id: string) => Promise<void>;
-  setStatusQuery: (query: string | undefined) => void;
-  setNameQuery: (query: string) => void;
   setPeriodQuery: (periodId?: string) => void;
   reset: () => void;
 };
@@ -37,8 +33,6 @@ const initialState = {
   isLoading: false,
   error: null,
   activationData: [],
-  status: "",
-  name: "",
   message: null,
   loadError: null,
 };
@@ -47,26 +41,17 @@ const useActivationStore = create<ActivationState & ActivationActions>(
   (set, get) => ({
     ...initialState,
 
-    setStatusQuery: (query) => {
-      set({ status: query ?? "" });
-    },
-
-    setNameQuery: (query) => {
-      set({ name: query });
-      get().getAllActivations();
-    },
-
     setPeriodQuery: (periodId) => {
       if (periodId !== get().periodId) set({ periodId, activationData: [] });
     },
 
     getAllActivations: async () => {
-      const { name, periodId } = get();
+      const { periodId } = get();
 
       set({ isLoading: true, loadError: null });
 
       try {
-        const res = await getAllActivation(name, periodId);
+        const res = await getAllActivation(periodId);
 
         if (get().periodId !== periodId) return;
 
@@ -83,15 +68,10 @@ const useActivationStore = create<ActivationState & ActivationActions>(
     },
 
     refreshActivations: coalesce(async () => {
-      const { name, periodId } = get();
-      const res = await getAllActivation(name, periodId);
+      const { periodId } = get();
+      const res = await getAllActivation(periodId);
 
-      if (
-        get().name === name &&
-        get().periodId === periodId &&
-        res.status &&
-        res.data
-      ) {
+      if (get().periodId === periodId && res.status && res.data) {
         set({ activationData: res.data, loadError: null });
       }
     }),

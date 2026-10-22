@@ -22,7 +22,32 @@ export const groupActivationsByStudent = (
     students.set(activation.user_id, student);
   }
 
-  return Array.from(students.values());
+  const grouped = Array.from(students.values());
+
+  for (const student of grouped)
+    student.activations.sort(
+      (a, b) =>
+        semesterOf(a) - semesterOf(b) ||
+        activationSubjectName(a).localeCompare(activationSubjectName(b)),
+    );
+
+  return grouped.sort((a, b) => a.nim.localeCompare(b.nim));
+};
+
+const semesterOf = (activation: IGetActivationResponseBody) =>
+  Number(activation.subjects[0]?.semester ?? 0);
+
+const normalize = (value: string) =>
+  value.trim().replace(/\s+/g, " ").toLowerCase();
+
+export const matchesStudent = (student: IStudentActivations, query: string) => {
+  const wanted = normalize(query);
+
+  return (
+    !wanted ||
+    normalize(student.student).includes(wanted) ||
+    student.nim.includes(wanted)
+  );
 };
 
 export const isFullyPaid = ({ paid, activations }: IStudentActivations) =>

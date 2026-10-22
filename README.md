@@ -157,7 +157,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah (hanya LABORAN), lihat "Ubah Mata Kuliah" |
 | `/dashboard/master-data/jam-sesi` | Jam sesi Senin–Kamis dan Jumat: tambah, ubah jam, nonaktifkan, hapus, dan daftar kelas di tiap sesi (hanya LABORAN) |
-| `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up, dan hapus pendaftaran yang belum bayar. Ada pilihan periode; periode lama hanya bisa dilihat |
+| `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa (urut NIM, cari nama atau NIM) + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up, dan hapus pendaftaran yang belum bayar. Ada pilihan periode; periode lama hanya bisa dilihat. Lihat "Pembayaran" |
 | `/dashboard/master-data/periode` | Periode akademik: periode aktif, Mulai Semester Baru, dan daftar periode (hanya LABORAN), lihat "Periode Akademik" |
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman untuk semua mahasiswa atau untuk mahasiswa mata kuliah tertentu (hanya LABORAN), lihat "Pengumuman untuk Mata Kuliah Tertentu" |
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman, masing-masing dengan keterangan "Untuk: ..." |
@@ -241,8 +241,8 @@ sibuk, silakan coba lagi sebentar lagi." dari backend:
   dashboard) menampilkan `error`. Store yang `error`-nya juga dibaca dialog
   atau tombol aksi (kelas, pembayaran, pengumuman) punya `loadError` terpisah,
   supaya error aksi tidak ikut muncul di atas halaman.
-- Selama gagal, keterangan kosong seperti "Belum ada pengumuman" atau "Tidak
-  ada data" tidak ditampilkan, dan kartu jumlah di Pembayaran menampilkan "–"
+- Selama gagal, keterangan kosong seperti "Belum ada pengumuman" atau "Belum
+  ada mahasiswa yang mendaftar praktikum di periode ini." tidak ditampilkan, dan kartu jumlah di Pembayaran menampilkan "–"
   alih-alih 0, supaya laboran tidak mengira datanya hilang.
 - Refresh yang dipicu event real-time, termasuk `ready` saat stream SSE
   tersambung kembali setelah server hidup, menghapus pesan itu bila berhasil.
@@ -270,8 +270,8 @@ server mati atau sibuk semua halaman terlempar ke Dashboard tanpa pesan.
   `components/master-data/student-payment-dialog.tsx` berisi kelas dan status
   tiap mata kuliah; tombol Ubah membuka form ubah status/kelas di pop-up yang
   sama. Filter "Belum Bayar" = masih ada mata kuliah belum lunas, "Sudah
-  Bayar" = semua lunas; filter dihitung di browser, jadi `GET /activation`
-  hanya dikirim dengan `?name=`. Kartu angka tetap menghitung per aktivasi
+  Bayar" = semua lunas. Filter dan pencarian dihitung di browser (lihat
+  "Pembayaran"). Kartu angka tetap menghitung per aktivasi
 - Form ubah pembayaran menolak "Simpan Perubahan" tanpa perubahan dengan pesan
   "Tidak ada perubahan yang perlu disimpan.", baik aktivasi yang sudah punya
   kelas maupun yang belum, jadi tidak ada permintaan yang dikirim ke server
@@ -1033,6 +1033,64 @@ pada 22 Oktober 2026:
   ganda dan Enter dua kali di satu browser sudah aman sejak sebelumnya, karena
   tombol Simpan langsung nonaktif.
 
+### Pembayaran
+
+Halaman Pembayaran (`dashboard/master-data/pembayaran`) diperbaiki pada
+23 Oktober 2026.
+
+**Pencarian dan pilihan**
+- Pencarian dihitung di browser dari data periode yang sudah dimuat
+  (`matchesStudent` di `app/utils/payment.ts`). Kata yang diketik cocok dengan
+  sebagian nama atau NIM, tanpa membedakan huruf besar dan spasi berlebih.
+  `GET /activation` tidak lagi dikirim dengan `?name=` setiap kali mengetik.
+  Cara lama punya tiga masalah:
+  - NIM tidak bisa dicari, karena server hanya mencocokkan nama.
+  - Jawaban server yang terlambat untuk kata sebelumnya bisa menimpa hasil
+    kata yang baru.
+  - Angka di kartu ikut menghitung hasil pencarian, jadi mencari satu nama
+    membuat kartu menjadi 1 dan 0.
+- Kata pencarian dan pilihan Show All/Sudah Bayar/Belum Bayar disimpan di
+  halaman, bukan di store. Setiap kali halaman dibuka, kotak cari kosong dan
+  pilihannya Show All.
+  - Dulu kata pencarian tertinggal di store sementara kotak cari kosong.
+    Setelah pindah halaman lewat sidebar, daftar tetap tersaring tanpa
+    terlihat.
+  - Tombol pilihan punya `aria-pressed`.
+- Daftar diurutkan menurut NIM, dan mata kuliah di pop-up menurut semester
+  lalu abjad (`groupActivationsByStudent`). Dulu keduanya diurutkan menurut
+  waktu mendaftar, yang terbaru di atas.
+
+**Tampilan**
+- Baris dipisah garis tipis, sekitar 53 px per mahasiswa. Dulu 88 px karena
+  ada jarak 36 px antarbaris.
+- Kartu jumlah lebih pendek (148 px, dulu 200 px), dan tombol pilihan berada
+  di samping kotak cari. Di layar 1366 × 768 lima baris pertama langsung
+  terlihat. Dulu baris pertama berada di tepi bawah layar.
+- Baris judul kolom `sticky`, jadi tetap terlihat saat daftar digulir.
+- Kolom memakai grid berlebar tetap: Mata Kuliah 104 px, Status 144 px, dan
+  tombol 72 px. Judul kolom pun sejajar dengan isinya.
+- Di bawah 1280 px (`xl`), NIM ditulis di bawah nama supaya kolom nama tetap
+  lebar. Dulu di layar 1024 px judul "Status Pembayaran" turun 2 baris dan
+  nama panjang turun 5 baris.
+
+**Keterangan**
+- Saat memuat tertulis "Loading..." seperti di halaman lain (dulu "Memuat
+  data...").
+- Keterangan kosong kini dibedakan:
+  - "Belum ada mahasiswa yang mendaftar praktikum di periode ini."
+  - "Tidak ada mahasiswa yang cocok dengan "…"." Bila pilihan Sudah
+    Bayar/Belum Bayar aktif, ditambah "di pilihan …".
+  - "Semua mahasiswa sudah bayar." bila pilihan Belum Bayar kosong.
+  - "Belum ada mahasiswa yang lunas." bila pilihan Sudah Bayar kosong.
+
+**Pop-up Ubah Data Aktivasi**
+- Tombol geser, pilihan kelas, dan Kembali dikunci selama menyimpan
+  (`<fieldset disabled>`). Dulu ketiganya masih bisa dipakai, tetapi
+  perubahannya tidak ikut tersimpan.
+- Tombol geser bernama "Status pembayaran" untuk pembaca layar.
+- Ikon hiasan (kaca pembesar, panah Kembali, panah pilihan kelas) memakai
+  `alt=""`.
+
 ### Tanda HP tidak biasa
 
 Backend mencatat HP yang dipakai scan, dan presensi dari HP yang bukan HP
@@ -1118,7 +1176,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 17 menit
+npm test                    # semua tes browser, sekitar 18 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
@@ -1130,6 +1188,7 @@ node tests/login.mjs        # satu tes saja
 | `sesi-pulih` | token kedaluwarsa diperbarui diam-diam, server mati memunculkan pemberitahuan tanpa melempar ke login, halaman pulih sendiri saat server hidup, tombol Coba lagi, token rusak kembali ke login dan cookie dihapus | 15 |
 | `server-mati` | 13 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 29 |
 | `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi. Hapus pendaftaran: tombol hanya di mata kuliah Belum Bayar, tidak menimpa kotak status, dan Ubah sejajar di semua baris, Batal tidak menghapus, Ya, hapus mengirim satu DELETE, penolakan server tampil di konfirmasi, pendaftaran terakhir menutup pop-up dengan pesan di halaman | 67 |
+| `daftar-pembayaran` | daftar urut NIM, mata kuliah di pop-up urut semester lalu abjad; cari NIM dan sebagian nama tanpa peduli huruf besar dan spasi; kartu tetap total periode saat mencari; mengetik tidak mengirim permintaan ke server; pesan tidak ketemu menyebut kata dan pilihannya; kembali lewat sidebar mulai dari kotak cari kosong dan Show All; keterangan untuk periode tanpa pendaftar, semua lunas, dan belum ada yang lunas; Loading... saat memuat; di 1366 × 768 kartu paling tinggi 160 px, tombol pilihan sebaris dengan kotak cari, baris pertama paling jauh 360 px dari atas, jarak antarbaris paling banyak 56 px, judul kolom tetap di atas saat digulir; di 1024 px judul satu baris dan sejajar isinya, NIM di bawah nama, kolom nama minimal 180 px; tombol geser bernama Status pembayaran dan terkunci bersama pilihan kelas dan Kembali selama menyimpan | 23 |
 | `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
 | `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah dan hapus tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus) | 32 |
 | `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |

@@ -331,11 +331,12 @@ export default function StudentPaymentDialog({
             <>
               <button
                 onClick={() => setEditingId(null)}
-                className="flex w-fit flex-row items-center space-x-1 text-sm font-semibold text-[#3272CA]"
+                disabled={isLoading}
+                className="flex w-fit flex-row items-center space-x-1 text-sm font-semibold text-[#3272CA] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Image
                   src={"/down-blue.png"}
-                  alt="kembali"
+                  alt=""
                   width={16}
                   height={16}
                   className="rotate-90"
@@ -369,111 +370,121 @@ export default function StudentPaymentDialog({
                       {activationSubjectName(editing)}
                     </p>
                   </div>
-                  <div className="flex flex-col">
-                    <p className="text-xs font-semibold text-[#5E6278]">
-                      Status Pembayaran
-                    </p>
-                    <div className="mt-2 flex flex-row items-center space-x-3">
-                      <p className="text-sm font-bold text-[#1D1D1D]">
-                        Belum Bayar
+                  <fieldset
+                    disabled={isLoading}
+                    className="flex min-w-0 flex-col space-y-6"
+                  >
+                    <div className="flex flex-col">
+                      <p className="text-xs font-semibold text-[#5E6278]">
+                        Status Pembayaran
                       </p>
-                      <Switch
-                        checked={paymentStatus}
-                        onChange={setPaymentStatus}
-                        className="group relative flex h-7 w-14 cursor-pointer rounded-full bg-[#D9D9D9] p-1 transition-colors duration-200 ease-in-out focus:outline-none data-[checked]:bg-[#3272CA] data-[focus]:outline-1 data-[focus]:outline-white"
-                      >
-                        <span
-                          aria-hidden="true"
-                          className="pointer-events-none inline-block size-5 translate-x-0 rounded-full bg-[white] shadow-lg ring-0 transition duration-200 ease-in-out group-data-[checked]:translate-x-7"
-                        />
-                      </Switch>
-                      <p className="text-sm font-bold text-[#1D1D1D]">
-                        Sudah Bayar
-                      </p>
-                    </div>
-                    {editing.registered_class &&
-                      editing.status &&
-                      !paymentStatus && (
-                        <p className="mt-2 text-xs font-semibold text-[#F1416C]">
-                          Mahasiswa akan dikeluarkan dari kelas{" "}
-                          {editing.registered_class.name} bila belum punya
-                          presensi.
+                      <div className="mt-2 flex flex-row items-center space-x-3">
+                        <p className="text-sm font-bold text-[#1D1D1D]">
+                          Belum Bayar
                         </p>
-                      )}
-                  </div>
-                  <div className="flex flex-col">
-                    <p className="text-xs font-semibold text-[#5E6278]">
-                      Kelas Praktikum
-                    </p>
-                    {editing.registered_class && (
-                      <p className="mt-1 text-xs text-[#5E6278]">
-                        Kelas sekarang:{" "}
-                        <span className="font-bold text-[#1D1D1D]">
-                          {editing.registered_class.name}
-                        </span>
-                      </p>
-                    )}
-                    <Listbox value={selectedClass} onChange={setSelectedClass}>
-                      <ListboxButton className="mt-2 flex w-full flex-row items-center justify-between rounded-2xl border-2 border-[#BFD9EF] p-3 text-left text-sm font-semibold text-[#3272CA]">
-                        <span>
-                          {selectedClass
-                            ? `Kelas ${selectedClass.name} — ${formatDay(selectedClass.day)}, ${selectedClass.session_time}`
-                            : "Pilih Kelas"}
-                        </span>
-                        <Image
-                          src={"/down-blue.png"}
-                          alt="chevron down"
-                          width={20}
-                          height={20}
-                        />
-                      </ListboxButton>
-                      <ListboxOptions className="mt-1 w-full overflow-hidden rounded-2xl border-2 border-[#BFD9EF] bg-white">
-                        {editing.available_classes.length === 0 && (
-                          <p className="px-3 py-2 text-sm text-[#5E6278]">
-                            Belum ada kelas untuk mata kuliah ini.
+                        <Switch
+                          checked={paymentStatus}
+                          onChange={setPaymentStatus}
+                          aria-label="Status pembayaran"
+                          className="group relative flex h-7 w-14 cursor-pointer rounded-full bg-[#D9D9D9] p-1 transition-colors duration-200 ease-in-out focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 data-[checked]:bg-[#3272CA] data-[focus]:outline-1 data-[focus]:outline-white"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none inline-block size-5 translate-x-0 rounded-full bg-[white] shadow-lg ring-0 transition duration-200 ease-in-out group-data-[checked]:translate-x-7"
+                          />
+                        </Switch>
+                        <p className="text-sm font-bold text-[#1D1D1D]">
+                          Sudah Bayar
+                        </p>
+                      </div>
+                      {editing.registered_class &&
+                        editing.status &&
+                        !paymentStatus && (
+                          <p className="mt-2 text-xs font-semibold text-[#F1416C]">
+                            Mahasiswa akan dikeluarkan dari kelas{" "}
+                            {editing.registered_class.name} bila belum punya
+                            presensi.
                           </p>
                         )}
-                        {!editing.registered_class &&
-                          editing.available_classes.length > 0 && (
-                            <ListboxOption
-                              value={null}
-                              className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#5E6278] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
-                            >
-                              Kosongkan (mahasiswa memilih sendiri)
-                            </ListboxOption>
-                          )}
-                        {editing.available_classes.map((availableClass) => {
-                          const isCurrent =
-                            editing.registered_class?.id === availableClass.id;
-
-                          return (
-                            <ListboxOption
-                              key={availableClass.id}
-                              value={availableClass}
-                              disabled={availableClass.is_full && !isCurrent}
-                              className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#1D1D1D] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40 data-[focus]:bg-[#3272CA] data-[focus]:text-white"
-                            >
-                              Kelas {availableClass.name} —{" "}
-                              {formatDay(availableClass.day)},{" "}
-                              {availableClass.session_time} (
-                              {availableClass.registered_students}/
-                              {availableClass.quota})
-                              {isCurrent && " — kelas sekarang"}
-                              {availableClass.is_full &&
-                                !isCurrent &&
-                                " — Penuh"}
-                            </ListboxOption>
-                          );
-                        })}
-                      </ListboxOptions>
-                    </Listbox>
-                    {!editing.registered_class && (
-                      <p className="mt-2 text-xs text-[#5E6278]">
-                        Kosongkan bila mahasiswa memilih kelas sendiri di
-                        aplikasi.
+                    </div>
+                    <div className="flex flex-col">
+                      <p className="text-xs font-semibold text-[#5E6278]">
+                        Kelas Praktikum
                       </p>
-                    )}
-                  </div>
+                      {editing.registered_class && (
+                        <p className="mt-1 text-xs text-[#5E6278]">
+                          Kelas sekarang:{" "}
+                          <span className="font-bold text-[#1D1D1D]">
+                            {editing.registered_class.name}
+                          </span>
+                        </p>
+                      )}
+                      <Listbox
+                        value={selectedClass}
+                        onChange={setSelectedClass}
+                      >
+                        <ListboxButton className="mt-2 flex w-full flex-row items-center justify-between rounded-2xl border-2 border-[#BFD9EF] p-3 text-left text-sm font-semibold text-[#3272CA] disabled:cursor-not-allowed disabled:opacity-60">
+                          <span>
+                            {selectedClass
+                              ? `Kelas ${selectedClass.name} — ${formatDay(selectedClass.day)}, ${selectedClass.session_time}`
+                              : "Pilih Kelas"}
+                          </span>
+                          <Image
+                            src={"/down-blue.png"}
+                            alt=""
+                            width={20}
+                            height={20}
+                          />
+                        </ListboxButton>
+                        <ListboxOptions className="mt-1 w-full overflow-hidden rounded-2xl border-2 border-[#BFD9EF] bg-white">
+                          {editing.available_classes.length === 0 && (
+                            <p className="px-3 py-2 text-sm text-[#5E6278]">
+                              Belum ada kelas untuk mata kuliah ini.
+                            </p>
+                          )}
+                          {!editing.registered_class &&
+                            editing.available_classes.length > 0 && (
+                              <ListboxOption
+                                value={null}
+                                className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#5E6278] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
+                              >
+                                Kosongkan (mahasiswa memilih sendiri)
+                              </ListboxOption>
+                            )}
+                          {editing.available_classes.map((availableClass) => {
+                            const isCurrent =
+                              editing.registered_class?.id ===
+                              availableClass.id;
+
+                            return (
+                              <ListboxOption
+                                key={availableClass.id}
+                                value={availableClass}
+                                disabled={availableClass.is_full && !isCurrent}
+                                className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#1D1D1D] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40 data-[focus]:bg-[#3272CA] data-[focus]:text-white"
+                              >
+                                Kelas {availableClass.name} —{" "}
+                                {formatDay(availableClass.day)},{" "}
+                                {availableClass.session_time} (
+                                {availableClass.registered_students}/
+                                {availableClass.quota})
+                                {isCurrent && " — kelas sekarang"}
+                                {availableClass.is_full &&
+                                  !isCurrent &&
+                                  " — Penuh"}
+                              </ListboxOption>
+                            );
+                          })}
+                        </ListboxOptions>
+                      </Listbox>
+                      {!editing.registered_class && (
+                        <p className="mt-2 text-xs text-[#5E6278]">
+                          Kosongkan bila mahasiswa memilih kelas sendiri di
+                          aplikasi.
+                        </p>
+                      )}
+                    </div>
+                  </fieldset>
                   {dialogError && (
                     <p className="text-sm font-semibold text-[#F1416C]">
                       {dialogError}
