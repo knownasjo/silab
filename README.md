@@ -195,17 +195,39 @@ menampilkan inisial, nama, dan peran pengguna. Untuk laboran dan dosen bagian
 ini adalah tautan ke `/dashboard/profil`; untuk asisten hanya tampilan, karena
 mahasiswa (termasuk asisten) mengelola akunnya di aplikasi mobile.
 
+- Halaman berjudul "Profil" (32 px tebal seperti halaman lain). Selama data
+  akun dimuat tampil "Loading...". Bila data akun gagal dimuat (misalnya
+  server mati), halaman hanya berisi judul; pesan merah "Data akun gagal
+  dimuat" dengan tombol Coba lagi datang dari `account-load-notice.tsx` di
+  layout.
+- Data Akun: nama dan peran pindah baris di spasi (`break-words`), jadi nama
+  panjang tidak terpotong di tengah kata. NIM/NIY dan email boleh terpotong di
+  mana saja (`break-all`) karena tidak punya spasi.
 - **Ubah nama**: `PUT /auth/me`, 3–100 karakter, spasi berlebih dirapikan.
-  Nama di menu samping langsung berganti karena store memakai data balasan
-  server. NIM/NIY dan email tidak bisa diubah; halaman Profil menulis "NIY"
-  untuk dosen dan laboran.
+  Label menulis "(maks: 100 karakter)", penghitung di bawah isian menulis
+  misalnya "11/100", dan isian berhenti di 100 karakter. Nama yang sama dengan
+  nama sekarang (juga bila bedanya hanya spasi) dibalas "Tidak ada perubahan
+  yang perlu disimpan." tanpa mengirim apa pun. Nama di menu samping langsung
+  berganti karena store memakai data balasan server. NIM/NIY dan email tidak
+  bisa diubah; halaman Profil menulis "NIY" untuk dosen dan laboran.
 - **Ganti password**: `PUT /auth/me/password` dengan password lama, password
   baru (min. 8, tanpa spasi, harus berbeda), dan konfirmasi. Isian diperiksa
   dulu di browser; password baru berspasi di mana pun dibalas "Password baru
   tidak boleh mengandung spasi." tanpa mengirim apa pun, dan server juga
   menolaknya (aturan sejak 1 Oktober 2026, lihat README backend). Server membalas token baru yang langsung disimpan ke cookie, jadi
   browser ini tetap masuk, sedangkan browser/HP lain dengan akun yang sama
-  kembali ke `/auth` sekitar 1,5 detik kemudian.
+  kembali ke `/auth` sekitar 1,5 detik kemudian. Ketiga kolom punya tombol
+  mata seperti halaman Log In (label "Tampilkan password lama" dan
+  seterusnya); setelah berhasil, kolom kosong dan tersembunyi lagi.
+- Batasan yang dibiarkan: bila satu permintaan butuh lebih dari 1 detik
+  (jaringan sangat lambat), tab lain di browser yang sama bisa ikut kembali ke
+  `/auth` setelah ganti password. Tab itu menyambung ulang real-time 1 detik
+  setelah server memutusnya, masih dengan token lama, karena token baru belum
+  sempat tersimpan. Tab tempat password diganti tetap masuk, dan tab lain bisa
+  langsung dibuka lagi tanpa login. Pada jeda 0, 300, dan 700 ms tidak terjadi.
+- Kedua form terkunci (`<fieldset disabled>`) selama menyimpan, jadi ketikan
+  saat itu tidak hilang ditimpa hasil simpan. Pesan berhasil atau gagal hilang
+  begitu isian diketik lagi.
 - `GET /auth/me` membalas `name`, bukan `fullname`; `IMeResponseBody` sudah
   disesuaikan.
 
@@ -1379,7 +1401,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 26 menit
+npm test                    # semua tes browser, sekitar 23 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
@@ -1407,6 +1429,7 @@ node tests/login.mjs        # satu tes saja
 | `praktikum` | Loading... saat memuat; mata kuliah urut abjad dan kelas urut A, B, C (juga daftar kelas asisten); "Belum ada kelas di periode ini."; nama mata kuliah panjang 2 baris di dalam kartu; tanda Penuh dan ruangan di kartu kelas; semester dan mata kuliah tetap terbuka setelah kembali dari detail kelas; pesan error bila `GET /class` gagal; tombol Tambah Praktikum utuh di layar 1024px | 20 |
 | `detail-kelas` | Loading... saat memuat; pertemuan yang presensinya dibuka langsung terpilih, tanpa itu pertemuan terakhir; tanda Dibuka di daftar pertemuan; pilihan tetap setelah kembali dari Rekap; Belum ada mahasiswa / Belum ada pertemuan; Tambah Pertemuan: Batal tidak menyimpan, Enter menyimpan, pertemuan baru langsung terpilih; QR: Layar Penuh memperbesar QR, Keluar Layar Penuh, Tutup; Ubah Status Presensi: jarak di layar 720 px dan Batal tanpa mengirim apa pun; layar 1024 px: tombol satu baris, NIM dan nama tidak saling menimpa, nama dosen utuh; pesan error bila `GET /meeting/:classId` gagal | 24 |
 | `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
+| `profil` | judul Profil 32 px; Loading... bergaya halaman lain saat memuat; data akun gagal dimuat: hanya judul dan pesan merah, lalu Coba lagi memuat form; nama 100 karakter di Data Akun pindah baris di spasi di 1024 dan 1366 px; Ubah Nama: (maks: 100 karakter), penghitung 11/100 dan 16/100, 120 huruf berhenti di 100, nama sama atau beda spasi saja dibalas Tidak ada perubahan tanpa mengirim, pesan hilang saat mengetik, isian terkunci selama menyimpan dan ketikan saat itu tidak masuk, nama baru di isian, menu samping, dan database; Ganti Password: tombol mata di tiga kolom hanya menampilkan kolomnya sendiri dan tidak menyimpan form, pesan hilang saat mengetik, isian dan tombol mata terkunci selama menyimpan, setelah berhasil kolom kosong dan tersembunyi lagi, password baru bisa dipakai masuk dan halaman tetap masuk; asisten melihat judul dan data akun tanpa form | 27 |
 | `dropdown` | sorotan opsi pertama dan terakhir menempel sampai tepi daftar dengan latar biru dan tulisan putih di 12 dropdown: Jenis Pengumuman, Dosen Pengampu, Semester, Mata Kuliah, Hari, Ruangan, Sesi Kelas, Periode, Pilih Pertemuan, menu titik tiga pengumuman (Hapus merah), Jenis Pengumuman di pop-up Edit, Pilih Kelas di Pembayaran; Pilih Pertemuan dengan keyboard: sorotan biru dan Enter memilih | 17 |
 | `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; sorotan biru opsi menempel sampai tepi daftar; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; Sesi Kelas menulis "Pilih ruangan dulu" sampai ruangan dipilih, hanya berisi sesi hari dan ruangan itu, dan kosong lagi saat ruangan diganti; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 34 |
 | `rekap-presensi` | layar 1024 px dengan 15 pertemuan: kolom Hadir terlihat tanpa menggeser, No, NIM, dan Nama tetap di kiri setelah digeser ke ujung (hanya kolom pertemuan yang bergeser), scrollbar 6 px hanya di bawah kolom pertemuan, hanya tampil saat digeser dan hilang lagi setelah diam (dicek dari piksel screenshot), kolom Nama minimal 200 px, tombol Unduh PDF satu baris; layar 1366 px: No, NIM, dan Nama tetap di kiri, baris Jumlah hadir, periode dan dosen pengampu; kelas 40 mahasiswa: keterangan dan Jumlah hadir terlihat tanpa menggulir, judul kolom tetap di atas setelah digulir; PDF: nama panjang utuh, judul kolom Responsi Akhir per kata, Jumlah hadir, periode dan dosen, semua tulisan rekap satu pertemuan berjudul panjang muat di kertas; data kelas gagal dimuat lalu pulih lewat event; kelas dihapus saat terbuka; Detail Kelas urut NIM dan keterangan ikon rekap | 29 |
