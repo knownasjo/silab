@@ -9,6 +9,7 @@ import ClassFormFields, {
   validateClassForm,
 } from "@/app/components/praktikum/class-form-fields";
 import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
+import NoPeriodNotice from "@/app/components/period/no-period-notice";
 import ClassesPreview from "./components/classes-preview";
 import useClassStore from "@/app/store/useClassStore";
 import useSessionStore from "@/app/store/useSessionStore";
@@ -140,6 +141,7 @@ export default function TambahPraktikum() {
           Kembali
         </Link>
       </div>
+      <NoPeriodNotice />
       {loadProblem && (
         <FeedbackBox feedback={{ ok: false, message: loadProblem }} />
       )}

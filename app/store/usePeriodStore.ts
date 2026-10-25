@@ -19,7 +19,7 @@ type PeriodActions = {
   getPeriods: () => Promise<void>;
   refreshPeriods: () => Promise<void>;
   selectPeriod: (id: string | null) => void;
-  startPeriod: (body?: IStartPeriodRequestBody) => Promise<PeriodResult>;
+  startPeriod: (body: IStartPeriodRequestBody) => Promise<PeriodResult>;
 };
 
 const initialState = {
@@ -35,12 +35,20 @@ export const TERM_LABELS: Record<AcademicTerm, string> = {
   GENAP: "Genap",
 };
 
-export const nextPeriodName = (period: IPeriodResponseBody) => {
-  if (period.term === "GANJIL") return `${period.year} ${TERM_LABELS.GENAP}`;
+export const nextPeriodOf = (
+  period: IPeriodResponseBody,
+): IStartPeriodRequestBody => {
+  if (period.term === "GANJIL") return { year: period.year, term: "GENAP" };
 
   const start = Number(period.year.split("/")[1]);
 
-  return `${start}/${start + 1} ${TERM_LABELS.GANJIL}`;
+  return { year: `${start}/${start + 1}`, term: "GANJIL" };
+};
+
+export const nextPeriodName = (period: IPeriodResponseBody) => {
+  const { year, term } = nextPeriodOf(period);
+
+  return `${year} ${TERM_LABELS[term]}`;
 };
 
 const keepSelection = (

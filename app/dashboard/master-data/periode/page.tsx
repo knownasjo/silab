@@ -63,7 +63,8 @@ export default function PeriodeAkademik() {
         <div className="flex flex-col">
           <p className="text-sm font-semibold text-[#5E6278]">Periode aktif</p>
           <p className="text-2xl font-bold text-[#1D1D1D]">
-            {activePeriod?.name ?? (isLoaded ? "Belum ada periode" : "–")}
+            {activePeriod?.name ??
+              (isLoaded ? "Belum ada periode" : error ? "–" : "Loading...")}
           </p>
         </div>
         {isLoaded && (
@@ -81,6 +82,11 @@ export default function PeriodeAkademik() {
           <p>Pendaftaran</p>
           <p></p>
         </div>
+        {!isLoaded && !error && (
+          <p className="border-t border-[#F1F1F2] py-3 text-sm font-semibold text-[#5E6278]">
+            Loading...
+          </p>
+        )}
         {isLoaded && periodsData.length === 0 && !error && (
           <p className="border-t border-[#F1F1F2] py-3 text-sm font-semibold text-[#5E6278]">
             Belum ada periode.

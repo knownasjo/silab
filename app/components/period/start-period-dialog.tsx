@@ -14,6 +14,7 @@ import {
 } from "@/app/interfaces/period/period.interface";
 import usePeriodStore, {
   nextPeriodName,
+  nextPeriodOf,
   TERM_LABELS,
 } from "@/app/store/usePeriodStore";
 
@@ -47,16 +48,15 @@ export default function StartPeriodDialog({
   const [confirmText, setConfirmText] = useState("");
   const [year, setYear] = useState("");
   const [term, setTerm] = useState<AcademicTerm>("GANJIL");
+  const [from, setFrom] = useState<IPeriodResponseBody | null>(null);
 
-  const isFirst = !activePeriod;
-  const targetName = activePeriod
-    ? nextPeriodName(activePeriod)
-    : `${year || "…"} ${TERM_LABELS[term]}`;
-  const buttonLabel = isFirst
-    ? "Mulai Periode Pertama"
-    : `Mulai Semester ${targetName}`;
+  const isFirst = !from;
+  const buttonLabel = activePeriod
+    ? `Mulai Semester ${nextPeriodName(activePeriod)}`
+    : "Mulai Periode Pertama";
 
   const open = () => {
+    setFrom(activePeriod);
     setFeedback(null);
     setConfirmText("");
     setIsOpen(true);
@@ -79,7 +79,9 @@ export default function StartPeriodDialog({
     setIsBusy(true);
     setFeedback(null);
 
-    const result = await startPeriod(isFirst ? { year, term } : {});
+    const result = await startPeriod(
+      from ? nextPeriodOf(from) : { year, term },
+    );
 
     setIsBusy(false);
 
@@ -111,9 +113,9 @@ export default function StartPeriodDialog({
               className="flex flex-col space-y-5"
             >
               <DialogTitle className="font-bold text-[#1d1d1d]">
-                {isFirst
-                  ? "Mulai periode pertama"
-                  : `Mulai semester ${targetName}?`}
+                {from
+                  ? `Mulai semester ${nextPeriodName(from)}?`
+                  : "Mulai periode pertama"}
               </DialogTitle>
 
               {isFirst ? (
@@ -149,12 +151,12 @@ export default function StartPeriodDialog({
                 <ul className="list-disc space-y-1 pl-5 text-sm font-semibold text-[#5E6278]">
                   <li>
                     Semua kelas, pertemuan, presensi, pembayaran, dan asisten{" "}
-                    {activePeriod.name} menjadi arsip yang hanya bisa dilihat.
+                    {from.name} menjadi arsip yang hanya bisa dilihat.
                   </li>
                   <li>Sesi presensi yang masih terbuka akan ditutup.</li>
                   <li>
-                    Jam sesi {activePeriod.name} disalin ke semester baru dan
-                    bisa diubah tanpa mengubah jam sesi {activePeriod.name}.
+                    Jam sesi {from.name} disalin ke semester baru dan bisa
+                    diubah tanpa mengubah jam sesi {from.name}.
                   </li>
                   <li>
                     Mahasiswa mendaftar ulang mata kuliah untuk semester baru.

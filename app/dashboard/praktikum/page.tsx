@@ -11,6 +11,7 @@ import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 import useSubjectStore from "@/app/store/useSubjectStore";
 import PeriodSelector from "@/app/components/period/period-selector";
 import ArchiveNotice from "@/app/components/period/archive-notice";
+import NoPeriodNotice from "@/app/components/period/no-period-notice";
 import { usePeriodView } from "@/app/store/usePeriodStore";
 
 export default function Praktikum() {
@@ -50,6 +51,7 @@ export default function Praktikum() {
     <div className="h-full w-full space-y-10 overflow-auto overscroll-contain">
       <FeedbackBox feedback={notice ? { ok: true, message: notice } : null} />
       {isStaff && <PeriodSelector />}
+      {isStaff && <NoPeriodNotice />}
       {isStaff && isArchive && viewedPeriod && (
         <ArchiveNotice name={viewedPeriod.name} />
       )}

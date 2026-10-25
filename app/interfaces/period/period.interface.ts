@@ -11,8 +11,8 @@ export interface IPeriodResponseBody {
 }
 
 export interface IStartPeriodRequestBody {
-  year?: string;
-  term?: AcademicTerm;
+  year: string;
+  term: AcademicTerm;
 }
 
 export interface IStartPeriodResponseBody {

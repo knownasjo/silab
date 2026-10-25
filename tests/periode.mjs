@@ -2,6 +2,7 @@ import {
   bodyHas,
   check,
   db,
+  json,
   openBrowser,
   runWebTest,
   section,
@@ -59,10 +60,34 @@ await runWebTest("Periode akademik di web", data, async (browser) => {
   const startButton = `Mulai Semester ${nextName}`;
   const submit = `[...document.querySelectorAll('button[type="submit"]')].find((b) => b.innerText.trim() === "Mulai Semester")`;
   const confirmInput = 'input[aria-label="Ketik MULAI"]';
+  const afterName = label(nextOf(nextOf(data.period)));
+  const NO_PERIOD = "Belum ada periode akademik";
+  const network = (latency) =>
+    browser.send("Network.emulateNetworkConditions", {
+      offline: false,
+      latency,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    });
 
   check("login laboran", await browser.login(data.laboran, data.password));
 
   section("Halaman Periode Akademik");
+  await network(1500);
+  await browser.navigate("/dashboard/master-data/periode", {
+    waitForLoad: false,
+  });
+  const loading = await waitFor(
+    `location.pathname === "/dashboard/master-data/periode" && [...document.querySelectorAll("main p")].filter((p) => p.innerText.trim() === "Loading...").length === 2`,
+    20000,
+  );
+  const emptyWhileLoading = await evaluate(bodyHas("Belum ada periode"));
+  await network(0);
+  check(
+    "saat memuat, kotak periode aktif dan tabel menulis Loading...",
+    loading && !emptyWhileLoading,
+    JSON.stringify({ loading, emptyWhileLoading }),
+  );
   await browser.navigate("/dashboard/master-data/periode");
   check(
     "halaman tampil dengan periode aktif",
@@ -113,10 +138,22 @@ await runWebTest("Periode akademik di web", data, async (browser) => {
   const [testSession] = await data.sessions();
   const sessionRow = `[...document.querySelectorAll("div.grid")].find((row) => row.firstElementChild?.innerText === "Sesi ${testSession.number}")`;
   const jamSesi = await openBrowser();
+  const stale = await openBrowser();
   try {
     check(
-      "login laboran di browser kedua",
-      await jamSesi.login(data.laboran, data.password),
+      "login laboran di browser kedua dan ketiga",
+      (await jamSesi.login(data.laboran, data.password)) &&
+        (await stale.login(data.laboran, data.password)),
+    );
+    await stale.navigate("/dashboard/master-data/periode");
+    await stale.waitFor(bodyHas(startButton), 20000);
+    await stale.clickText(startButton);
+    await stale.waitFor(`!!document.querySelector('${confirmInput}')`, 5000);
+    await stale.typeInto(confirmInput, "MULAI");
+    await jamSesi.intercept((request) =>
+      request.method === "GET" && new URL(request.url).pathname === "/period"
+        ? json(200, { status: true, message: "Berhasil", data: [] })
+        : undefined,
     );
     await jamSesi.navigate("/dashboard/master-data/jam-sesi");
     check(
@@ -126,6 +163,11 @@ await runWebTest("Periode akademik di web", data, async (browser) => {
         20000,
       ),
     );
+    check(
+      "  daftar periode kosong (tiruan): petunjuk Belum ada periode tampil",
+      await jamSesi.waitFor(bodyHas(NO_PERIOD), 10000),
+    );
+    await jamSesi.intercept(() => undefined);
     await realClick(submit);
     check(
       `semester ${nextName} dimulai dari web`,
@@ -139,8 +181,40 @@ await runWebTest("Periode akademik di web", data, async (browser) => {
       ),
       await jamSesi.evaluate(`(${sessionRow})?.innerText`),
     );
+    check(
+      "  petunjuk Belum ada periode hilang sendiri lewat event period",
+      await jamSesi.waitFor(`!${bodyHas(NO_PERIOD)}`, 15000),
+    );
+
+    section("Dialog yang dibuka sebelum semester berganti");
+    await stale.waitFor(bodyHas(`Mulai Semester ${afterName}`), 15000);
+    const staleTitle = await stale.evaluate(
+      `document.querySelector('[role="dialog"] h2')?.innerText`,
+    );
+    check(
+      "judul dialog di browser lain tetap semester yang dikonfirmasi",
+      staleTitle === `Mulai semester ${nextName}?`,
+      staleTitle,
+    );
+    await stale.realClick(submit);
+    check(
+      "  Mulai Semester ditolak karena semester itu sudah dimulai",
+      await stale.waitFor(
+        bodyHas(`Semester ${nextName} sudah dimulai.`),
+        10000,
+      ),
+    );
+    check(
+      "  tidak ada semester yang terlewat",
+      (await activeName()) === nextName &&
+        (await db.mst_academic_period.count({
+          where: { createdBy: data.laboran.id },
+        })) === 1,
+      await activeName(),
+    );
   } finally {
     await jamSesi.close();
+    await stale.close();
   }
   check(
     "  tersimpan di database",

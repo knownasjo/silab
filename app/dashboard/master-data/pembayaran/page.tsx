@@ -15,6 +15,7 @@ import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
 import PeriodSelector from "@/app/components/period/period-selector";
 import ArchiveNotice from "@/app/components/period/archive-notice";
+import NoPeriodNotice from "@/app/components/period/no-period-notice";
 import { usePeriodView } from "@/app/store/usePeriodStore";
 
 type PaymentFilter = "all" | "paid" | "unpaid";
@@ -94,6 +95,7 @@ export default function Pembayaran() {
   return (
     <div className="flex h-full w-full flex-col space-y-5 overflow-auto overscroll-contain">
       <PeriodSelector />
+      <NoPeriodNotice />
       {isArchive && viewedPeriod && <ArchiveNotice name={viewedPeriod.name} />}
       <FeedbackBox
         feedback={loadError ? { ok: false, message: loadError } : feedback}

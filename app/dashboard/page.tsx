@@ -9,6 +9,7 @@ import useRealtimeEvents from "../hooks/useRealtimeEvents";
 import FeedbackBox from "../components/feedback-box";
 import PeriodSelector from "../components/period/period-selector";
 import ArchiveNotice from "../components/period/archive-notice";
+import NoPeriodNotice from "../components/period/no-period-notice";
 import usePeriodStore, { usePeriodView } from "../store/usePeriodStore";
 
 export default function Dashboard() {
@@ -71,6 +72,7 @@ export default function Dashboard() {
   return (
     <div className="flex h-full w-full flex-col space-y-6 overflow-auto overscroll-contain">
       <BannerDashboard />
+      <NoPeriodNotice />
       {role === "DOSEN" && <PeriodSelector />}
       {role === "DOSEN" && isArchive && viewedPeriod && (
         <ArchiveNotice name={viewedPeriod.name} />

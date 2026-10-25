@@ -819,6 +819,29 @@ periode, misalnya "2026/2027 Ganjil". Aturannya ada di README backend bagian
   baru bisa ditekan setelah laboran mengetik `MULAI` (huruf besar). Bila belum
   ada periode sama sekali, dialog meminta tahun ajaran dan Ganjil/Genap untuk
   periode pertama.
+- **Dialog mengingat semester yang dituju saat dibuka (25 Oktober 2026).**
+  Dialog mengirim `{ year, term }` semester itu, dan isinya tidak ikut
+  berganti saat event `period` datang. Bila laboran lain atau tab lain sudah
+  memulai semester itu, tombol Mulai Semester dibalas "Semester 2026/2027
+  Genap sudah dimulai." di dalam dialog. Dulu judul dialog yang sudah terbuka
+  berganti sendiri menjadi semester sesudahnya (misalnya "Mulai semester
+  2027/2028 Ganjil?"), sementara tulisan MULAI masih terisi, jadi satu klik
+  melompati semester. Server sendiri juga hanya menerima semester berikutnya;
+  lihat README backend.
+- Saat memuat, kotak periode aktif dan tabel menulis "Loading...", bukan "–"
+  dan tabel kosong. Bila gagal, kotak tetap "–" dan pesan error tampil di
+  atasnya.
+- **Belum ada periode sama sekali** (database baru): Dashboard, Praktikum,
+  Tambah Praktikum, Jam Sesi, dan Pembayaran menampilkan kotak kuning
+  `NoPeriodNotice` (`app/components/period/no-period-notice.tsx`).
+  - Untuk laboran: "Belum ada periode akademik. Mulai periode pertama dulu
+    sebelum mengisi jam sesi, kelas, dan pendaftaran." dengan tombol "Buka
+    Periode Akademik".
+  - Untuk dosen, di Dashboard dan Praktikum: "Belum ada periode akademik.
+    Data praktikum muncul setelah laboran memulai semester." tanpa tombol.
+  - Kotak hilang sendiri lewat event `period` begitu periode pertama dimulai.
+  - Kotak tidak tampil bila daftar periode gagal dimuat, karena belum
+    diketahui apakah periodenya memang kosong.
 - **Pilihan periode** ada di Praktikum, Pembayaran, dan dashboard dosen,
   hanya untuk LABORAN dan DOSEN. Asisten mahasiswa selalu melihat periode
   aktif. Pilihan disimpan di `usePeriodStore` selama tab terbuka dan kembali
@@ -1249,7 +1272,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 19 menit
+npm test                    # semua tes browser, sekitar 20 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
@@ -1264,7 +1287,8 @@ node tests/login.mjs        # satu tes saja
 | `jam-sesi` | awalnya PSI dan Senin terpilih dengan satu kartu Senin · PSI; tombol Ruangan dan Hari berganti kartu (SBTI hanya berisi sesi SBTI, lalu Jumat · SBTI); 1366 px: tombol di dalam kartu, jam satu baris, Ubah sejajar di semua baris; 1024 px: tombol di baris kedua tepat di bawah jam, tidak keluar kartu, halaman tidak bergeser ke samping; sesi yang kelasnya sudah dihapus (0 kelas) benar-benar terhapus dengan pesan di bawah judul kartu; jam bertabrakan saat mengubah sesi paling atas: pesan merah di bawah form itu dan terlihat di layar, pesan berhasil di bawah barisnya; Ubah juga di hari lain hanya berisi hari di ruangan yang sama dengan nomor itu dan jamnya sekarang, centang Selasa mengubah Senin dan Selasa saja; Tambahkan juga ke berisi 4 hari lainnya tanpa teks menempel kotak centang, centang Rabu membuat sesi Senin dan Rabu lalu centangnya kosong lagi; jam baru yang membuat peserta bentrok tetap tersimpan dengan kotak kuning berisi nama dan kedua kelasnya; jam 7.00, 07:00, 0700, 730 dirapikan, Enter dari kotak jam mengirim 22.30–22.40 untuk Jumat PSI; isian Tambah Sesi (termasuk centang) dan form Ubah terkunci selama menyimpan; dengan jaringan lambat, pesan berhasil muncul bersamaan dengan baris yang sudah berganti nomor; Loading... saat memuat; saat `GET /session` gagal tanpa "Belum ada sesi" dan pesan gagal hilang sendiri setelah data termuat lagi | 24 |
 | `daftar-pembayaran` | daftar urut NIM, mata kuliah di pop-up urut semester lalu abjad; cari NIM dan sebagian nama tanpa peduli huruf besar dan spasi; kartu tetap total periode saat mencari; mengetik tidak mengirim permintaan ke server; pesan tidak ketemu menyebut kata dan pilihannya; kembali lewat sidebar mulai dari kotak cari kosong dan Show All; keterangan untuk periode tanpa pendaftar, semua lunas, dan belum ada yang lunas; Loading... saat memuat; di 1366 × 768 kartu paling tinggi 160 px, tombol pilihan sebaris dengan kotak cari, baris pertama paling jauh 360 px dari atas, jarak antarbaris paling banyak 56 px, judul kolom tetap di atas saat digulir; di 1024 px judul satu baris dan sejajar isinya, NIM di bawah nama, kolom nama minimal 180 px; tombol geser bernama Status pembayaran dan terkunci bersama pilihan kelas dan Kembali selama menyimpan | 23 |
 | `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
-| `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah dan hapus tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus) | 32 |
+| `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah dan hapus tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus); Loading... saat memuat; dialog yang dibuka di browser lain sebelum semester berganti tetap menulis semester yang dikonfirmasi, tombolnya ditolak "sudah dimulai", dan tidak ada semester terlewat; petunjuk Belum ada periode (daftar periode tiruan kosong) hilang sendiri lewat event `period` | 38 |
+| `tanpa-periode` | daftar periode tiruan kosong: petunjuk dan tombol Buka Periode Akademik untuk laboran di Dashboard, Praktikum, Tambah Praktikum, Jam Sesi, dan Pembayaran, tombol membuka Mulai Periode Pertama, halaman Periode Akademik sendiri tanpa petunjuk; petunjuk dosen tanpa tombol di Dashboard dan Praktikum; tanpa petunjuk saat periode ada atau saat daftar periode gagal dimuat | 20 |
 | `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |
 | `pengumuman` | List dan Detail: Loading... saat memuat, label jenis, tanggal jam lokal beserta penulis, Edit tanpa perubahan tidak mengirim apa pun, dosen tanpa menu Edit/Hapus. Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Hapus, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 1000 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, pengumuman panjang dipotong 3 baris di daftar dan tampil utuh dengan paragraf terpisah di detail, dosen melihat pesan hanya laboran. Permintaan simpan dan ubah dicegat, jadi tidak ada pengumuman asli yang terkirim | 34 |
 | `pengumuman-matkul` | pilihan Untuk di Buat Pengumuman: bawaan Semua mahasiswa, hilang untuk jenis pendaftaran, daftar mata kuliah dengan kode dan semester, tanpa centang ditolak tanpa mengirim, `subjectIds` yang terkirim dan tersimpan, pendaftaran tetap terkirim untuk semua; kartu dan detail menyebut tujuan beserta semesternya; Edit terisi tujuan lama, tanpa perubahan tidak mengirim, mengganti mata kuliah dan kembali ke Semua mahasiswa; kotak centang dan pilihan bergaya tema (input asli tersembunyi, biru `#3272CA`, pilihan tanpa garis luar) dan tersusun atas-bawah | 28 |

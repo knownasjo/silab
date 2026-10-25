@@ -13,7 +13,7 @@ export const getPeriods = async () => {
   return res.data;
 };
 
-export const postPeriod = async (body: IStartPeriodRequestBody = {}) => {
+export const postPeriod = async (body: IStartPeriodRequestBody) => {
   const res = await satellite.post<IBaseResponse<IStartPeriodResponseBody>>(
     "/period",
     body,

@@ -4,6 +4,7 @@ import { FormEvent, ReactNode, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
+import NoPeriodNotice from "@/app/components/period/no-period-notice";
 import useSessionStore from "@/app/store/useSessionStore";
 import useClassStore from "@/app/store/useClassStore";
 import useAuthStore from "@/app/store/useAuthStore";
@@ -730,6 +731,7 @@ export default function JamSesi() {
           dinonaktifkan agar tidak muncul di pilihan kelas baru.
         </p>
       </div>
+      <NoPeriodNotice />
       {error && <FeedbackBox feedback={{ ok: false, message: error }} />}
       <div className="flex flex-col space-y-3">
         <ChoiceButtons
