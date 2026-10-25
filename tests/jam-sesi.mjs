@@ -11,55 +11,101 @@ import {
 
 const data = new TestData("73");
 const PAGE = "/dashboard/master-data/jam-sesi";
-const WEEKDAY_CARD = 'section[aria-label="Jam sesi Senin–Kamis"]';
-const FRIDAY_CARD = 'section[aria-label="Jam sesi Jumat"]';
+const CARD = "main section[aria-label^=Jam]";
+const ADD_DAYS = `${CARD} [role=group][aria-label^=Tambahkan]`;
 const BELUM_ADA = "Belum ada sesi.";
+const DAY_NAMES = {
+  MONDAY: "Senin",
+  TUESDAY: "Selasa",
+  WEDNESDAY: "Rabu",
+  FRIDAY: "Jumat",
+};
 
 await runWebTest("Jam Sesi", data, async (browser) => {
   const { evaluate, waitFor, send, realClick, typeInto } = browser;
 
   const sessions = await data.sessions();
-  const first = await db.mst_session.create({
-    data: {
-      periodId: data.period.id,
-      day_group: "WEEKDAY",
-      number: data.sessionFrom + 7,
-      startAt: "06.00",
-      endAt: "06.40",
-      created_by: data.laboran.id,
-    },
-  });
+  const tuesday = await data.sessions({ day: "TUESDAY" });
+  const friday = await data.sessions({ day: "FRIDAY" });
+  await data.sessions({ room: "SBTI", day: "TUESDAY" });
+  const extra = (room, day, number, startAt, endAt) =>
+    db.mst_session.create({
+      data: {
+        periodId: data.period.id,
+        room,
+        day,
+        number,
+        startAt,
+        endAt,
+        created_by: data.laboran.id,
+      },
+    });
+  const first = await extra(
+    "PSI",
+    "MONDAY",
+    data.sessionFrom + 7,
+    "06.00",
+    "06.40",
+  );
+  const sbtiEarly = await extra(
+    "SBTI",
+    "MONDAY",
+    data.sessionFrom + 8,
+    "17.15",
+    "17.55",
+  );
   const subject = await data.subject("Uji Jam Sesi Basis Data");
-  await data.classOf(subject, "A", "MONDAY", 1);
-  const gone = await data.classOf(subject, "B", "TUESDAY", 2);
+  const networking = await data.subject("Uji Jam Sesi Jaringan");
+  const basisData = await data.classOf(subject, "A", "MONDAY", 1);
+  const gone = await data.classOf(subject, "B", "MONDAY", 2);
   await db.mst_class.update({
     where: { id: gone.id },
     data: { deleted_at: new Date() },
   });
-  const freeNumbers = async (day_group) => {
-    const used = new Set(
-      (
-        await db.mst_session.findMany({
-          where: { periodId: data.period.id, day_group },
-          select: { number: true },
-        })
-      ).map((session) => session.number),
-    );
-    return Array.from({ length: 20 }, (_, i) => 20 - i).filter(
-      (number) => !used.has(number),
-    );
-  };
-  const [weekdayFree] = await freeNumbers("WEEKDAY");
-  const [fridayFree, fridayFree2, fridayFree3] = await freeNumbers("FRIDAY");
-  const label = (session, group = "Senin–Kamis") =>
-    `Sesi ${session.number ?? session} ${group}`;
+  const networkClass = await db.mst_class.create({
+    data: {
+      subjectId: networking.id,
+      periodId: data.period.id,
+      name: "A",
+      quota: 30,
+      day: "MONDAY",
+      room: "SBTI",
+      sessionId: sbtiEarly.id,
+      startAt: sbtiEarly.startAt,
+      endAt: sbtiEarly.endAt,
+      created_by: data.laboran.id,
+    },
+  });
+  const student = await data.student("Uji Jam Sesi Peserta");
+  await data.enroll(student, basisData);
+  await data.enroll(student, networkClass);
+
+  const used = new Set(
+    (
+      await db.mst_session.findMany({
+        where: { periodId: data.period.id },
+        select: { number: true },
+      })
+    ).map((session) => session.number),
+  );
+  const [freeA, freeB, freeC, freeD, freeE, freeF, freeG, freeH] = Array.from(
+    { length: 20 },
+    (_, i) => 20 - i,
+  ).filter((number) => !used.has(number));
+  const label = (session, day = "MONDAY", room = "PSI") =>
+    typeof session === "number"
+      ? `Sesi ${session} ${DAY_NAMES[day]} ${room}`
+      : `Sesi ${session.number} ${DAY_NAMES[session.day]} ${session.room}`;
 
   let mode = "normal";
   const posts = [];
+  const puts = [];
   await browser.intercept((request) => {
     const path = new URL(request.url).pathname.replace(/\/$/, "");
     if (request.method === "POST" && path === "/session")
       posts.push(JSON.parse(request.postData ?? "{}"));
+    if (request.method === "PUT" && path.startsWith("/session/"))
+      puts.push(JSON.parse(request.postData ?? "{}"));
     if (mode === "fail" && request.method === "GET" && path === "/session")
       return { fail: "ConnectionRefused" };
   });
@@ -83,30 +129,71 @@ await runWebTest("Jam Sesi", data, async (browser) => {
       downloadThroughput: -1,
       uploadThroughput: -1,
     });
+  const ubah = (session) =>
+    `document.querySelector('[aria-label="Ubah ${typeof session === "string" ? session : label(session)}"]')`;
   const open = async () => {
     await browser.navigate(PAGE);
-    const ok = await waitFor(
-      `!!document.querySelector('[aria-label="Ubah ${label(sessions[5])}"]')`,
-      20000,
-    );
+    const ok = await waitFor(`!!${ubah(sessions[5])}`, 20000);
     await sleep(600);
     return ok;
   };
   const button = (text, scope = "document") =>
     `[...${scope}.querySelectorAll("button")].find((b) => b.innerText.trim() === ${JSON.stringify(text)} && b.getBoundingClientRect().width > 0)`;
-  const messages = (card) =>
-    evaluate(
-      `[...document.querySelectorAll('${card} [role="status"], ${card} [role="alert"]')].map((e) => e.innerText.trim())`,
+  const choose = async (group, text) => {
+    await realClick(
+      button(
+        text,
+        `document.querySelector('[role="group"][aria-label="${group}"]')`,
+      ),
     );
+    await sleep(400);
+  };
+  const tick = async (scope, text) => {
+    await realClick(
+      `[...document.querySelectorAll(${JSON.stringify(`${scope} label`)})].find((l) => l.innerText.trim().startsWith(${JSON.stringify(text)}))`,
+    );
+    await sleep(150);
+  };
+  const labelsIn = (scope) =>
+    evaluate(
+      `[...document.querySelectorAll(${JSON.stringify(`${scope} label`)})].map((l) => l.innerText.replace(/\\s+/g, " ").trim())`,
+    );
+  const unticked = (scope) =>
+    evaluate(
+      `[...document.querySelectorAll(${JSON.stringify(`${scope} input[type=checkbox]`)})].every((c) => !c.checked)`,
+    );
+  const cardState = () =>
+    evaluate(`(() => {
+      const cards = [...document.querySelectorAll("${CARD}")];
+      const pressed = (group) => [...document.querySelectorAll('[role="group"][aria-label="' + group + '"] button[aria-pressed="true"]')].map((b) => b.innerText.trim());
+      return {
+        cards: cards.map((c) => c.getAttribute("aria-label")),
+        title: cards[0]?.querySelector("p")?.innerText.trim(),
+        room: pressed("Ruangan"),
+        day: pressed("Hari"),
+      };
+    })()`);
 
   check("login laboran", await browser.login(data.laboran, data.password));
 
   section("Tampilan");
   await size(1366, 768);
   check("halaman Jam Sesi terbuka", await open());
+  const start = await cardState();
+  check(
+    "awalnya PSI dan Senin terpilih; satu kartu Senin · PSI",
+    JSON.stringify(start) ===
+      JSON.stringify({
+        cards: ["Jam sesi Senin PSI"],
+        title: "Senin · PSI",
+        room: ["PSI"],
+        day: ["Senin"],
+      }),
+    JSON.stringify(start),
+  );
   const layout = () =>
     evaluate(`(() => {
-      const card = document.querySelector('${WEEKDAY_CARD}');
+      const card = document.querySelector("${CARD}");
       const box = card.getBoundingClientRect();
       const page = document.querySelector("main > div");
       const rows = [...card.querySelectorAll('button[aria-label^="Ubah "]')].map((ubah) => {
@@ -118,7 +205,7 @@ await runWebTest("Jam Sesi", data, async (browser) => {
       });
       return {
         rows,
-        outside: [...card.querySelectorAll("button")].filter((b) => b.getBoundingClientRect().right > box.right + 1).length,
+        outside: [...document.querySelectorAll("main button, main label")].filter((b) => b.getBoundingClientRect().right > box.right + 1).length,
         pageScroll: page.scrollWidth > page.clientWidth,
       };
     })()`);
@@ -150,27 +237,51 @@ await runWebTest("Jam Sesi", data, async (browser) => {
   await size(1366, 768);
   await sleep(400);
 
+  section("Pilihan ruangan dan hari");
+  await choose("Ruangan", "SBTI");
+  const sbti = await cardState();
+  const sbtiRows = await evaluate(
+    `({ own: !!${ubah(sbtiEarly)}, psi: !!${ubah(first)} })`,
+  );
+  await choose("Hari", "Jumat");
+  const sbtiFriday = await cardState();
+  await choose("Ruangan", "PSI");
+  await choose("Hari", "Senin");
+  const back = await waitFor(`!!${ubah(first)}`, 5000);
+  check(
+    "pilih SBTI: kartu Senin · SBTI hanya berisi sesi SBTI",
+    sbti.title === "Senin · SBTI" &&
+      JSON.stringify(sbti.room) === '["SBTI"]' &&
+      sbtiRows.own &&
+      !sbtiRows.psi,
+    JSON.stringify({ sbti, sbtiRows }),
+  );
+  check(
+    "  pilih Jumat: kartu Jumat · SBTI; kembali ke PSI Senin menampilkan sesi PSI lagi",
+    sbtiFriday.title === "Jumat · SBTI" &&
+      sbtiFriday.cards.length === 1 &&
+      back,
+    JSON.stringify({ sbtiFriday, back }),
+  );
+
   section("Sesi yang kelasnya sudah dihapus");
   const goneRow = await evaluate(
-    `[...document.querySelectorAll('${WEEKDAY_CARD} div.grid')].find((row) => row.innerText.startsWith("${label(sessions[1])}".replace(" Senin–Kamis", "")))?.innerText.replace(/\\n/g, " | ")`,
+    `[...document.querySelectorAll("${CARD} div.grid")].find((row) => row.innerText.startsWith("Sesi ${sessions[1].number}"))?.innerText.replace(/\\n/g, " | ")`,
   );
   await realClick(
     `document.querySelector('[aria-label="Hapus ${label(sessions[1])}"]')`,
   );
   await sleep(300);
   await realClick(button("Ya, hapus"));
-  const removed = await waitFor(
-    `!document.querySelector('[aria-label="Ubah ${label(sessions[1])}"]')`,
-    8000,
-  );
+  const removed = await waitFor(`!${ubah(sessions[1])}`, 8000);
   await waitFor(
-    `!!document.querySelector('${WEEKDAY_CARD} [role="status"]')?.innerText.includes("berhasil dihapus")`,
+    `!!document.querySelector("${CARD} [role=status]")?.innerText.includes("berhasil dihapus")`,
     8000,
   );
   const top = await evaluate(`(() => {
-    const card = document.querySelector('${WEEKDAY_CARD}');
-    const status = card.querySelector('[role="status"]');
-    return { text: status?.innerText.trim(), afterTitle: status?.previousElementSibling?.innerText.trim() === "Senin–Kamis" };
+    const card = document.querySelector("${CARD}");
+    const status = card.querySelector("[role=status]");
+    return { text: status?.innerText.trim(), afterTitle: status?.previousElementSibling?.innerText.trim() === "Senin · PSI" };
   })()`);
   check(
     "baris menulis 0 kelas dan ada tombol Hapus; Ya, hapus benar-benar menghapus, pesannya di atas kartu",
@@ -184,42 +295,35 @@ await runWebTest("Jam Sesi", data, async (browser) => {
   section("Pesan di dekat barisnya");
   await evaluate(`document.querySelector("main > div").scrollTop = 0`);
   await sleep(300);
-  await realClick(
-    `document.querySelector('[aria-label="Ubah ${label(first)}"]')`,
-  );
+  await realClick(ubah(first));
   await sleep(300);
-  await typeInto(`[aria-label="Nomor ${label(first)}"]`, String(weekdayFree));
+  await typeInto(`[aria-label="Nomor ${label(first)}"]`, String(freeA));
   await typeInto(`[aria-label="Jam mulai ${label(first)}"]`, "17.50");
   await typeInto(`[aria-label="Jam selesai ${label(first)}"]`, "18.10");
   await realClick(button("Simpan"));
-  await waitFor(
-    `!!document.querySelector('${WEEKDAY_CARD} [role="alert"]')`,
-    8000,
-  );
+  await waitFor(`!!document.querySelector("${CARD} [role=alert]")`, 8000);
   const clash = await evaluate(`(() => {
     const form = document.querySelector('[aria-label="Jam mulai ${label(first)}"]')?.closest("form");
-    const alert = form?.querySelector('[role="alert"]');
+    const alert = form?.querySelector("[role=alert]");
     const r = alert?.getBoundingClientRect();
     return { text: alert?.innerText.trim(), visible: !!r && r.top >= 0 && r.bottom <= innerHeight };
   })()`);
   check(
     "jam yang bertabrakan saat mengubah sesi paling atas: pesan merah di bawah form itu dan terlihat di layar",
-    !!clash.text?.startsWith("Jam sesi bertabrakan dengan Sesi ") &&
+    clash.text ===
+      `Jam sesi bertabrakan dengan ${label(sessions[0])} (18.00–18.40)!` &&
       clash.visible,
     JSON.stringify(clash),
   );
   await typeInto(`[aria-label="Jam mulai ${label(first)}"]`, "06.00");
   await typeInto(`[aria-label="Jam selesai ${label(first)}"]`, "06.30");
   await realClick(button("Simpan"));
-  const renamed = `Sesi ${weekdayFree} Senin–Kamis`;
-  await waitFor(
-    `!!document.querySelector('[aria-label="Ubah ${renamed}"]')`,
-    8000,
-  );
+  const renamed = label(freeA);
+  await waitFor(`!!${ubah(renamed)}`, 8000);
   await sleep(300);
   const saved = await evaluate(`(() => {
-    const row = document.querySelector('[aria-label="Ubah ${renamed}"]').closest("div.grid").parentElement;
-    const status = row.querySelector('[role="status"]');
+    const row = ${ubah(renamed)}.closest("div.grid").parentElement;
+    const status = row.querySelector("[role=status]");
     const r = status?.getBoundingClientRect();
     return { text: status?.innerText.trim(), visible: !!r && r.top >= 0 && r.bottom <= innerHeight };
   })()`);
@@ -229,7 +333,144 @@ await runWebTest("Jam Sesi", data, async (browser) => {
     JSON.stringify(saved),
   );
 
+  section("Ubah juga di hari lain");
+  const target = sessions[2];
+  const group = `[role=group][aria-label="Ubah juga di hari lain untuk ${label(target)}"]`;
+  await realClick(ubah(target));
+  await waitFor(`!!document.querySelector(${JSON.stringify(group)})`, 5000);
+  await sleep(300);
+  const listed = await labelsIn(group);
+  const noneTicked = await unticked(group);
+  check(
+    "form Ubah menampilkan hari lain di ruangan yang sama dengan nomor itu dan jamnya sekarang, belum dicentang",
+    JSON.stringify(listed) ===
+      JSON.stringify([
+        `Selasa sekarang ${tuesday[2].startAt} – ${tuesday[2].endAt}`,
+        `Jumat sekarang ${friday[2].startAt} – ${friday[2].endAt}`,
+      ]) && noneTicked,
+    JSON.stringify({ listed, noneTicked }),
+  );
+  await tick(group, "Selasa");
+  puts.length = 0;
+  await typeInto(`[aria-label="Nomor ${label(target)}"]`, String(freeF));
+  await typeInto(`[aria-label="Jam mulai ${label(target)}"]`, "19.35");
+  await realClick(button("Simpan"));
+  const both = await waitFor(
+    bodyHas(`Sesi ${freeF} PSI hari Senin dan Selasa berhasil diperbarui`),
+    8000,
+  );
+  const [mondayAfter, tuesdayAfter, fridayAfter] = await Promise.all(
+    [target, tuesday[2], friday[2]].map((session) =>
+      db.mst_session.findUnique({ where: { id: session.id } }),
+    ),
+  );
+  check(
+    "  centang Selasa lalu Simpan: nomor dan jam Senin serta Selasa berubah, Jumat tetap",
+    both &&
+      JSON.stringify(puts[0]?.also_days) === '["TUESDAY"]' &&
+      [mondayAfter, tuesdayAfter].every(
+        (session) => session.number === freeF && session.startAt === "19.35",
+      ) &&
+      fridayAfter.number === friday[2].number &&
+      fridayAfter.startAt === friday[2].startAt,
+    JSON.stringify({
+      both,
+      puts,
+      monday: mondayAfter,
+      tuesday: tuesdayAfter,
+      friday: fridayAfter,
+    }),
+  );
+
+  section("Tambahkan juga ke hari lain");
+  const addDays = await labelsIn(ADD_DAYS);
+  const tickGaps = await evaluate(
+    `[...document.querySelectorAll(${JSON.stringify(`${ADD_DAYS} label`)})].map((label) => {
+      const box = label.querySelector("span[aria-hidden]").getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents([...label.childNodes].find((node) => node.nodeType === 3));
+      return Math.round(range.getBoundingClientRect().left - box.right);
+    })`,
+  );
+  await typeInto(`[aria-label="Nomor sesi baru Senin PSI"]`, String(freeB));
+  await typeInto(`[aria-label="Jam mulai sesi baru Senin PSI"]`, "22.30");
+  await typeInto(`[aria-label="Jam selesai sesi baru Senin PSI"]`, "22.40");
+  await tick(ADD_DAYS, "Rabu");
+  posts.length = 0;
+  await realClick(button("Tambah Sesi", `document.querySelector("${CARD}")`));
+  const addedMany = await waitFor(
+    bodyHas(`Sesi ${freeB} PSI hari Senin dan Rabu berhasil ditambahkan`),
+    8000,
+  );
+  await sleep(300);
+  const addedRows = await db.mst_session.findMany({
+    where: { periodId: data.period.id, room: "PSI", number: freeB },
+  });
+  const resetTicks = await unticked(ADD_DAYS);
+  check(
+    "pilihan hari lain berisi 4 hari selain Senin, nama hari tidak menempel kotak centang",
+    JSON.stringify(addDays) === '["Selasa","Rabu","Kamis","Jumat"]' &&
+      tickGaps.every((gap) => gap >= 6),
+    JSON.stringify({ addDays, tickGaps }),
+  );
+  check(
+    "  centang Rabu membuat sesi di Senin dan Rabu, lalu centangnya kosong lagi",
+    addedMany &&
+      JSON.stringify(posts[0]?.also_days) === '["WEDNESDAY"]' &&
+      JSON.stringify(addedRows.map((s) => s.day).sort()) ===
+        '["MONDAY","WEDNESDAY"]' &&
+      resetTicks,
+    JSON.stringify({
+      addDays,
+      addedMany,
+      posts,
+      days: addedRows.map((s) => s.day),
+      resetTicks,
+    }),
+  );
+
+  section("Peringatan jadwal bentrok");
+  await choose("Ruangan", "SBTI");
+  const warnedLabel = label(freeG, "MONDAY", "SBTI");
+  await realClick(ubah(sbtiEarly));
+  await sleep(300);
+  await typeInto(`[aria-label="Nomor ${label(sbtiEarly)}"]`, String(freeG));
+  await typeInto(`[aria-label="Jam selesai ${label(sbtiEarly)}"]`, "18.20");
+  await realClick(button("Simpan"));
+  const warned = await waitFor(
+    `${bodyHas("Perhatian, 1 jadwal jadi bentrok.")} && !!${ubah(warnedLabel)}`,
+    8000,
+  );
+  await sleep(300);
+  const warning = await evaluate(`(() => {
+    const row = ${ubah(warnedLabel)}?.closest("div.grid")?.parentElement;
+    const box = row?.querySelector("[role=status]");
+    return {
+      message: box?.querySelector("p")?.innerText.trim(),
+      items: [...(box?.querySelectorAll("li") ?? [])].map((li) => li.innerText.trim()),
+      background: box ? getComputedStyle(box).backgroundColor : null,
+    };
+  })()`);
+  const networkAfter = await db.mst_class.findUnique({
+    where: { id: networkClass.id },
+  });
+  check(
+    "jam baru membuat peserta bentrok: tetap tersimpan, kotak kuning di bawah barisnya menyebut nama dan kedua kelas",
+    warned &&
+      warning.message ===
+        `${warnedLabel} berhasil diperbarui; jam 1 kelas ikut berubah. Perhatian, 1 jadwal jadi bentrok.` &&
+      JSON.stringify(warning.items) ===
+        JSON.stringify([
+          "Uji Jam Sesi Jaringan kelas A (Senin, 17.15 - 18.20, SBTI): peserta Uji Jam Sesi Peserta juga mengikuti praktikum Uji Jam Sesi Basis Data kelas A (Senin, 18.00 - 18.40, PSI)",
+        ]) &&
+      warning.background === "rgb(255, 248, 221)" &&
+      networkAfter.endAt === "18.20",
+    JSON.stringify({ warned, warning, endAt: networkAfter.endAt }),
+  );
+  await choose("Ruangan", "PSI");
+
   section("Format jam");
+  await choose("Hari", "Jumat");
   const tidied = [];
   for (const [typed, expected] of [
     ["7.00", "07.00"],
@@ -237,15 +478,15 @@ await runWebTest("Jam Sesi", data, async (browser) => {
     ["0700", "07.00"],
     ["730", "07.30"],
   ]) {
-    await typeInto(`[aria-label="Jam mulai sesi baru Jumat"]`, typed);
+    await typeInto(`[aria-label="Jam mulai sesi baru Jumat PSI"]`, typed);
     await evaluate(
-      `document.querySelector('[aria-label="Jam mulai sesi baru Jumat"]').blur()`,
+      `document.querySelector('[aria-label="Jam mulai sesi baru Jumat PSI"]').blur()`,
     );
     await sleep(150);
     tidied.push({
       typed,
       shown: await evaluate(
-        `document.querySelector('[aria-label="Jam mulai sesi baru Jumat"]').value`,
+        `document.querySelector('[aria-label="Jam mulai sesi baru Jumat PSI"]').value`,
       ),
       expected,
     });
@@ -256,9 +497,9 @@ await runWebTest("Jam Sesi", data, async (browser) => {
     JSON.stringify(tidied),
   );
   posts.length = 0;
-  await typeInto(`[aria-label="Nomor sesi baru Jumat"]`, String(fridayFree));
-  await typeInto(`[aria-label="Jam mulai sesi baru Jumat"]`, "2230");
-  await typeInto(`[aria-label="Jam selesai sesi baru Jumat"]`, "22:40");
+  await typeInto(`[aria-label="Nomor sesi baru Jumat PSI"]`, String(freeC));
+  await typeInto(`[aria-label="Jam mulai sesi baru Jumat PSI"]`, "2230");
+  await typeInto(`[aria-label="Jam selesai sesi baru Jumat PSI"]`, "22:40");
   for (const type of ["keyDown", "keyUp"])
     await send("Input.dispatchKeyEvent", {
       type,
@@ -268,35 +509,39 @@ await runWebTest("Jam Sesi", data, async (browser) => {
       ...(type === "keyDown" && { text: "\r" }),
     });
   const added = await waitFor(
-    bodyHas(`Sesi ${fridayFree} Jumat berhasil ditambahkan`),
+    bodyHas(`${label(freeC, "FRIDAY")} berhasil ditambahkan`),
     8000,
   );
   check(
-    "  Enter langsung dari kotak jam: dikirim sebagai 22.30–22.40 dan tersimpan",
+    "  Enter langsung dari kotak jam: dikirim sebagai 22.30–22.40 untuk Jumat PSI dan tersimpan",
     added &&
       posts.length === 1 &&
       posts[0].startAt === "22.30" &&
-      posts[0].endAt === "22.40",
+      posts[0].endAt === "22.40" &&
+      posts[0].room === "PSI" &&
+      posts[0].day === "FRIDAY",
     JSON.stringify({ added, posts }),
   );
 
   section("Kunci selama menyimpan");
-  await typeInto(`[aria-label="Nomor sesi baru Jumat"]`, String(fridayFree2));
-  await typeInto(`[aria-label="Jam mulai sesi baru Jumat"]`, "22.45");
-  await typeInto(`[aria-label="Jam selesai sesi baru Jumat"]`, "22.55");
+  await typeInto(`[aria-label="Nomor sesi baru Jumat PSI"]`, String(freeD));
+  await typeInto(`[aria-label="Jam mulai sesi baru Jumat PSI"]`, "22.45");
+  await typeInto(`[aria-label="Jam selesai sesi baru Jumat PSI"]`, "22.55");
   await network(1500);
-  await realClick(
-    button("Tambah Sesi", `document.querySelector('${FRIDAY_CARD}')`),
-  );
+  await realClick(button("Tambah Sesi", `document.querySelector("${CARD}")`));
   await sleep(300);
   const addLocked = await evaluate(
-    `[...document.querySelectorAll('${FRIDAY_CARD} form input')].map((input) => input.matches(":disabled"))`,
+    `[...document.querySelectorAll("${CARD} form input")].map((input) => input.matches(":disabled"))`,
   );
   await waitFor(
-    bodyHas(`Sesi ${fridayFree2} Jumat berhasil ditambahkan`),
+    bodyHas(`${label(freeD, "FRIDAY")} berhasil ditambahkan`),
     15000,
   );
-  await realClick(`document.querySelector('[aria-label="Ubah ${renamed}"]')`);
+  await network(0);
+  await choose("Hari", "Senin");
+  await waitFor(`!!${ubah(renamed)}`, 8000);
+  await network(1500);
+  await realClick(ubah(renamed));
   await sleep(300);
   await realClick(button("Simpan"));
   await sleep(300);
@@ -308,8 +553,8 @@ await runWebTest("Jam Sesi", data, async (browser) => {
   await sleep(4000);
   await network(0);
   check(
-    "isian Tambah Sesi serta isian dan Batal di form Ubah terkunci selama menyimpan",
-    addLocked.length === 3 &&
+    "isian Tambah Sesi (termasuk centang hari) serta isian dan Batal di form Ubah terkunci selama menyimpan",
+    addLocked.length === 7 &&
       addLocked.every(Boolean) &&
       !!editLocked &&
       editLocked.length === 4 &&
@@ -317,17 +562,41 @@ await runWebTest("Jam Sesi", data, async (browser) => {
     JSON.stringify({ addLocked, editLocked }),
   );
 
+  section("Pesan dan baris berubah bersamaan");
+  const moved = label(freeH);
+  await realClick(ubah(renamed));
+  await sleep(300);
+  await typeInto(`[aria-label="Nomor ${renamed}"]`, String(freeH));
+  await network(1500);
+  await realClick(button("Simpan"));
+  const together = await evaluate(`new Promise((resolve) => {
+    const started = Date.now();
+    const tick = () => {
+      const message = [...document.querySelectorAll("${CARD} [role=status]")].some((el) => el.innerText.includes(${JSON.stringify(`${moved} berhasil diperbarui`)}));
+      if (message) return resolve({ row: !!${ubah(moved)}, old: !!${ubah(renamed)}, ms: Date.now() - started });
+      if (Date.now() - started > 15000) return resolve(null);
+      setTimeout(tick, 20);
+    };
+    tick();
+  })`);
+  await network(0);
+  check(
+    "jaringan lambat: pesan berhasil muncul bersamaan dengan baris yang sudah berganti nomor",
+    !!together && together.row && !together.old,
+    JSON.stringify(together),
+  );
+
   section("Memuat dan gagal");
   await network(1500);
   await browser.navigate(PAGE, { waitForLoad: false });
   const loading = await waitFor(
-    `location.pathname === "${PAGE}" && [...document.querySelectorAll("section p")].filter((p) => p.innerText.trim() === "Loading...").length === 2`,
+    `location.pathname === "${PAGE}" && [...document.querySelectorAll("section p")].filter((p) => p.innerText.trim() === "Loading...").length === 1`,
     20000,
   );
   const emptyWhileLoading = await evaluate(bodyHas(BELUM_ADA));
   await network(0);
   check(
-    "saat memuat kedua kartu menulis Loading..., bukan Belum ada sesi",
+    "saat memuat kartunya menulis Loading..., bukan Belum ada sesi",
     loading && !emptyWhileLoading,
     JSON.stringify({ loading, emptyWhileLoading }),
   );
@@ -343,14 +612,15 @@ await runWebTest("Jam Sesi", data, async (browser) => {
   const event = await call("POST", "/session", {
     token,
     body: {
-      day_group: "FRIDAY",
-      number: fridayFree3,
+      room: "PSI",
+      day: "MONDAY",
+      number: freeE,
       startAt: "23.00",
       endAt: "23.10",
     },
   });
   const recovered = await waitFor(
-    `!${bodyHas("Tidak dapat terhubung ke server")} && !!document.querySelector('[aria-label="Ubah Sesi ${fridayFree3} Jumat"]')`,
+    `!${bodyHas("Tidak dapat terhubung ke server")} && !!${ubah(label(freeE))}`,
     10000,
   );
   check(

@@ -1,27 +1,31 @@
 export function coalesce<A extends unknown[]>(
   task: (...args: A) => Promise<unknown>,
 ): (...args: A) => Promise<void> {
-  const pending = new Map<string, { queued: boolean }>();
+  const pending = new Map<string, { queued: boolean; done: Promise<void> }>();
 
-  return async (...args: A) => {
+  return (...args: A) => {
     const key = JSON.stringify(args);
     const running = pending.get(key);
 
     if (running) {
       running.queued = true;
-      return;
+      return running.done;
     }
 
-    const entry = { queued: false };
+    const entry = { queued: false, done: Promise.resolve() };
     pending.set(key, entry);
 
-    try {
-      do {
-        entry.queued = false;
-        await task(...args).catch(() => undefined);
-      } while (entry.queued);
-    } finally {
-      pending.delete(key);
-    }
+    entry.done = (async () => {
+      try {
+        do {
+          entry.queued = false;
+          await task(...args).catch(() => undefined);
+        } while (entry.queued);
+      } finally {
+        pending.delete(key);
+      }
+    })();
+
+    return entry.done;
   };
 }

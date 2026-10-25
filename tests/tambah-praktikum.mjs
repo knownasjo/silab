@@ -2,6 +2,7 @@ import {
   bodyHas,
   call,
   check,
+  db,
   json,
   runWebTest,
   section,
@@ -55,7 +56,19 @@ await runWebTest("Halaman Tambah Praktikum", data, async (browser) => {
   await data.classOf(long, "A", "THURSDAY", 2);
   for (const student of await data.students(2))
     await data.enroll(student, alfaB);
-  const sessions = await data.sessions();
+  const sbtiMonday = await data.sessions({ room: "SBTI", day: "MONDAY" });
+  const psiThursday = await data.sessions({ day: "THURSDAY" });
+  const sbtiOnly = await db.mst_session.create({
+    data: {
+      periodId: data.period.id,
+      room: "SBTI",
+      day: "MONDAY",
+      number: data.sessionFrom + 7,
+      startAt: "06.00",
+      endAt: "06.40",
+      created_by: data.laboran.id,
+    },
+  });
 
   let failClass = false;
   let noSubjects = false;
@@ -342,7 +355,7 @@ await runWebTest("Halaman Tambah Praktikum", data, async (browser) => {
   await typeInto(`${FORM} #class-quota`, "30");
   await pick(FIELDS.day, "Senin");
   await pick(FIELDS.room, "SBTI");
-  await pick(FIELDS.session, `Sesi ${sessions[0].number},`);
+  await pick(FIELDS.session, `Sesi ${sbtiMonday[0].number},`);
   for (const width of [1440, 1280, 1024]) {
     await resize(width);
     await sleep(600);
@@ -370,6 +383,45 @@ await runWebTest("Halaman Tambah Praktikum", data, async (browser) => {
   await browser.pressEscape();
   await resize(1440);
 
+  section("Sesi mengikuti hari dan ruangan");
+  await openPage();
+  await pick(SUBJECT_BTN, ALFA);
+  await pick(FIELDS.day, "Senin");
+  const beforeRoom = await evaluate(
+    `({ text: (${FIELDS.session}).innerText.trim(), disabled: (${FIELDS.session}).disabled })`,
+  );
+  const sessionOptions = async () => {
+    await realClick(FIELDS.session);
+    await waitFor(`!!(${option("Sesi ")})`, 5000);
+    await sleep(200);
+    return evaluate(
+      `[...document.querySelectorAll('[role="option"]')].map((o) => o.innerText.trim())`,
+    );
+  };
+  await pick(FIELDS.room, "SBTI");
+  const sbtiOptions = await sessionOptions();
+  await realClick(option(`Sesi ${sbtiOnly.number},`));
+  await sleep(400);
+  const picked = await evaluate(`(${FIELDS.session}).innerText.trim()`);
+  await pick(FIELDS.room, "PSI");
+  const afterRoom = await evaluate(`(${FIELDS.session}).innerText.trim()`);
+  const psiOptions = await sessionOptions();
+  await browser.pressEscape();
+  check(
+    "hari sudah dipilih tapi ruangan belum: Sesi Kelas menulis Pilih ruangan dulu dan terkunci",
+    beforeRoom.text === "Pilih ruangan dulu" && beforeRoom.disabled,
+    JSON.stringify(beforeRoom),
+  );
+  check(
+    "  Senin SBTI menampilkan sesi khusus SBTI; ganti ke PSI mengosongkan sesi dan sesi SBTI tidak muncul",
+    sbtiOptions.includes(`Sesi ${sbtiOnly.number}, 06.00 - 06.40`) &&
+      picked === `Sesi ${sbtiOnly.number} · 06.00–06.40` &&
+      afterRoom === "Sesi Kelas" &&
+      psiOptions.length > 0 &&
+      !psiOptions.some((text) => text.startsWith(`Sesi ${sbtiOnly.number},`)),
+    JSON.stringify({ sbtiOptions, picked, afterRoom, psiOptions }),
+  );
+
   section("Menyimpan");
   await openPage();
   await pick(SUBJECT_BTN, ALFA);
@@ -377,7 +429,7 @@ await runWebTest("Halaman Tambah Praktikum", data, async (browser) => {
   await typeInto(`${FORM} #class-quota`, "30");
   await pick(FIELDS.day, "Kamis");
   await pick(FIELDS.room, "PSI");
-  await pick(FIELDS.session, `Sesi ${sessions[2].number},`);
+  await pick(FIELDS.session, `Sesi ${psiThursday[2].number},`);
   await slow(1500);
   await realClick(SUBMIT);
   await sleep(600);

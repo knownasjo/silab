@@ -156,7 +156,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `.../tambah-praktikum` | Buat kelas baru (hanya LABORAN), lihat "Tambah Praktikum dan Jam Sesi" |
 | `.../recap-attendances` | Rekap presensi per kelas (`?classId=`) atau per pertemuan (`&meetingId=`) + unduh PDF |
 | `/dashboard/master-data/add-subject` | Tambah mata kuliah (hanya LABORAN), lihat "Ubah Mata Kuliah" |
-| `/dashboard/master-data/jam-sesi` | Jam sesi Senin–Kamis dan Jumat: tambah, ubah jam, nonaktifkan, hapus, dan daftar kelas di tiap sesi (hanya LABORAN) |
+| `/dashboard/master-data/jam-sesi` | Jam sesi per ruangan dan per hari: tambah dan ubah jam (bisa sekaligus untuk hari lain), nonaktifkan, hapus, dan daftar kelas di tiap sesi (hanya LABORAN) |
 | `/dashboard/master-data/pembayaran` | Satu baris per mahasiswa (urut NIM, cari nama atau NIM) + pop-up status bayar tiap mata kuliah; konfirmasi bayar + pilih/pindah kelas dari pop-up, dan hapus pendaftaran yang belum bayar. Ada pilihan periode; periode lama hanya bisa dilihat. Lihat "Pembayaran" |
 | `/dashboard/master-data/periode` | Periode akademik: periode aktif, Mulai Semester Baru, dan daftar periode (hanya LABORAN), lihat "Periode Akademik" |
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman untuk semua mahasiswa atau untuk mahasiswa mata kuliah tertentu (hanya LABORAN), lihat "Pengumuman untuk Mata Kuliah Tertentu" |
@@ -383,7 +383,13 @@ server mati atau sibuk semua halaman terlempar ke Dashboard tanpa pesan.
   `refresh…` di store (tanpa `isLoading`, jadi tombol dan tabel tidak
   berkedip). Aksi itu dibungkus `coalesce` (`app/utils/coalesce.ts`): event
   yang datang beruntun digabung dan permintaan berjalan berurutan, sehingga
-  respons lama tidak menimpa yang baru. Stream memakai `fetch` (bukan
+  respons lama tidak menimpa yang baru. Sejak 25 Oktober 2026, pemanggil yang
+  datang saat pemuatan sedang berjalan ikut menunggu sampai pemuatan terbaru
+  selesai. Akibatnya pesan berhasil setelah menyimpan jam sesi atau
+  menambah/menghapus asisten baru muncul setelah daftarnya ikut berubah. Dulu
+  pemanggil itu langsung dianggap selesai: dengan jaringan lambat, pesan "Sesi
+  14 Senin PSI berhasil diperbarui" tampil sekitar 1,5 detik sementara barisnya
+  masih menulis nomor lama. Stream memakai `fetch` (bukan
   `EventSource`) agar token tetap dikirim di header
 - Fitur modul praktikum tidak dikerjakan. Kotak Modul "Click to Open" di
   detail kelas dan halaman Segera Hadir yang ditujunya sudah dihapus
@@ -472,9 +478,11 @@ bertambah, dan jam sesi tertulis tetap di kode.
   Kolom Kelas otomatis menjadi satu huruf besar dan kolom Kuota hanya menerima
   angka. Mengetik huruf lain di kolom Kelas langsung mengganti huruf lama,
   tanpa perlu menghapusnya dulu (juga di Ubah Kelas).
-- Pilihan **Sesi Kelas** diambil dari `GET /session`, terkunci sampai hari
-  dipilih, dan menyesuaikan hari: Senin–Kamis memakai sesi Senin–Kamis, Jumat
-  memakai sesi Jumat. Bila sesi hari itu belum ada, muncul "Jam sesi hari Jumat
+- Pilihan **Sesi Kelas** diambil dari `GET /session`, terkunci sampai hari dan
+  ruangan dipilih ("Pilih hari dulu", lalu "Pilih ruangan dulu"), dan hanya
+  berisi sesi hari dan ruangan itu. Mengganti hari atau ruangan mengosongkan
+  sesi yang sudah dipilih bila sesi itu bukan milik hari dan ruangan yang
+  baru. Bila sesinya belum ada, muncul "Jam sesi hari Jumat di ruang SBTI
   belum diatur. Atur di Master Data → Jam Sesi."
 - Setelah berhasil, isian dikosongkan (mata kuliah tetap terpilih) dan kelas
   baru langsung muncul di pratinjau. Pratinjau dan pilihan sesi ikut berubah
@@ -517,11 +525,12 @@ bertambah, dan jam sesi tertulis tetap di kode.
     membuat nama kelas kembar atau memakai ruang yang sama, karena server
     memproses tambah dan ubah kelas satu per satu per periode (lihat README
     backend).
-- Halaman **Master Data → Jam Sesi** menampilkan dua kartu (Senin–Kamis dan
-  Jumat). Tiap sesi punya tombol Ubah (nomor dan jam; bila sesi dipakai kelas
-  muncul keterangan "Jam n kelas di sesi ini ikut berubah."), Nonaktifkan/
-  Aktifkan, dan Hapus dengan konfirmasi (hanya sesi yang belum dipakai kelas).
-  Di bawahnya ada form Tambah Sesi.
+- Halaman **Master Data → Jam Sesi** punya pilihan **Ruangan** (PSI, SBTI) dan
+  **Hari** (Senin–Jumat), lalu menampilkan satu kartu, misalnya "Senin · PSI".
+  Tiap sesi punya tombol Ubah (nomor dan jam; bila sesi dipakai kelas muncul
+  keterangan "Jam n kelas di sesi ini ikut berubah."), Nonaktifkan/Aktifkan,
+  dan Hapus dengan konfirmasi (hanya sesi yang belum dipakai kelas). Di
+  bawahnya ada form Tambah Sesi.
 - Jumlah kelas di tiap sesi ("2 kelas") bisa diklik untuk membuka daftar
   kelasnya di bawah baris itu, misalnya "Algoritma dan Pemrograman — Kelas D ·
   Rabu · PSI", diurutkan per hari lalu ruang. Nama kelas membuka halaman
@@ -548,7 +557,7 @@ bertambah, dan jam sesi tertulis tetap di kode.
       aksi baru.
     - Dulu semua pesan tampil di bagian bawah kartu. Saat mengubah sesi paling
       atas di layar setinggi 768 px, pesannya berada di luar layar.
-  - **Memuat dan gagal.** Saat memuat, kedua kartu menulis "Loading..."
+  - **Memuat dan gagal.** Saat memuat, kartunya menulis "Loading..."
     (begitu juga daftar kelas per sesi). Saat `GET /session` gagal,
     keterangan "Belum ada sesi..." tidak ditampilkan. `refreshSessions` kini
     menghapus pesan gagal begitu data berhasil dimuat lagi, misalnya lewat
@@ -565,6 +574,30 @@ bertambah, dan jam sesi tertulis tetap di kode.
     pesan ubah jam hanya menghitung kelas yang masih ada. Penyimpanan
     bersamaan diantrekan di server. Keduanya dijelaskan di "Tambah kelas dan
     jam sesi" di README backend.
+- Jam sesi per ruangan dan per hari, 25 Oktober 2026. Jam tiap ruangan bisa
+  berbeda (misalnya Sesi 1 PSI 07.00–08.55 dan Sesi 1 SBTI 07.35–09.20),
+  begitu juga jam tiap hari, jadi pembagian "Senin–Kamis" dan "Jumat" diganti
+  (lihat "Jam sesi per ruangan dan per hari" di README backend).
+  - **Pilihan ruangan dan hari.** Tombol Ruangan dan Hari (`aria-pressed`)
+    memilih kartu yang tampil; awalnya PSI dan Senin. Berganti pilihan
+    membuka kartu baru, jadi isian Tambah Sesi dan pesan kartu sebelumnya
+    hilang. Nama sesi di tombol dan pesan kini lengkap, misalnya "Sesi 1
+    Senin PSI".
+  - **Tambahkan juga ke.** Di bawah form Tambah Sesi ada centang untuk empat
+    hari lainnya. Hari yang dicentang mendapat sesi bernomor dan berjam sama
+    di ruangan itu, misalnya "Sesi 7 PSI hari Senin dan Rabu berhasil
+    ditambahkan". Semuanya tersimpan bersama atau tidak sama sekali, dan
+    centangnya kosong lagi setelah berhasil.
+  - **Ubah juga di hari lain.** Form Ubah menampilkan hari lain di ruangan
+    yang sama yang punya nomor sesi itu, beserta jamnya sekarang (dan
+    "nonaktif" bila sesinya nonaktif). Hari yang dicentang mendapat nomor dan
+    jam yang sama, dan keterangan jumlah kelas ikut menghitung kelas di hari
+    itu. Awalnya tidak ada yang dicentang.
+  - **Peringatan bentrok.** Bila jam baru membuat peserta atau asisten kelas
+    di sesi itu bentrok dengan kelas lain (termasuk kelas di ruangan lain),
+    jam tetap disimpan, tetapi pesan di bawah barisnya berwarna kuning dan
+    berisi daftar bentroknya. `FeedbackBox` kini bisa menampilkan `warnings`.
+  - Nonaktifkan dan Hapus tetap berlaku untuk satu hari saja.
 - Selain laboran, kedua halaman hanya menampilkan pesan bahwa halaman itu untuk
   laboran.
 - Isian kelas (Kelas, Kuota, Hari, Ruangan, Sesi Kelas), pemeriksaannya, dan
@@ -1211,7 +1244,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 18 menit
+npm test                    # semua tes browser, sekitar 19 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
@@ -1223,7 +1256,7 @@ node tests/login.mjs        # satu tes saja
 | `sesi-pulih` | token kedaluwarsa diperbarui diam-diam, server mati memunculkan pemberitahuan tanpa melempar ke login, halaman pulih sendiri saat server hidup, tombol Coba lagi, token rusak kembali ke login dan cookie dihapus | 15 |
 | `server-mati` | 13 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 29 |
 | `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi. Hapus pendaftaran: tombol hanya di mata kuliah Belum Bayar, tidak menimpa kotak status, dan Ubah sejajar di semua baris, Batal tidak menghapus, Ya, hapus mengirim satu DELETE, penolakan server tampil di konfirmasi, pendaftaran terakhir menutup pop-up dengan pesan di halaman | 67 |
-| `jam-sesi` | 1366 px: tombol di dalam kartu, jam satu baris, Ubah sejajar di semua baris; 1024 px: tombol di baris kedua tepat di bawah jam, tidak keluar kartu, halaman tidak bergeser ke samping; sesi yang kelasnya sudah dihapus (0 kelas) benar-benar terhapus dengan pesan di bawah judul kartu; jam bertabrakan saat mengubah sesi paling atas: pesan merah di bawah form itu dan terlihat di layar, pesan berhasil di bawah barisnya; jam 7.00, 07:00, 0700, 730 dirapikan, Enter dari kotak jam mengirim 22.30–22.40; isian Tambah Sesi dan form Ubah terkunci selama menyimpan; Loading... saat memuat; saat `GET /session` gagal tanpa "Belum ada sesi" dan pesan gagal hilang sendiri setelah data termuat lagi | 15 |
+| `jam-sesi` | awalnya PSI dan Senin terpilih dengan satu kartu Senin · PSI; tombol Ruangan dan Hari berganti kartu (SBTI hanya berisi sesi SBTI, lalu Jumat · SBTI); 1366 px: tombol di dalam kartu, jam satu baris, Ubah sejajar di semua baris; 1024 px: tombol di baris kedua tepat di bawah jam, tidak keluar kartu, halaman tidak bergeser ke samping; sesi yang kelasnya sudah dihapus (0 kelas) benar-benar terhapus dengan pesan di bawah judul kartu; jam bertabrakan saat mengubah sesi paling atas: pesan merah di bawah form itu dan terlihat di layar, pesan berhasil di bawah barisnya; Ubah juga di hari lain hanya berisi hari di ruangan yang sama dengan nomor itu dan jamnya sekarang, centang Selasa mengubah Senin dan Selasa saja; Tambahkan juga ke berisi 4 hari lainnya tanpa teks menempel kotak centang, centang Rabu membuat sesi Senin dan Rabu lalu centangnya kosong lagi; jam baru yang membuat peserta bentrok tetap tersimpan dengan kotak kuning berisi nama dan kedua kelasnya; jam 7.00, 07:00, 0700, 730 dirapikan, Enter dari kotak jam mengirim 22.30–22.40 untuk Jumat PSI; isian Tambah Sesi (termasuk centang) dan form Ubah terkunci selama menyimpan; dengan jaringan lambat, pesan berhasil muncul bersamaan dengan baris yang sudah berganti nomor; Loading... saat memuat; saat `GET /session` gagal tanpa "Belum ada sesi" dan pesan gagal hilang sendiri setelah data termuat lagi | 24 |
 | `daftar-pembayaran` | daftar urut NIM, mata kuliah di pop-up urut semester lalu abjad; cari NIM dan sebagian nama tanpa peduli huruf besar dan spasi; kartu tetap total periode saat mencari; mengetik tidak mengirim permintaan ke server; pesan tidak ketemu menyebut kata dan pilihannya; kembali lewat sidebar mulai dari kotak cari kosong dan Show All; keterangan untuk periode tanpa pendaftar, semua lunas, dan belum ada yang lunas; Loading... saat memuat; di 1366 × 768 kartu paling tinggi 160 px, tombol pilihan sebaris dengan kotak cari, baris pertama paling jauh 360 px dari atas, jarak antarbaris paling banyak 56 px, judul kolom tetap di atas saat digulir; di 1024 px judul satu baris dan sejajar isinya, NIM di bawah nama, kolom nama minimal 180 px; tombol geser bernama Status pembayaran dan terkunci bersama pilihan kelas dan Kembali selama menyimpan | 23 |
 | `kode-matkul` | kode di kartu praktikum, kolom kode hanya angka dan 9 digit saat tambah dan ubah, kode ikut di judul PDF rekap presensi | 29 |
 | `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah dan hapus tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus) | 32 |
@@ -1237,7 +1270,7 @@ node tests/login.mjs        # satu tes saja
 | `detail-kelas` | Loading... saat memuat; pertemuan yang presensinya dibuka langsung terpilih, tanpa itu pertemuan terakhir; tanda Dibuka di daftar pertemuan; pilihan tetap setelah kembali dari Rekap; Belum ada mahasiswa / Belum ada pertemuan; Tambah Pertemuan: Batal tidak menyimpan, Enter menyimpan, pertemuan baru langsung terpilih; QR: Layar Penuh memperbesar QR, Keluar Layar Penuh, Tutup; Ubah Status Presensi: jarak di layar 720 px dan Batal tanpa mengirim apa pun; layar 1024 px: tombol satu baris, NIM dan nama tidak saling menimpa, nama dosen utuh; pesan error bila `GET /meeting/:classId` gagal | 24 |
 | `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
 | `dropdown` | sorotan opsi pertama dan terakhir menempel sampai tepi daftar dengan latar biru dan tulisan putih di 12 dropdown: Jenis Pengumuman, Dosen Pengampu, Semester, Mata Kuliah, Hari, Ruangan, Sesi Kelas, Periode, Pilih Pertemuan, menu titik tiga pengumuman (Hapus merah), Jenis Pengumuman di pop-up Edit, Pilih Kelas di Pembayaran; Pilih Pertemuan dengan keyboard: sorotan biru dan Enter memilih | 17 |
-| `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; sorotan biru opsi menempel sampai tepi daftar; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 32 |
+| `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; sorotan biru opsi menempel sampai tepi daftar; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; Sesi Kelas menulis "Pilih ruangan dulu" sampai ruangan dipilih, hanya berisi sesi hari dan ruangan itu, dan kosong lagi saat ruangan diganti; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 34 |
 | `rekap-presensi` | layar 1024 px dengan 15 pertemuan: kolom Hadir terlihat tanpa menggeser, No, NIM, dan Nama tetap di kiri setelah digeser ke ujung (hanya kolom pertemuan yang bergeser), scrollbar 6 px hanya di bawah kolom pertemuan, hanya tampil saat digeser dan hilang lagi setelah diam (dicek dari piksel screenshot), kolom Nama minimal 200 px, tombol Unduh PDF satu baris; layar 1366 px: No, NIM, dan Nama tetap di kiri, baris Jumlah hadir, periode dan dosen pengampu; kelas 40 mahasiswa: keterangan dan Jumlah hadir terlihat tanpa menggulir, judul kolom tetap di atas setelah digulir; PDF: nama panjang utuh, judul kolom Responsi Akhir per kata, Jumlah hadir, periode dan dosen, semua tulisan rekap satu pertemuan berjudul panjang muat di kertas; data kelas gagal dimuat lalu pulih lewat event; kelas dihapus saat terbuka; Detail Kelas urut NIM dan keterangan ikon rekap | 29 |
 | `tambah-matkul` | judul; tulisan Pilih semester dan Pilih dosen pengampu; daftar Mata kuliah yang sudah ada awalnya tertutup per semester (urut, dengan jumlahnya), klik judul membuka isinya (urut abjad, kode dan dosen) dan menutupnya lagi; semester yang dipilih di form terbuka sendiri dan tertutup lagi saat pilihan diganti, semester yang dibuka sendiri tetap terbuka; Kosongkan menutup semua semester; satu-satunya semester langsung terbuka; daftar 22 dosen berhenti 16 px dari bawah layar dan dosen terakhir utuh; opsi tanpa tombol di dalamnya; nama dosen panjang satu baris dengan ... dan nama lengkap saat disorot di layar 1024 px; pilih semester dan dosen dengan keyboard; isian dan Kosongkan terkunci selama menyimpan; setelah Simpan semesternya tetap terbuka dan mata kuliah baru ada di sana; daftar ikut berubah saat laboran lain menambah dan mengganti nama, tanpa membuka semester sendiri; isian pop-up Ubah Mata Kuliah terkunci selama menyimpan; Pilih hari dan Pilih ruangan di Tambah Praktikum; daftar Pilih Pertemuan 20 pertemuan di layar 1024 px berhenti 16 px dari bawah layar tanpa menutupi tombolnya | 25 |
 

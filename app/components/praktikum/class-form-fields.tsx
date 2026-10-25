@@ -8,7 +8,7 @@ import ClassDayDropdown from "@/app/components/praktikum/class-day-dropdown";
 import ClassRoomDropdown from "@/app/components/praktikum/class-room-dropdown";
 import ClassSessionListbox from "@/app/components/praktikum/class-sessions-listbox";
 import { ISessionResponseBody } from "@/app/interfaces/session/session.interface";
-import { dayGroupOf } from "@/app/utils/day";
+import { formatDay } from "@/app/utils/day";
 
 export type ClassForm = {
   name: string;
@@ -55,14 +55,15 @@ export default function ClassFormFields({
 }: ClassFormFieldsProps) {
   const daySessions = useMemo(
     () =>
-      form.day
+      form.day && form.room
         ? sessions.filter(
             (session) =>
               (session.is_active || session.id === currentSessionId) &&
-              session.day_group === dayGroupOf(form.day),
+              session.day === form.day &&
+              session.room === form.room,
           )
         : [],
-    [sessions, form.day, currentSessionId],
+    [sessions, form.day, form.room, currentSessionId],
   );
 
   useEffect(() => {
@@ -75,12 +76,14 @@ export default function ClassFormFields({
   }, [sessionsLoaded, daySessions, form.sessionId, onChange]);
 
   const noSessionForDay =
-    !!form.day && sessionsLoaded && daySessions.length === 0;
+    !!form.day && !!form.room && sessionsLoaded && daySessions.length === 0;
   const sessionPlaceholder = !form.day
     ? "Pilih hari dulu"
-    : noSessionForDay
-      ? "Belum ada sesi"
-      : "Sesi Kelas";
+    : !form.room
+      ? "Pilih ruangan dulu"
+      : noSessionForDay
+        ? "Belum ada sesi"
+        : "Sesi Kelas";
 
   return (
     <div className="flex w-full flex-col space-y-6">
@@ -111,9 +114,8 @@ export default function ClassFormFields({
       </div>
       {noSessionForDay && (
         <p className="text-sm font-semibold text-[#F1416C]">
-          Jam sesi{" "}
-          {dayGroupOf(form.day) === "FRIDAY" ? "hari Jumat" : "Senin–Kamis"}{" "}
-          belum diatur. Atur di{" "}
+          Jam sesi hari {formatDay(form.day)} di ruang {form.room} belum diatur.
+          Atur di{" "}
           <Link href="/dashboard/master-data/jam-sesi" className="underline">
             Master Data → Jam Sesi
           </Link>

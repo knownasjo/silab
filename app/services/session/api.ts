@@ -26,10 +26,9 @@ export const putSession = async (
   id: string,
   body: IUpdateSessionRequestBody,
 ) => {
-  const res = await satellite.put<IBaseResponse<ISessionResponseBody>>(
-    `/session/${id}`,
-    body,
-  );
+  const res = await satellite.put<
+    IBaseResponse<ISessionResponseBody> & { warnings?: string[] }
+  >(`/session/${id}`, body);
 
   return res.data;
 };

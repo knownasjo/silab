@@ -1,8 +1,7 @@
-export type SessionDayGroup = "WEEKDAY" | "FRIDAY";
-
 export interface ISessionResponseBody {
   id: string;
-  day_group: SessionDayGroup;
+  room: string;
+  day: string;
   number: number;
   startAt: string;
   endAt: string;
@@ -11,10 +10,12 @@ export interface ISessionResponseBody {
 }
 
 export interface IAddSessionRequestBody {
-  day_group: SessionDayGroup;
+  room: string;
+  day: string;
   number: number;
   startAt: string;
   endAt: string;
+  also_days: string[];
 }
 
 export interface IUpdateSessionRequestBody {
@@ -22,4 +23,5 @@ export interface IUpdateSessionRequestBody {
   startAt?: string;
   endAt?: string;
   is_active?: boolean;
+  also_days?: string[];
 }

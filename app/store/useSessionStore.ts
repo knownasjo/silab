@@ -17,7 +17,7 @@ type SessionState = GlobalState & {
   isLoaded: boolean;
 };
 
-type SessionResult = { ok: boolean; message: string };
+type SessionResult = { ok: boolean; message: string; warnings?: string[] };
 
 type SessionActions = {
   getSessions: () => Promise<void>;
@@ -81,7 +81,7 @@ const useSessionStore = create<SessionState & SessionActions>((set, get) => ({
       const res = await putSession(id, body);
 
       await get().refreshSessions();
-      return { ok: true, message: res.message };
+      return { ok: true, message: res.message, warnings: res.warnings };
     } catch (error: any) {
       return failure(error);
     }

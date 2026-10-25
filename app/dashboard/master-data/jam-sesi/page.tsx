@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
@@ -8,14 +8,11 @@ import useSessionStore from "@/app/store/useSessionStore";
 import useClassStore from "@/app/store/useClassStore";
 import useAuthStore from "@/app/store/useAuthStore";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
-import {
-  ISessionResponseBody,
-  SessionDayGroup,
-} from "@/app/interfaces/session/session.interface";
+import { ISessionResponseBody } from "@/app/interfaces/session/session.interface";
 import { IGetClassResponseBody } from "@/app/interfaces/class/class.interface";
-import { DAY_GROUP_LABELS, DAY_LABELS, formatDay } from "@/app/utils/day";
+import { DAY_LABELS, formatDay } from "@/app/utils/day";
 
-const DAY_GROUPS: SessionDayGroup[] = ["WEEKDAY", "FRIDAY"];
+const ROOMS = ["PSI", "SBTI"];
 
 const inputClassName =
   "h-[44px] w-full rounded-xl bg-[#f5f5f5] px-3 font-semibold text-[#1D1D1D] focus:outline-[#3272CA] disabled:cursor-not-allowed disabled:opacity-60";
@@ -92,6 +89,15 @@ const byDayThenRoom = (a: IGetClassResponseBody, b: IGetClassResponseBody) =>
   a.room.localeCompare(b.room) ||
   a.subject_name.localeCompare(b.subject_name);
 
+const byDay = (a: ISessionResponseBody, b: ISessionResponseBody) =>
+  DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day);
+
+const sessionLabel = (session: ISessionResponseBody) =>
+  `Sesi ${session.number} ${formatDay(session.day)} ${session.room}`;
+
+const toggleDay = (days: string[], day: string) =>
+  days.includes(day) ? days.filter((item) => item !== day) : [...days, day];
+
 function TimeInput({
   label,
   placeholder,
@@ -118,14 +124,96 @@ function TimeInput({
   );
 }
 
+function DayCheckbox({
+  label,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: ReactNode;
+  checked: boolean;
+  disabled: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <label
+      className={`flex flex-row items-center gap-2 text-sm font-semibold ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"} ${checked ? "text-[#3272CA]" : "text-[#1D1D1D]"}`}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={onChange}
+        className="peer sr-only"
+      />
+      <span
+        aria-hidden="true"
+        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-[#BFD9EF] bg-white transition-colors peer-checked:border-[#3272CA] peer-checked:bg-[#3272CA] peer-focus-visible:ring-2 peer-focus-visible:ring-[#3272CA]/40"
+      >
+        <svg
+          viewBox="0 0 12 12"
+          className={`h-3 w-3 ${checked ? "opacity-100" : "opacity-0"}`}
+        >
+          <path
+            d="M2.5 6.5l2.5 2.5 4.5-5"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
+      {label}
+    </label>
+  );
+}
+
+function ChoiceButtons({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={label}
+      className="flex flex-row flex-wrap items-center gap-2"
+    >
+      <p className="w-[80px] shrink-0 text-base font-semibold text-[#5E6278]">
+        {label}
+      </p>
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          aria-pressed={value === option.value}
+          onClick={() => onChange(option.value)}
+          className={`h-fit w-fit shrink-0 rounded-full border-2 p-3 text-xs font-semibold ${value === option.value ? "border-[#3272CA] bg-[#3272CA] text-white" : "border-[#BFD9EF] bg-white text-[#3272CA]"}`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function SessionRow({
   session,
+  siblings,
   classes,
   feedback,
   onFeedback,
   onDeleted,
 }: {
   session: ISessionResponseBody;
+  siblings: ISessionResponseBody[];
   classes: IGetClassResponseBody[];
   feedback: Feedback;
   onFeedback: (feedback: Feedback) => void;
@@ -137,8 +225,14 @@ function SessionRow({
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
-  const label = `Sesi ${session.number} ${DAY_GROUP_LABELS[session.day_group]}`;
+  const [alsoDays, setAlsoDays] = useState<string[]>([]);
+  const label = sessionLabel(session);
   const listId = `kelas-sesi-${session.id}`;
+  const ticked = siblings.filter((sibling) => alsoDays.includes(sibling.day));
+  const movedClasses = ticked.reduce(
+    (sum, sibling) => sum + sibling.classes,
+    session.classes,
+  );
 
   useEffect(() => {
     if (session.classes === 0) setIsShowingClasses(false);
@@ -159,6 +253,7 @@ function SessionRow({
       startAt: session.startAt,
       endAt: session.endAt,
     });
+    setAlsoDays([]);
     setIsEditing(true);
     setIsConfirmingDelete(false);
     onFeedback(null);
@@ -182,6 +277,7 @@ function SessionRow({
         number: Number(tidy.number),
         startAt: tidy.startAt,
         endAt: tidy.endAt,
+        also_days: ticked.map((sibling) => sibling.day),
       }),
     );
 
@@ -254,9 +350,42 @@ function SessionRow({
             </button>
           </div>
         </div>
-        {session.classes > 0 && (
+        {siblings.length > 0 && (
+          <div
+            role="group"
+            aria-label={`Ubah juga di hari lain untuk ${label}`}
+            className="flex flex-col space-y-2 pt-1"
+          >
+            <p className="text-xs font-semibold text-[#5E6278]">
+              Ubah juga di hari lain (nomor dan jamnya disamakan dengan sesi
+              ini):
+            </p>
+            {siblings.map((sibling) => (
+              <DayCheckbox
+                key={sibling.id}
+                checked={alsoDays.includes(sibling.day)}
+                disabled={isBusy}
+                onChange={() =>
+                  setAlsoDays((prev) => toggleDay(prev, sibling.day))
+                }
+                label={
+                  <>
+                    <span className="w-[56px]">{formatDay(sibling.day)}</span>
+                    <span className="text-xs font-normal text-[#5E6278]">
+                      sekarang {sibling.startAt} – {sibling.endAt}
+                      {sibling.is_active ? "" : ", nonaktif"}
+                    </span>
+                  </>
+                }
+              />
+            ))}
+          </div>
+        )}
+        {movedClasses > 0 && (
           <p className="text-xs font-semibold text-[#5E6278]">
-            Jam {session.classes} kelas di sesi ini ikut berubah.
+            Jam {movedClasses} kelas di sesi ini
+            {ticked.length > 0 ? " dan di hari yang dicentang" : ""} ikut
+            berubah.
           </p>
         )}
         <FeedbackBox feedback={feedback} />
@@ -396,22 +525,23 @@ function SessionRow({
   );
 }
 
-function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
+function DayCard({ room, day }: { room: string; day: string }) {
   const { sessionsData, addSession, isLoaded, error } = useSessionStore();
   const { classesData } = useClassStore();
   const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [alsoDays, setAlsoDays] = useState<string[]>([]);
   const [placed, setPlaced] = useState<{ at: string; feedback: Feedback }>({
     at: "",
     feedback: null,
   });
   const [isSaving, setIsSaving] = useState(false);
-  const sessions = sessionsData.filter(
-    (session) => session.day_group === dayGroup,
-  );
-  const groupLabel = DAY_GROUP_LABELS[dayGroup];
+  const roomSessions = sessionsData.filter((session) => session.room === room);
+  const sessions = roomSessions.filter((session) => session.day === day);
+  const place = `${formatDay(day)} ${room}`;
+  const otherDays = DAY_ORDER.filter((item) => item !== day);
   const feedbackAt = (at: string) =>
     placed.at === at ? placed.feedback : null;
-  const place = (at: string) => (feedback: Feedback) =>
+  const placeAt = (at: string) => (feedback: Feedback) =>
     setPlaced({ at, feedback });
 
   const add = async (event: FormEvent) => {
@@ -423,38 +553,44 @@ function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
     const problem = checkDraft(tidy);
 
     if (problem) {
-      place("add")({ ok: false, message: problem });
+      placeAt("add")({ ok: false, message: problem });
       return;
     }
 
     setIsSaving(true);
-    place("add")(null);
+    placeAt("add")(null);
     const result = await addSession({
-      day_group: dayGroup,
+      room,
+      day,
       number: Number(tidy.number),
       startAt: tidy.startAt,
       endAt: tidy.endAt,
+      also_days: alsoDays,
     });
     setIsSaving(false);
-    place("add")(result);
+    placeAt("add")(result);
 
-    if (result.ok) setDraft(emptyDraft);
+    if (result.ok) {
+      setDraft(emptyDraft);
+      setAlsoDays([]);
+    }
   };
 
   return (
     <section
-      aria-label={`Jam sesi ${groupLabel}`}
+      aria-label={`Jam sesi ${place}`}
       className="flex w-full flex-col space-y-3 rounded-2xl bg-white p-5"
     >
-      <p className="text-xl font-bold text-[#1D1D1D]">{groupLabel}</p>
+      <p className="text-xl font-bold text-[#1D1D1D]">
+        {formatDay(day)} · {room}
+      </p>
       <FeedbackBox feedback={feedbackAt("top")} />
       {!isLoaded && !error && (
         <p className="text-sm font-semibold text-[#5E6278]">Loading...</p>
       )}
       {isLoaded && !error && sessions.length === 0 && (
         <p className="text-sm font-semibold text-[#5E6278]">
-          Belum ada sesi. Kelas{" "}
-          {dayGroup === "FRIDAY" ? "hari Jumat" : "Senin–Kamis"} belum bisa
+          Belum ada sesi. Kelas hari {formatDay(day)} di ruang {room} belum bisa
           dibuat sebelum sesinya ditambahkan.
         </p>
       )}
@@ -463,64 +599,90 @@ function DayGroupCard({ dayGroup }: { dayGroup: SessionDayGroup }) {
           <SessionRow
             key={session.id}
             session={session}
+            siblings={roomSessions
+              .filter(
+                (other) =>
+                  other.number === session.number && other.id !== session.id,
+              )
+              .sort(byDay)}
             classes={classesData
               .filter((subjectClass) => subjectClass.sessionId === session.id)
               .sort(byDayThenRoom)}
             feedback={feedbackAt(session.id)}
-            onFeedback={place(session.id)}
-            onDeleted={(message) => place("top")({ ok: true, message })}
+            onFeedback={placeAt(session.id)}
+            onDeleted={(message) => placeAt("top")({ ok: true, message })}
           />
         ))}
       </div>
       <form
         noValidate
         onSubmit={add}
-        className="grid grid-cols-[90px_1fr_1fr_auto] items-end gap-3 border-t border-[#F1F1F2] pt-4"
+        className="flex flex-col space-y-3 border-t border-[#F1F1F2] pt-4"
       >
-        <label className="flex flex-col space-y-1 text-xs font-semibold text-[#5E6278]">
-          <span>Sesi ke-</span>
-          <input
-            aria-label={`Nomor sesi baru ${groupLabel}`}
-            className={inputClassName}
-            inputMode="numeric"
-            placeholder="1"
-            value={draft.number}
+        <div className="grid grid-cols-[90px_1fr_1fr_auto] items-end gap-3">
+          <label className="flex flex-col space-y-1 text-xs font-semibold text-[#5E6278]">
+            <span>Sesi ke-</span>
+            <input
+              aria-label={`Nomor sesi baru ${place}`}
+              className={inputClassName}
+              inputMode="numeric"
+              placeholder="1"
+              value={draft.number}
+              disabled={isSaving}
+              onChange={(event) =>
+                setDraft({
+                  ...draft,
+                  number: event.target.value.replace(/\D/g, "").slice(0, 2),
+                })
+              }
+            />
+          </label>
+          <label className="flex flex-col space-y-1 text-xs font-semibold text-[#5E6278]">
+            <span>Jam mulai</span>
+            <TimeInput
+              label={`Jam mulai sesi baru ${place}`}
+              placeholder="07.00"
+              value={draft.startAt}
+              disabled={isSaving}
+              onChange={(startAt) => setDraft((prev) => ({ ...prev, startAt }))}
+            />
+          </label>
+          <label className="flex flex-col space-y-1 text-xs font-semibold text-[#5E6278]">
+            <span>Jam selesai</span>
+            <TimeInput
+              label={`Jam selesai sesi baru ${place}`}
+              placeholder="08.40"
+              value={draft.endAt}
+              disabled={isSaving}
+              onChange={(endAt) => setDraft((prev) => ({ ...prev, endAt }))}
+            />
+          </label>
+          <button
+            type="submit"
             disabled={isSaving}
-            onChange={(event) =>
-              setDraft({
-                ...draft,
-                number: event.target.value.replace(/\D/g, "").slice(0, 2),
-              })
-            }
-          />
-        </label>
-        <label className="flex flex-col space-y-1 text-xs font-semibold text-[#5E6278]">
-          <span>Jam mulai</span>
-          <TimeInput
-            label={`Jam mulai sesi baru ${groupLabel}`}
-            placeholder="07.00"
-            value={draft.startAt}
-            disabled={isSaving}
-            onChange={(startAt) => setDraft((prev) => ({ ...prev, startAt }))}
-          />
-        </label>
-        <label className="flex flex-col space-y-1 text-xs font-semibold text-[#5E6278]">
-          <span>Jam selesai</span>
-          <TimeInput
-            label={`Jam selesai sesi baru ${groupLabel}`}
-            placeholder="08.40"
-            value={draft.endAt}
-            disabled={isSaving}
-            onChange={(endAt) => setDraft((prev) => ({ ...prev, endAt }))}
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={isSaving}
-          className="h-[44px] rounded-full bg-[#3272CA] px-[16px] text-sm font-semibold text-white disabled:opacity-60"
+            className="h-[44px] rounded-full bg-[#3272CA] px-[16px] text-sm font-semibold text-white disabled:opacity-60"
+          >
+            Tambah Sesi
+          </button>
+        </div>
+        <div
+          role="group"
+          aria-label={`Tambahkan juga ke hari lain di ruang ${room}`}
+          className="flex flex-row flex-wrap items-center gap-x-5 gap-y-2"
         >
-          Tambah Sesi
-        </button>
+          <p className="text-xs font-semibold text-[#5E6278]">
+            Tambahkan juga ke:
+          </p>
+          {otherDays.map((item) => (
+            <DayCheckbox
+              key={item}
+              label={formatDay(item)}
+              checked={alsoDays.includes(item)}
+              disabled={isSaving}
+              onChange={() => setAlsoDays((prev) => toggleDay(prev, item))}
+            />
+          ))}
+        </div>
       </form>
       <FeedbackBox feedback={feedbackAt("add")} />
     </section>
@@ -531,6 +693,8 @@ export default function JamSesi() {
   const { getSessions, refreshSessions, error } = useSessionStore();
   const { getAllClass, refreshAllClass } = useClassStore();
   const { userData } = useAuthStore();
+  const [room, setRoom] = useState(ROOMS[0]);
+  const [day, setDay] = useState(DAY_ORDER[0]);
 
   useEffect(() => {
     getSessions();
@@ -559,17 +723,32 @@ export default function JamSesi() {
       <div className="flex flex-col">
         <p className="text-[32px] font-bold text-black">Jam Sesi</p>
         <p className="text-base font-semibold text-[#5E6278]">
-          Jam sesi berlaku untuk semester yang sedang aktif; setiap semester
-          baru mendapat salinannya sendiri. Jam kelas mengikuti sesinya.
-          Mengubah jam sesi ikut mengubah jam semua kelas di sesi itu. Sesi yang
-          sudah dipakai kelas tidak bisa dihapus, hanya dinonaktifkan agar tidak
-          muncul di pilihan kelas baru.
+          Jam sesi diatur per ruangan dan per hari untuk semester yang sedang
+          aktif; setiap semester baru mendapat salinannya sendiri. Jam kelas
+          mengikuti sesinya. Mengubah jam sesi ikut mengubah jam semua kelas di
+          sesi itu. Sesi yang sudah dipakai kelas tidak bisa dihapus, hanya
+          dinonaktifkan agar tidak muncul di pilihan kelas baru.
         </p>
       </div>
       {error && <FeedbackBox feedback={{ ok: false, message: error }} />}
-      {DAY_GROUPS.map((dayGroup) => (
-        <DayGroupCard key={dayGroup} dayGroup={dayGroup} />
-      ))}
+      <div className="flex flex-col space-y-3">
+        <ChoiceButtons
+          label="Ruangan"
+          options={ROOMS.map((item) => ({ value: item, label: item }))}
+          value={room}
+          onChange={setRoom}
+        />
+        <ChoiceButtons
+          label="Hari"
+          options={DAY_ORDER.map((item) => ({
+            value: item,
+            label: formatDay(item),
+          }))}
+          value={day}
+          onChange={setDay}
+        />
+      </div>
+      <DayCard key={`${room}-${day}`} room={room} day={day} />
     </div>
   );
 }

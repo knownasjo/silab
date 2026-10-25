@@ -154,6 +154,7 @@ await runWebTest("Sorotan semua dropdown", data, async (browser) => {
   await inspect("Hari", nextOf("form p", "Hari"));
   await inspect("Ruangan", nextOf("form p", "Ruangan"));
   await pick(nextOf("form p", "Hari"), "Senin");
+  await pick(nextOf("form p", "Ruangan"), "PSI");
   await inspect(
     "Sesi Kelas",
     `document.querySelector('form button[aria-label="Sesi Kelas"]')`,
