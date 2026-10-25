@@ -11,6 +11,7 @@ import {
   putAnnouncement,
 } from "../services/announcement/api";
 import { coalesce } from "../utils/coalesce";
+import { ANNOUNCEMENT_GONE } from "../utils/announcement";
 
 type AnnouncementState = GlobalState & {
   announcementsData: IGetAllAnnouncementsResponseBody[];
@@ -25,8 +26,8 @@ type AnnouncementActions = {
   updateAnnouncement: (
     id: string,
     body: IAddAnnouncementRequestBody,
-  ) => Promise<boolean>;
-  removeAnnouncement: (id: string) => Promise<boolean>;
+  ) => Promise<{ ok: boolean; message: string }>;
+  removeAnnouncement: (id: string) => Promise<{ ok: boolean; message: string }>;
   getAllAnnouncements: () => Promise<void>;
   getAnnouncementById: (id: string) => Promise<void>;
   refreshAllAnnouncements: () => Promise<void>;
@@ -56,44 +57,24 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
     },
 
     updateAnnouncement: async (id, body) => {
-      set({ isLoading: true, error: null });
-
       try {
         const res = await putAnnouncement(id, body);
 
-        if (res.status) {
-          await get().getAllAnnouncements();
-          return true;
-        }
-
-        set({ error: res.message });
-        return false;
+        await get().refreshAllAnnouncements();
+        return { ok: res.status, message: res.message };
       } catch (error: any) {
-        set({ error: error?.message ?? "Terjadi kesalahan" });
-        return false;
-      } finally {
-        set({ isLoading: false });
+        return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
       }
     },
 
     removeAnnouncement: async (id) => {
-      set({ isLoading: true, error: null });
-
       try {
         const res = await deleteAnnouncement(id);
 
-        if (res.status) {
-          await get().getAllAnnouncements();
-          return true;
-        }
-
-        set({ error: res.message });
-        return false;
+        await get().refreshAllAnnouncements();
+        return { ok: res.status, message: res.message };
       } catch (error: any) {
-        set({ error: error?.message ?? "Terjadi kesalahan" });
-        return false;
-      } finally {
-        set({ isLoading: false });
+        return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
       }
     },
 
@@ -143,7 +124,12 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
           set({ loadError: res.message });
         }
       } catch (error: any) {
-        set({ loadError: error?.message ?? "Terjadi kesalahan" });
+        set({
+          loadError:
+            error?.code === 404
+              ? ANNOUNCEMENT_GONE
+              : (error?.message ?? "Terjadi kesalahan"),
+        });
       } finally {
         set({ isLoading: false });
       }

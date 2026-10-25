@@ -1,8 +1,20 @@
 import {
   AnnouncementType,
   AnnouncementTypeEnum,
+  IAddAnnouncementRequestBody,
   IGetAllAnnouncementsResponseBody,
 } from "../interfaces/announcement/announcement.interface";
+
+export const MAX_TITLE_LENGTH = 150;
+export const MAX_BODY_LENGTH = 1000;
+export const ANNOUNCEMENT_GONE = "Pengumuman ini sudah dihapus.";
+
+export type AnnouncementForm = {
+  type: AnnouncementTypeEnum;
+  title: string;
+  body: string;
+  audience: string[] | null;
+};
 
 export const ANNOUNCEMENT_TYPES: AnnouncementType[] = [
   { title: "Pengumuman", value: AnnouncementTypeEnum.BASIC },
@@ -50,3 +62,20 @@ export const targetSubjectIds = (
   type: AnnouncementTypeEnum,
   audience: string[] | null,
 ) => (type === AnnouncementTypeEnum.BASIC && audience ? audience : []);
+
+export const validateAnnouncementForm = (form: AnnouncementForm) => {
+  if (form.title.trim() === "") return "Judul pengumuman wajib diisi!";
+  if (form.body.trim() === "") return "Deskripsi pengumuman wajib diisi!";
+  if (form.type === AnnouncementTypeEnum.BASIC && form.audience?.length === 0)
+    return NEED_TARGET_SUBJECT;
+  return null;
+};
+
+export const tidyAnnouncementForm = (
+  form: AnnouncementForm,
+): IAddAnnouncementRequestBody => ({
+  type: form.type,
+  title: form.title.trim(),
+  body: form.body.trim(),
+  subjectIds: targetSubjectIds(form.type, form.audience),
+});

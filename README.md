@@ -746,6 +746,9 @@ Halaman Buat Pengumuman dan dialog Edit punya pilihan **Untuk**
     tujuan pengumuman yang sedang diedit tidak boleh ikut terbuang karenanya.
   - Selama memuat tertulis "Loading...", dan bila gagal "Daftar mata kuliah
     gagal dimuat. ...". Dulu keduanya tertulis "Belum ada mata kuliah.".
+- Keterangan "Untuk: Mahasiswa …" di kartu List Pengumuman dan halaman detail
+  ikut berubah saat nama mata kuliahnya diganti (event `subject`, sejak 25
+  Oktober 2026). Dulu nama lama bertahan sampai halaman dimuat ulang.
 - Dialog Edit terisi tujuan yang tersimpan. "Tidak ada perubahan yang perlu
   disimpan." kini juga memperhitungkan mata kuliah tujuan.
 - Kartu di List Pengumuman dan halaman detail menampilkan "Untuk: Semua
@@ -1243,6 +1246,54 @@ pada 25 Oktober 2026:
 - Klik ganda dan Enter dua kali di Simpan sudah aman sejak sebelumnya: hanya
   satu pengumuman yang terkirim.
 
+### List dan Detail Pengumuman
+
+Halaman List Pengumuman (`dashboard/pengumuman/list-pengumuman`) dan Detail
+Pengumuman (`dashboard/pengumuman/[id]`) diperbaiki pada 25 Oktober 2026:
+
+- Pop-up Edit dan Hapus kini komponen sendiri
+  (`components/pengumuman/announcement-edit-dialog.tsx` dan
+  `announcement-delete-dialog.tsx`) yang dipasang sekali oleh halaman List,
+  bukan oleh tiap kartu. Kartu hanya memanggil `onEdit` dan `onDelete`.
+  - Dulu pop-up hilang tiba-tiba tanpa penjelasan bila laboran lain menghapus
+    pengumuman itu, karena kartunya ikut hilang dari daftar. Sekarang pop-up
+    tetap terbuka. Pop-up Edit menulis "Pengumuman ini sudah dihapus. Isian di
+    bawah tidak bisa disimpan, tetapi masih bisa disalin." dan Simpan
+    Perubahan diganti Tutup. Pop-up Hapus hanya menulis "Pengumuman ini sudah
+    dihapus." dengan tombol Tutup.
+  - Pesan itu tidak muncul saat laboran sendiri yang menghapus: event
+    real-time bisa datang sebelum jawaban `DELETE`, jadi pesan disembunyikan
+    selama penghapusan berjalan.
+- Pop-up Edit: isian terkunci selama menyimpan (`<fieldset disabled>`).
+  Tulisan judul dan deskripsi bisa diklik (`htmlFor`), dan judul punya
+  "(maks: 150 karakter)" serta penghitung "0/150", sama seperti Buat
+  Pengumuman. Aturan isian (`validateAnnouncementForm`,
+  `tidyAnnouncementForm`, `MAX_TITLE_LENGTH`, `MAX_BODY_LENGTH`) kini ada di
+  `utils/announcement.ts` dan dipakai bersama Buat Pengumuman.
+- Pop-up Edit dan Hapus bergaya seperti pop-up lain: jarak tepi 40 px, Batal
+  bergaris, Simpan Perubahan biru muda, dan "Ya, hapus" merah. Judul pop-up
+  Hapus menjadi "Hapus pengumuman?" dengan keterangan "… akan dihapus dan
+  tidak tampil lagi di HP mahasiswa."
+- Setelah Simpan Perubahan atau Ya, hapus, kotak hijau ("Pengumuman berhasil
+  diperbarui" atau "Pengumuman berhasil dihapus") tampil di atas daftar.
+  Kalau daftar sedang digulir ke bawah, halaman bergulir ke kotak itu.
+  `updateAnnouncement` dan `removeAnnouncement` mengembalikan `{ ok, message }`
+  dan menunggu daftar dimuat ulang, jadi kotak hijau muncul bersamaan dengan
+  kartu yang sudah berubah atau hilang.
+- Judul halaman "List Pengumuman", sama dengan nama menunya (dulu "Semua
+  pengumuman."). "Loading..." dan pesan gagal ("Daftar pengumuman gagal
+  dimuat. …") bergaya seperti halaman lain.
+- Detail: judul "Detail Pengumuman" dengan tombol Kembali ke List, isi di
+  kotak putih, dan keterangan berupa dua kolom (tulisan 240 px, isinya memakai
+  sisa lebar). Dulu isinya hanya memakai sepertiga kanan, sehingga keterangan
+  Untuk turun 4–6 baris.
+  - Bila pengumuman dihapus saat detailnya terbuka, halaman tetap di situ dan
+    menulis "Pengumuman ini sudah dihapus.". Dulu langsung pindah ke List
+    tanpa penjelasan.
+  - Membuka alamat pengumuman yang sudah dihapus (jawaban 404) juga menulis
+    "Pengumuman ini sudah dihapus." dengan tombol Kembali. Dulu hanya
+    "Pengumuman tidak ditemukan!" tanpa jalan kembali.
+
 ### Tanda HP tidak biasa
 
 Backend mencatat HP yang dipakai scan, dan presensi dari HP yang bukan HP
@@ -1328,7 +1379,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 22 menit
+npm test                    # semua tes browser, sekitar 26 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
@@ -1348,6 +1399,7 @@ node tests/login.mjs        # satu tes saja
 | `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |
 | `pengumuman` | List dan Detail: Loading... saat memuat, label jenis, tanggal jam lokal beserta penulis, Edit tanpa perubahan tidak mengirim apa pun, dosen tanpa menu Edit/Hapus. Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Kosongkan, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 1000 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, pengumuman panjang dipotong 3 baris di daftar dan tampil utuh dengan paragraf terpisah di detail, dosen melihat pesan hanya laboran. Permintaan simpan dan ubah dicegat, jadi tidak ada pengumuman asli yang terkirim | 34 |
 | `buat-pengumuman` | judul halaman satu saja; klik tulisan Judul dan Deskripsi memindahkan kursor; penghitung judul 0/150 sampai 150/150; daftar mata kuliah tujuan: Loading... saat memuat, pesan gagal (bukan "Belum ada mata kuliah."), pulih sendiri lewat event, mata kuliah baru dan ganti nama dari tab lain muncul, mata kuliah tercentang yang dihapus hilang beserta centangnya sehingga Simpan hanya mengirim yang masih ada, dan bila itu satu-satunya Simpan meminta memilih; isian, jenis, dan Kosongkan terkunci selama menyimpan dan ketikan saat itu tidak masuk; pesan berhasil dan gagal (ditolak server, server tidak bisa dihubungi) di kotak di atas tombol tanpa pop-up, isian tetap; tombol Kosongkan bertanya bila ada ketikan, Batal tidak mengubah apa pun, tanpa ketikan langsung kosong; draf tetap ada setelah pindah halaman dan muat ulang, tidak terlihat laboran lain, dibuang setelah Simpan dan Kosongkan; dosen tidak pernah melihat form sekilas | 37 |
+| `list-pengumuman` | judul List Pengumuman; Loading... dan pesan gagal bergaya halaman lain; keterangan Untuk di kartu dan detail ikut berubah saat nama mata kuliah diganti; pop-up Edit: klik tulisan judul dan deskripsi memindahkan kursor, penghitung 15/150 dan (maks: 150 karakter), Batal bergaris dan jarak tepi 40 px, isian terkunci selama menyimpan, kotak hijau dan kartu baru setelah tersimpan, kotak hijau tetap terlihat walau kartu paling bawah yang diubah; pengumuman dihapus laboran lain saat pop-up Edit atau Hapus terbuka: pop-up tetap terbuka dengan pesan, ketikan tetap ada, hanya tombol Tutup; pop-up Hapus: judul, keterangan HP mahasiswa, Ya, hapus merah, Batal tidak menghapus, kartu hilang dengan kotak hijau; detail: judul, tombol Kembali, kolom keterangan selebar sisa kotak di 1366 dan 1024 px, dihapus saat terbuka atau dibuka sesudah dihapus menampilkan pesan dan tombol Kembali | 33 |
 | `pengumuman-matkul` | pilihan Untuk di Buat Pengumuman: bawaan Semua mahasiswa, hilang untuk jenis pendaftaran, daftar mata kuliah dengan kode dan semester, tanpa centang ditolak tanpa mengirim, `subjectIds` yang terkirim dan tersimpan, pendaftaran tetap terkirim untuk semua; kartu dan detail menyebut tujuan beserta semesternya; Edit terisi tujuan lama, tanpa perubahan tidak mengirim, mengganti mata kuliah dan kembali ke Semua mahasiswa; kotak centang dan pilihan bergaya tema (input asli tersembunyi, biru `#3272CA`, pilihan tanpa garis luar) dan tersusun atas-bawah | 28 |
 | `hapus-matkul` | tombol Hapus Mata Kuliah di dialog Ubah (dosen tidak punya), letaknya di kiri dan tidak bertumpuk dengan Batal/Simpan, Batal tidak menghapus, Ya, hapus mengirim satu DELETE lalu kartu hilang dengan pesan hijau, halaman dosen di browser kedua ikut berubah tanpa dimuat ulang, penolakan server untuk mata kuliah yang sudah punya kelas tampil di konfirmasi | 21 |
 | `info-kelas` | kotak informasi di detail kelas pada layar 1440, 1280, dan 1024 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 19 |

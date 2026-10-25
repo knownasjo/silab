@@ -1,16 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import useAnnouncementStore from "@/app/store/useAnnouncementStore";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 import FeedbackBox from "@/app/components/feedback-box";
 import AnnouncementTypeBadge from "@/app/components/pengumuman/announcement-type-badge";
-import { audienceLabel, formatPostedAt } from "@/app/utils/announcement";
+import {
+  ANNOUNCEMENT_GONE,
+  audienceLabel,
+  formatPostedAt,
+} from "@/app/utils/announcement";
 
 export default function AnnouncementDetails() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
+  const [deletedId, setDeletedId] = useState<string | null>(null);
 
   const {
     getAnnouncementById,
@@ -24,11 +29,12 @@ export default function AnnouncementDetails() {
   }, [getAnnouncementById, params.id]);
 
   useRealtimeEvents(({ type, data }) => {
-    if (type === "ready") refreshAnnouncementById(params.id);
+    if (type === "ready" || type === "subject")
+      refreshAnnouncementById(params.id);
     if (type !== "announcement" || data.announcementId !== params.id) return;
 
     if (data.action === "deleted") {
-      router.replace("/dashboard/pengumuman/list-pengumuman");
+      setDeletedId(params.id);
     } else {
       refreshAnnouncementById(params.id);
     }
@@ -36,61 +42,47 @@ export default function AnnouncementDetails() {
 
   const announcement =
     announcementData?.id === params.id ? announcementData : null;
-
-  if (!announcement && loadError) {
-    return (
-      <div className="w-full">
-        <FeedbackBox feedback={{ ok: false, message: loadError }} />
-      </div>
-    );
-  }
-
-  if (!announcement) return <p>Loading...</p>;
+  const problem =
+    deletedId === params.id ? ANNOUNCEMENT_GONE : !announcement && loadError;
 
   return (
-    <div className="w-full overflow-auto overscroll-contain">
-      <div className="flex w-full flex-col">
-        <p className="mt-10 text-[22px] font-bold text-[#1D1D1D]">
-          {announcement.title}
-        </p>
-        <p className="mt-10 whitespace-pre-line break-words text-[18px] font-semibold text-[#1D1D1D]">
-          {announcement.body}
-        </p>
-
-        <div className="my-10 h-[1px] w-full bg-[#1D1D1D]/20" />
-        <div className="flex w-full flex-col space-y-10">
-          <div className="flex flex-row justify-between">
-            <p className="w-1/3 text-lg font-bold text-[#1D1D1D]/50">
-              Jenis Pengumuman
-            </p>
-            <div className="w-1/3">
+    <div className="flex w-full flex-col space-y-8">
+      <div className="flex w-full flex-row items-start justify-between gap-4">
+        <p className="text-[32px] font-bold text-black">Detail Pengumuman</p>
+        <Link
+          href="/dashboard/pengumuman/list-pengumuman"
+          className="h-fit shrink-0 content-center rounded-full bg-white p-3 text-sm font-semibold text-[#3272CA]"
+        >
+          Kembali
+        </Link>
+      </div>
+      {problem ? (
+        <FeedbackBox feedback={{ ok: false, message: problem }} />
+      ) : !announcement ? (
+        <p className="text-sm font-semibold text-[#5E6278]">Loading...</p>
+      ) : (
+        <div className="flex w-full flex-col rounded-2xl bg-white p-8 text-[#1D1D1D]">
+          <p className="break-words text-[22px] font-bold">
+            {announcement.title}
+          </p>
+          <p className="mt-6 whitespace-pre-line break-words text-[18px] font-semibold">
+            {announcement.body}
+          </p>
+          <div className="my-8 h-[1px] w-full bg-[#1D1D1D]/20" />
+          <div className="grid grid-cols-[240px_minmax(0,1fr)] gap-x-6 gap-y-6 text-lg font-bold">
+            <p className="text-[#1D1D1D]/50">Jenis Pengumuman</p>
+            <div>
               <AnnouncementTypeBadge type={announcement.type} />
             </div>
-          </div>
-          <div className="flex flex-row justify-between">
-            <p className="w-1/3 text-lg font-bold text-[#1D1D1D]/50">Untuk</p>
-            <p className="w-1/3 break-words text-lg font-bold text-[#1D1D1D]">
-              {audienceLabel(announcement)}
-            </p>
-          </div>
-          <div className="flex flex-row justify-between">
-            <p className="w-1/3 text-lg font-bold text-[#1D1D1D]/50">
-              Dibuat oleh
-            </p>
-            <p className="w-1/3 text-lg font-bold text-[#1D1D1D]">
-              {announcement.author}
-            </p>
-          </div>
-          <div className="flex flex-row justify-between">
-            <p className="w-1/3 text-lg font-bold text-[#1D1D1D]/50">
-              Tanggal / Waktu Posting
-            </p>
-            <p className="w-1/3 text-lg font-bold text-[#1D1D1D]">
-              {formatPostedAt(announcement.createdAt)}
-            </p>
+            <p className="text-[#1D1D1D]/50">Untuk</p>
+            <p className="break-words">{audienceLabel(announcement)}</p>
+            <p className="text-[#1D1D1D]/50">Dibuat oleh</p>
+            <p className="break-words">{announcement.author}</p>
+            <p className="text-[#1D1D1D]/50">Tanggal / Waktu Posting</p>
+            <p>{formatPostedAt(announcement.createdAt)}</p>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

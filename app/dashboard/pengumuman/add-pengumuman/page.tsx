@@ -10,24 +10,18 @@ import AnnouncementTypeDropdown from "@/app/components/pengumuman/announcement-t
 import AnnouncementAudienceField from "@/app/components/pengumuman/announcement-audience-field";
 import FeedbackBox, { Feedback } from "@/app/components/feedback-box";
 import {
-  NEED_TARGET_SUBJECT,
-  targetSubjectIds,
+  AnnouncementForm,
+  MAX_BODY_LENGTH,
+  MAX_TITLE_LENGTH,
+  tidyAnnouncementForm,
+  validateAnnouncementForm,
 } from "@/app/utils/announcement";
 import { useEffect, useState } from "react";
 import { AnnouncementTypeEnum } from "@/app/interfaces/announcement/announcement.interface";
 import useAnnouncementStore from "@/app/store/useAnnouncementStore";
 import useAuthStore from "@/app/store/useAuthStore";
 
-const MAX_BODY_LENGTH = 1000;
-const MAX_TITLE_LENGTH = 150;
 const DRAFT_KEY = "draf-pengumuman";
-
-type AnnouncementForm = {
-  type: AnnouncementTypeEnum;
-  title: string;
-  body: string;
-  audience: string[] | null;
-};
 
 const emptyForm: AnnouncementForm = {
   type: AnnouncementTypeEnum.BASIC,
@@ -72,14 +66,6 @@ const saveDraft = (userId: string, form: AnnouncementForm) => {
   } catch {}
 };
 
-const problemOf = (form: AnnouncementForm) => {
-  if (form.title.trim() === "") return "Judul pengumuman wajib diisi!";
-  if (form.body.trim() === "") return "Deskripsi pengumuman wajib diisi!";
-  if (form.type === AnnouncementTypeEnum.BASIC && form.audience?.length === 0)
-    return NEED_TARGET_SUBJECT;
-  return null;
-};
-
 export default function Pengumuman() {
   const { userData, error: accountError } = useAuthStore();
   const { addAnnouncement } = useAnnouncementStore();
@@ -122,7 +108,7 @@ export default function Pengumuman() {
   };
 
   const handleSave = async () => {
-    const problem = problemOf(form);
+    const problem = validateAnnouncementForm(form);
 
     if (problem) {
       setFeedback({ ok: false, message: problem });
@@ -132,12 +118,7 @@ export default function Pengumuman() {
     setIsSaving(true);
     setFeedback(null);
 
-    const result = await addAnnouncement({
-      type: form.type,
-      title: form.title.trim(),
-      body: form.body.trim(),
-      subjectIds: targetSubjectIds(form.type, form.audience),
-    });
+    const result = await addAnnouncement(tidyAnnouncementForm(form));
 
     setIsSaving(false);
     setFeedback(result);

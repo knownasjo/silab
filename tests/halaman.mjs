@@ -140,7 +140,7 @@ await runWebTest(
       [
         "Daftar pengumuman",
         "/dashboard/pengumuman/list-pengumuman",
-        "pengumuman",
+        "List Pengumuman",
       ],
       [
         "Rekap presensi tanpa kelas",
