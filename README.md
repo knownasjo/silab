@@ -732,7 +732,20 @@ Halaman Buat Pengumuman dan dialog Edit punya pilihan **Untuk**
   Praktikum, pilihan ini diganti keterangan "Semua mahasiswa. Pengumuman
   pendaftaran selalu untuk semua mahasiswa.", dan `subjectIds` dikirim kosong
   walaupun sebelumnya sempat ada mata kuliah yang dicentang.
-- Setelah Simpan atau Hapus, form kembali ke Semua mahasiswa.
+- Setelah Simpan atau Kosongkan, form kembali ke Semua mahasiswa.
+- Daftar mata kuliahnya dimuat ulang setiap kali halaman atau dialog Edit
+  dibuka, lalu ikut berubah lewat event `subject` dan saat koneksi real-time
+  tersambung lagi (sejak 25 Oktober 2026). Mata kuliah yang dihapus laboran
+  lain hilang dari daftar, dan centangnya ikut dibuang. Dulu daftar hanya
+  dimuat sekali, sehingga mata kuliah yang sudah dihapus tetap tampil dan
+  Simpan ditolak "Mata kuliah tidak ditemukan!".
+  - Centang hanya dibuang setelah daftar terbaru selesai dimuat
+    (`loadCount` di `useSubjectStore` naik setiap kali daftar berhasil
+    dimuat). Daftar yang masih tersimpan dari halaman lain bisa saja lebih
+    lama, misalnya belum berisi mata kuliah baru buatan laboran lain, dan
+    tujuan pengumuman yang sedang diedit tidak boleh ikut terbuang karenanya.
+  - Selama memuat tertulis "Loading...", dan bila gagal "Daftar mata kuliah
+    gagal dimuat. ...". Dulu keduanya tertulis "Belum ada mata kuliah.".
 - Dialog Edit terisi tujuan yang tersimpan. "Tidak ada perubahan yang perlu
   disimpan." kini juga memperhitungkan mata kuliah tujuan.
 - Kartu di List Pengumuman dan halaman detail menampilkan "Untuk: Semua
@@ -1187,6 +1200,49 @@ Halaman Pembayaran (`dashboard/master-data/pembayaran`) diperbaiki pada
 - Ikon hiasan (kaca pembesar, panah Kembali, panah pilihan kelas) memakai
   `alt=""`.
 
+### Buat Pengumuman
+
+Halaman Buat Pengumuman (`dashboard/pengumuman/add-pengumuman`) diperbaiki
+pada 25 Oktober 2026:
+
+- Judul "Buat Pengumuman", sama seperti Tambah Mata Kuliah dan halaman lain.
+  Kalimat "Buat pengumuman yang akan disebarkan ke mahasiswa" dan judul kotak
+  yang sama di bawahnya dihapus, begitu juga
+  `components/pengumuman/add-pengumuman/add-pengumuman-title.tsx`.
+- Isian dan tombol Kosongkan terkunci selama menyimpan (`<fieldset
+  disabled>`). Dulu ketikan selama menyimpan hilang begitu form dikosongkan.
+  Status sibuknya kini milik halaman sendiri, bukan `isLoading` di
+  `useAnnouncementStore` yang juga dipakai List Pengumuman, sehingga tombol
+  Simpan tidak ikut berputar saat daftar pengumuman sedang dimuat.
+  `addAnnouncement` kini mengembalikan `{ ok, message }`.
+- Pesan berhasil dan gagal tampil di kotak hijau atau merah di atas tombol,
+  sama seperti Tambah Mata Kuliah, bukan pop-up lagi. Isian tetap utuh bila
+  gagal.
+- Tombol Hapus kini bernama **Kosongkan**, sama seperti Tambah Mata Kuliah dan
+  Tambah Praktikum. Bila judul atau deskripsi sudah diketik, muncul
+  pertanyaan "Kosongkan isian?" dengan Batal dan Kosongkan. Bila belum ada
+  ketikan, form langsung kembali ke awal.
+- Isian disimpan sementara di `sessionStorage` (kunci
+  `draf-pengumuman:<id akun>`) setiap kali berubah: judul, jenis, tujuan, dan
+  deskripsi. Pindah halaman lewat menu atau memuat ulang halaman tidak lagi
+  menghapus isian. Draf dibuang setelah Simpan berhasil atau Kosongkan, dan
+  hilang sendiri saat tab browser ditutup. Kuncinya memakai id akun, jadi
+  laboran lain yang masuk di tab yang sama tidak melihat draf itu.
+  - Karena draf butuh id akun, form baru tampil setelah data akun termuat.
+    Sebelumnya tertulis "Loading...", atau kosong bila data akun gagal dimuat
+    (pemberitahuan "Data akun gagal dimuat" sudah tampil di atas). Akibatnya,
+    dosen yang membuka alamatnya langsung tidak lagi melihat form sekilas
+    sebelum pesan "Hanya laboran yang dapat membuat pengumuman.".
+- Tulisan "Judul Pengumuman" dan "Deskripsi Pengumuman" bisa diklik untuk
+  memindahkan kursor ke kotaknya (`htmlFor`). Kotak judul punya penghitung
+  "0/150" seperti deskripsi, jadi terlihat kenapa ketikan berhenti di 150
+  huruf.
+- Daftar mata kuliah tujuan: Loading..., pesan gagal, dan ikut berubah saat
+  mata kuliah ditambah, diubah, atau dihapus. Lihat "Pengumuman untuk Mata
+  Kuliah Tertentu".
+- Klik ganda dan Enter dua kali di Simpan sudah aman sejak sebelumnya: hanya
+  satu pengumuman yang terkirim.
+
 ### Tanda HP tidak biasa
 
 Backend mencatat HP yang dipakai scan, dan presensi dari HP yang bukan HP
@@ -1272,7 +1328,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 20 menit
+npm test                    # semua tes browser, sekitar 22 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
@@ -1290,7 +1346,8 @@ node tests/login.mjs        # satu tes saja
 | `periode` | halaman Periode Akademik, dialog yang baru terbuka setelah mengetik MULAI, Batal tidak mengganti semester, mulai semester dari web, tombol Lihat membuka arsip, tombol ubah dan hapus tersembunyi di Praktikum/detail kelas/Pembayaran, pilihan periode kembali ke aktif setelah dimuat ulang, halaman Jam Sesi yang sedang terbuka langsung berganti ke salinan jam sesi semester baru (0 kelas, bisa dihapus); Loading... saat memuat; dialog yang dibuka di browser lain sebelum semester berganti tetap menulis semester yang dikonfirmasi, tombolnya ditolak "sudah dimulai", dan tidak ada semester terlewat; petunjuk Belum ada periode (daftar periode tiruan kosong) hilang sendiri lewat event `period` | 38 |
 | `tanpa-periode` | daftar periode tiruan kosong: petunjuk dan tombol Buka Periode Akademik untuk laboran di Dashboard, Praktikum, Tambah Praktikum, Jam Sesi, dan Pembayaran, tombol membuka Mulai Periode Pertama, halaman Periode Akademik sendiri tanpa petunjuk; petunjuk dosen tanpa tombol di Dashboard dan Praktikum; tanpa petunjuk saat periode ada atau saat daftar periode gagal dimuat | 20 |
 | `perangkat` | kotak ⚠ HP tidak biasa: dosen hanya melihat, laboran menekan Ada (HP baru jadi HP biasa) dan Tidak ada (menjadi Tidak Hadir), tanda ⚠ di baris ikut hilang, halaman dosen berubah tanpa dimuat ulang, pesan bila staf lain sudah menjawab | 22 |
-| `pengumuman` | List dan Detail: Loading... saat memuat, label jenis, tanggal jam lokal beserta penulis, Edit tanpa perubahan tidak mengirim apa pun, dosen tanpa menu Edit/Hapus. Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Hapus, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 1000 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, pengumuman panjang dipotong 3 baris di daftar dan tampil utuh dengan paragraf terpisah di detail, dosen melihat pesan hanya laboran. Permintaan simpan dan ubah dicegat, jadi tidak ada pengumuman asli yang terkirim | 34 |
+| `pengumuman` | List dan Detail: Loading... saat memuat, label jenis, tanggal jam lokal beserta penulis, Edit tanpa perubahan tidak mengirim apa pun, dosen tanpa menu Edit/Hapus. Buat Pengumuman: pilihan jenis menampilkan nama, jenis yang tampil sama dengan yang terkirim setelah Simpan dan Kosongkan, judul dirapikan, isian kosong/spasi ditolak tanpa mengirim, batas 1000 karakter, penolakan server tampil tanpa menghapus isian, tinggi kotak, pengumuman panjang dipotong 3 baris di daftar dan tampil utuh dengan paragraf terpisah di detail, dosen melihat pesan hanya laboran. Permintaan simpan dan ubah dicegat, jadi tidak ada pengumuman asli yang terkirim | 34 |
+| `buat-pengumuman` | judul halaman satu saja; klik tulisan Judul dan Deskripsi memindahkan kursor; penghitung judul 0/150 sampai 150/150; daftar mata kuliah tujuan: Loading... saat memuat, pesan gagal (bukan "Belum ada mata kuliah."), pulih sendiri lewat event, mata kuliah baru dan ganti nama dari tab lain muncul, mata kuliah tercentang yang dihapus hilang beserta centangnya sehingga Simpan hanya mengirim yang masih ada, dan bila itu satu-satunya Simpan meminta memilih; isian, jenis, dan Kosongkan terkunci selama menyimpan dan ketikan saat itu tidak masuk; pesan berhasil dan gagal (ditolak server, server tidak bisa dihubungi) di kotak di atas tombol tanpa pop-up, isian tetap; tombol Kosongkan bertanya bila ada ketikan, Batal tidak mengubah apa pun, tanpa ketikan langsung kosong; draf tetap ada setelah pindah halaman dan muat ulang, tidak terlihat laboran lain, dibuang setelah Simpan dan Kosongkan; dosen tidak pernah melihat form sekilas | 37 |
 | `pengumuman-matkul` | pilihan Untuk di Buat Pengumuman: bawaan Semua mahasiswa, hilang untuk jenis pendaftaran, daftar mata kuliah dengan kode dan semester, tanpa centang ditolak tanpa mengirim, `subjectIds` yang terkirim dan tersimpan, pendaftaran tetap terkirim untuk semua; kartu dan detail menyebut tujuan beserta semesternya; Edit terisi tujuan lama, tanpa perubahan tidak mengirim, mengganti mata kuliah dan kembali ke Semua mahasiswa; kotak centang dan pilihan bergaya tema (input asli tersembunyi, biru `#3272CA`, pilihan tanpa garis luar) dan tersusun atas-bawah | 28 |
 | `hapus-matkul` | tombol Hapus Mata Kuliah di dialog Ubah (dosen tidak punya), letaknya di kiri dan tidak bertumpuk dengan Batal/Simpan, Batal tidak menghapus, Ya, hapus mengirim satu DELETE lalu kartu hilang dengan pesan hijau, halaman dosen di browser kedua ikut berubah tanpa dimuat ulang, penolakan server untuk mata kuliah yang sudah punya kelas tampil di konfirmasi | 21 |
 | `info-kelas` | kotak informasi di detail kelas pada layar 1440, 1280, dan 1024 px, tanpa asisten dan dengan 3 asisten bernama panjang: kuota dan jam tetap satu baris, semua nama asisten di dalam kotak, ikon kelola asisten menempel di tulisan Asisten Praktikum | 19 |

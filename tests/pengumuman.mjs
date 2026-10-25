@@ -22,6 +22,7 @@ const TYPES = {
   "Pendaftaran Inhal": "INHALL",
   "Pendaftaran Asisten Praktikum": "ASSISTANT",
 };
+const CONFIRM_CLEAR = `[...document.querySelectorAll('[role="dialog"] button')].find((b) => b.innerText.trim() === "Kosongkan")`;
 const menuItem = (title) =>
   `[...document.querySelectorAll('[role="menuitem"]')].find((item) => item.innerText.trim() === ${JSON.stringify(title)})`;
 
@@ -66,12 +67,10 @@ await runWebTest("Pengumuman di web", data, async (browser) => {
     evaluate(
       `document.querySelector('${TITLE}').value === "" && document.querySelector('${BODY}').value === ""`,
     );
-  const saveAndClose = async () => {
-    await clickText("Simpan");
-    const shown = await waitFor(bodyHas(SAVED), 5000);
-    await clickText("Tutup");
+  const save = async () => {
     await waitFor(`!${bodyHas(SAVED)}`, 3000);
-    return shown;
+    await clickText("Simpan");
+    return waitFor(bodyHas(SAVED), 5000);
   };
 
   check("login laboran", await browser.login(data.laboran, data.password));
@@ -102,7 +101,7 @@ await runWebTest("Pengumuman di web", data, async (browser) => {
     "  Pendaftaran praktikum dibuka  ",
     "Daftar lewat aplikasi SILAB.",
   );
-  check("Simpan: pesan berhasil tampil", await saveAndClose());
+  check("Simpan: pesan berhasil tampil", await save());
   check(
     "  terkirim sebagai Pendaftaran Praktikum, judul dirapikan",
     sent.length === 1 &&
@@ -117,25 +116,27 @@ await runWebTest("Pengumuman di web", data, async (browser) => {
     await typeShown(),
   );
   await fill("Lab tutup", "Lab tutup hari Jumat.");
-  await saveAndClose();
+  await save();
   check(
     "pengumuman berikutnya tanpa memilih jenis terkirim sebagai Pengumuman",
     sent.length === 2 && sent[1].type === "BASIC",
     JSON.stringify(sent[1]),
   );
 
-  section("Tombol Hapus");
+  section("Tombol Kosongkan");
   await pickType("Pendaftaran Inhal");
   await fill("Inhal", "Pendaftaran inhal dibuka.");
-  await clickText("Hapus");
-  await sleep(300);
+  await clickText("Kosongkan");
+  await waitFor(`!!(${CONFIRM_CLEAR})`, 3000);
+  await realClick(CONFIRM_CLEAR);
+  await waitFor(`!document.querySelector('[role="dialog"]')`, 3000);
   check(
-    "Hapus mengosongkan form dan jenis kembali ke Pengumuman",
+    "Kosongkan (setelah dikonfirmasi) mengosongkan form dan jenis kembali ke Pengumuman",
     (await fieldsEmpty()) && (await typeShown()) === "Pengumuman",
     await typeShown(),
   );
   await fill("Jadwal", "Jadwal praktikum sudah terbit.");
-  await saveAndClose();
+  await save();
   check(
     "  pengumuman sesudahnya terkirim sebagai Pengumuman",
     sent.length === 3 && sent[2].type === "BASIC",
@@ -175,8 +176,6 @@ await runWebTest("Pengumuman di web", data, async (browser) => {
       5000,
     ),
   );
-  await clickText("Tutup");
-  await sleep(300);
   check(
     "  isian tidak hilang setelah ditolak",
     (await evaluate(`document.querySelector('${TITLE}').value`)) === "Judul",

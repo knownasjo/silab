@@ -57,15 +57,9 @@ await runWebTest(
       await sleep(300);
     };
     const save = async () => {
-      await clickText("Simpan");
-      const shown = await waitFor(
-        bodyHas("Pengumuman berhasil diterbitkan"),
-        8000,
-      );
-      await clickText("Tutup");
       await waitFor(`!${bodyHas("Pengumuman berhasil diterbitkan")}`, 3000);
-      await sleep(300);
-      return shown;
+      await clickText("Simpan");
+      return waitFor(bodyHas("Pengumuman berhasil diterbitkan"), 8000);
     };
 
     check("login laboran", await browser.login(data.laboran, data.password));

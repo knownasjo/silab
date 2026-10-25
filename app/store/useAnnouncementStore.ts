@@ -15,12 +15,13 @@ import { coalesce } from "../utils/coalesce";
 type AnnouncementState = GlobalState & {
   announcementsData: IGetAllAnnouncementsResponseBody[];
   announcementData: IGetAllAnnouncementsResponseBody | null;
-  message: string | null;
   loadError: string | null;
 };
 
 type AnnouncementActions = {
-  addAnnouncement: (body: IAddAnnouncementRequestBody) => Promise<boolean>;
+  addAnnouncement: (
+    body: IAddAnnouncementRequestBody,
+  ) => Promise<{ ok: boolean; message: string }>;
   updateAnnouncement: (
     id: string,
     body: IAddAnnouncementRequestBody,
@@ -37,7 +38,6 @@ const initialState = {
   error: null,
   announcementsData: [],
   announcementData: null,
-  message: null,
   loadError: null,
 };
 
@@ -46,34 +46,22 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
     ...initialState,
 
     addAnnouncement: async (body) => {
-      set({ isLoading: true, error: null, message: null });
-
       try {
         const res = await postAnnouncement(body);
 
-        if (res.status) {
-          set({ message: res.message });
-          return true;
-        }
-
-        set({ error: res.message });
-        return false;
+        return { ok: res.status, message: res.message };
       } catch (error: any) {
-        set({ error: error?.message ?? "Terjadi kesalahan" });
-        return false;
-      } finally {
-        set({ isLoading: false });
+        return { ok: false, message: error?.message ?? "Terjadi kesalahan" };
       }
     },
 
     updateAnnouncement: async (id, body) => {
-      set({ isLoading: true, error: null, message: null });
+      set({ isLoading: true, error: null });
 
       try {
         const res = await putAnnouncement(id, body);
 
         if (res.status) {
-          set({ message: res.message });
           await get().getAllAnnouncements();
           return true;
         }
@@ -89,13 +77,12 @@ const useAnnouncementStore = create<AnnouncementState & AnnouncementActions>(
     },
 
     removeAnnouncement: async (id) => {
-      set({ isLoading: true, error: null, message: null });
+      set({ isLoading: true, error: null });
 
       try {
         const res = await deleteAnnouncement(id);
 
         if (res.status) {
-          set({ message: res.message });
           await get().getAllAnnouncements();
           return true;
         }

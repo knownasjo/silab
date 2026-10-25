@@ -15,6 +15,7 @@ import { coalesce } from "../utils/coalesce";
 type SubjectState = GlobalState & {
   subjectsData: IGetSubjectResponseBody[];
   isLoaded: boolean;
+  loadCount: number;
 };
 
 type SubjectActions = {
@@ -35,6 +36,7 @@ const initialState = {
   error: null,
   subjectsData: [],
   isLoaded: false,
+  loadCount: 0,
 };
 
 const useSubjectStore = create<SubjectState & SubjectActions>((set, get) => ({
@@ -47,7 +49,11 @@ const useSubjectStore = create<SubjectState & SubjectActions>((set, get) => ({
       const res = await getAllSubjects();
 
       if (res.data && res.status) {
-        set({ subjectsData: res.data, isLoaded: true });
+        set({
+          subjectsData: res.data,
+          isLoaded: true,
+          loadCount: get().loadCount + 1,
+        });
       } else {
         set({ error: res.message });
       }
@@ -62,7 +68,12 @@ const useSubjectStore = create<SubjectState & SubjectActions>((set, get) => ({
     const res = await getAllSubjects();
 
     if (res.data && res.status)
-      set({ subjectsData: res.data, error: null, isLoaded: true });
+      set({
+        subjectsData: res.data,
+        error: null,
+        isLoaded: true,
+        loadCount: get().loadCount + 1,
+      });
   }),
 
   addSubject: async (body) => {
