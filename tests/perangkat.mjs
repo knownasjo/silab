@@ -39,18 +39,18 @@ await runWebTest("Tanda HP tidak biasa di web", data, async (browser) => {
   };
   await db.trn_user_devices.createMany({
     data: [
-      { userId: andi.id, device_id: phone.andiOld, is_usual: true },
-      { userId: andi.id, device_id: phone.andiNew, is_usual: false },
+      { userId: andi.id, deviceId: phone.andiOld, isUsual: true },
+      { userId: andi.id, deviceId: phone.andiNew, isUsual: false },
     ],
   });
-  const scanned = (user, device_id, device_check) =>
+  const scanned = (user, deviceId, deviceCheck) =>
     db.trn_meeting_participants.create({
       data: {
         meetingId: meeting.id,
         userId: user.id,
         status: true,
-        device_id,
-        device_check,
+        deviceId,
+        deviceCheck,
       },
     });
   await scanned(andi, phone.andiNew, "TIDAK_BIASA");
@@ -125,13 +125,13 @@ await runWebTest("Tanda HP tidak biasa di web", data, async (browser) => {
     const andiRecord = await recordOf(andi);
     const andiUsual = (
       await db.trn_user_devices.findMany({
-        where: { userId: andi.id, is_usual: true },
+        where: { userId: andi.id, isUsual: true },
       })
-    ).map((d) => d.device_id);
+    ).map((d) => d.deviceId);
     check(
       "  tersimpan: tetap hadir, sudah dicek, HP baru jadi HP biasa",
       andiRecord.status === true &&
-        andiRecord.device_check === "SUDAH_DICEK" &&
+        andiRecord.deviceCheck === "SUDAH_DICEK" &&
         andiUsual.length === 1 &&
         andiUsual[0] === phone.andiNew,
       JSON.stringify({ andiRecord, andiUsual }),
@@ -155,7 +155,7 @@ await runWebTest("Tanda HP tidak biasa di web", data, async (browser) => {
     const budiRecord = await recordOf(budi);
     check(
       "  tersimpan: tidak hadir dan sudah dicek",
-      budiRecord.status === false && budiRecord.device_check === "SUDAH_DICEK",
+      budiRecord.status === false && budiRecord.deviceCheck === "SUDAH_DICEK",
       JSON.stringify(budiRecord),
     );
     check(
@@ -176,7 +176,7 @@ await runWebTest("Tanda HP tidak biasa di web", data, async (browser) => {
     section("Sudah dicek staf lain");
     await db.trn_meeting_participants.update({
       where: { meetingId_userId: { meetingId: meeting.id, userId: dedi.id } },
-      data: { device_check: "SUDAH_DICEK" },
+      data: { deviceCheck: "SUDAH_DICEK" },
     });
     await browser.realClick(button("Ada: Dedi HP Web"));
     check(

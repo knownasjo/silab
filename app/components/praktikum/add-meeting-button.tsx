@@ -18,7 +18,7 @@ interface AddMeetingButtonProps {
 
 const nextMeetingName = (meetings: IGetAllClassMeetingResponseBody[]) => {
   const numbers = meetings
-    .map((meeting) => /^pertemuan\s+(\d+)$/i.exec(meeting.meeting_name.trim()))
+    .map((meeting) => /^pertemuan\s+(\d+)$/i.exec(meeting.meetingName.trim()))
     .filter((match) => match !== null)
     .map((match) => Number(match[1]));
 

@@ -53,6 +53,11 @@ app/
 ├── dashboard/     ← halaman
 ```
 
+Nama field di `interfaces/`, dan di seluruh kode, memakai camelCase yang sama
+persis dengan yang dikirim dan diterima backend, misalnya `subjectName`,
+`isActive`, dan `alsoDays`. Sampai 25 Oktober 2026 sebagian field masih
+snake_case (`subject_name`, `is_active`) karena mengikuti backend lama.
+
 ### Kode generasi lama sudah dibersihkan
 
 Dulu ada dua generasi kode. Generasi lama (`app/actions/`) menembak backend di
@@ -208,11 +213,11 @@ mahasiswa (termasuk asisten) mengelola akunnya di aplikasi mobile.
 
 Ditentukan dari dua field yang dikirim backend:
 
-- `submitted_at === null` → **Belum Presensi**
-- `submitted_at` terisi dan `is_attended === true` → **Hadir**
-- `submitted_at` terisi dan `is_attended === false` → **Tidak Hadir**
+- `submittedAt === null` → **Belum Presensi**
+- `submittedAt` terisi dan `isAttended === true` → **Hadir**
+- `submittedAt` terisi dan `isAttended === false` → **Tidak Hadir**
 
-Jangan kembali ke pola lama `is_attended !== null` — backend selalu mengirim
+Jangan kembali ke pola lama `isAttended !== null` — backend selalu mengirim
 boolean, tidak pernah `null`, sehingga semua mahasiswa akan tampil
 "Tidak Hadir".
 
@@ -702,7 +707,7 @@ sudah terisi data sekarang.
   "Dosen pengampu: ..." dari `GET /subject` (semester sudah menjadi judul
   kelompoknya).
 - Judul rekap PDF memuat kode mata kuliah, misalnya "Praktikum Algoritma dan
-  Pemrograman (553310001) · Kelas C · Semester 1", dari `subject_code` di
+  Pemrograman (553310001) · Kelas C · Semester 1", dari `subjectCode` di
   `GET /class/:id`. Sebelumnya nama dosen tidak pernah tampil
   karena `subject-disclosure-details.tsx` memanggil endpoint `/subjects/:id`
   yang tidak ada; komponen itu sudah dihapus. Kelas di dalam kartu kini
@@ -825,7 +830,7 @@ periode, misalnya "2026/2027 Ganjil". Aturannya ada di README backend bagian
   - Praktikum: banner Tambah Praktikum dan tombol ubah mata kuliah; hanya
     mata kuliah yang punya kelas di periode itu yang ditampilkan.
   - Pembayaran: tombol Ubah dan Hapus di pop-up mahasiswa.
-  - Detail kelas (dibaca dari `period.is_active` di `GET /class/:id`, jadi
+  - Detail kelas (dibaca dari `period.isActive` di `GET /class/:id`, jadi
     berlaku juga bila dibuka lewat tautan langsung): Ubah Kelas, Hapus Kelas,
     kelola asisten, tambah/ubah/hapus pertemuan, buka sesi, QR, dan ubah
     presensi. Rekap dan unduh PDF tetap bisa.
@@ -876,7 +881,7 @@ periode, misalnya "2026/2027 Ganjil". Aturannya ada di README backend bagian
   dialog. Setelah berhasil, pesan hijau "Pertemuan 2 berhasil diubah menjadi
   Responsi" tampil di bawah tombol.
 - Hapus membuka konfirmasi. Bila sesi presensinya sedang dibuka atau sudah
-  ada presensi (dihitung dari `submitted_at` di data pertemuan), dialog
+  ada presensi (dihitung dari `submittedAt` di data pertemuan), dialog
   menjelaskan alasannya dan hanya ada tombol Tutup; penolakan dari server
   tetap tampil bila data di browser belum terbaru. Setelah dihapus, halaman
   memilih pertemuan lain menurut aturan di "Memilih pertemuan", dengan pesan
@@ -1162,7 +1167,7 @@ Halaman Pembayaran (`dashboard/master-data/pembayaran`) diperbaiki pada
 ### Tanda HP tidak biasa
 
 Backend mencatat HP yang dipakai scan, dan presensi dari HP yang bukan HP
-biasa mahasiswa itu bertanda `device_check: "TIDAK_BIASA"` di
+biasa mahasiswa itu bertanda `deviceCheck: "TIDAK_BIASA"` di
 `GET /meeting/:classId` (lihat "Satu HP satu akun per pertemuan" di README
 backend). Web memakainya untuk membantu asisten mencegah titip akun:
 

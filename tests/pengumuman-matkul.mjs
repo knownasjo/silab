@@ -99,7 +99,7 @@ await runWebTest(
     );
     check(
       "  kode dan semester tampil di tiap mata kuliah",
-      xLine.includes(X.subject_code) && xLine.includes("Semester 8"),
+      xLine.includes(X.subjectCode) && xLine.includes("Semester 8"),
       xLine,
     );
     await typeInto(TITLE, "Uji Tujuan Hanya Algoritma");
@@ -180,7 +180,7 @@ await runWebTest(
     });
     check(
       "  tersimpan di server untuk Algoritma di semester aktif",
-      saved?.for_all === false &&
+      saved?.forAll === false &&
         saved.periodId === data.period.id &&
         saved.subjects.map((s) => s.subjectId).join() === X.id,
     );
@@ -285,7 +285,7 @@ await runWebTest(
         title: "Uji Tujuan Detail",
         body: "Untuk dua mata kuliah.",
         author: data.laboran.id,
-        for_all: false,
+        forAll: false,
         periodId: data.period.id,
         subjects: { create: [{ subjectId: X.id }, { subjectId: Y.id }] },
       },

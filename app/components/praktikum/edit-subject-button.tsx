@@ -23,10 +23,10 @@ interface EditSubjectButtonProps {
 }
 
 const formOf = (subject: IGetSubjectResponseBody): SubjectForm => ({
-  subject_code: subject.subject_code,
-  subject_name: subject.subject_name,
+  subjectCode: subject.subjectCode,
+  subjectName: subject.subjectName,
   semester: subject.semester,
-  lecturer_id: subject.lecturer_id,
+  lecturerId: subject.lecturerId,
 });
 
 export default function EditSubjectButton({
@@ -117,7 +117,7 @@ export default function EditSubjectButton({
       <button
         type="button"
         onClick={open}
-        aria-label={`Ubah mata kuliah ${subject.subject_name}`}
+        aria-label={`Ubah mata kuliah ${subject.subjectName}`}
         className="shrink-0 rounded-full bg-[#D2E3F1] px-[16px] py-[6px] text-sm font-semibold text-[#3272CA]"
       >
         Ubah
@@ -129,7 +129,7 @@ export default function EditSubjectButton({
             {isConfirmingDelete ? (
               <>
                 <DialogTitle className="font-bold text-[#1d1d1d]">
-                  Hapus mata kuliah {subject.subject_name}?
+                  Hapus mata kuliah {subject.subjectName}?
                 </DialogTitle>
                 <div className="flex flex-col space-y-2 text-sm font-semibold">
                   <p className="text-[#1D1D1D]">
@@ -167,7 +167,7 @@ export default function EditSubjectButton({
                     Ubah Mata Kuliah
                   </DialogTitle>
                   <p className="text-sm font-semibold text-[#5E6278]">
-                    {subject.subject_name}
+                    {subject.subjectName}
                   </p>
                 </div>
                 <form
@@ -178,7 +178,7 @@ export default function EditSubjectButton({
                   <fieldset disabled={isSaving} className="min-w-0">
                     <SubjectFormFields form={form} onChange={updateForm} />
                   </fieldset>
-                  {form.lecturer_id !== initial.lecturer_id && (
+                  {form.lecturerId !== initial.lecturerId && (
                     <p className="text-sm font-semibold text-[#5E6278]">
                       Dosen baru langsung bisa melihat semua kelas, pertemuan,
                       dan presensi mata kuliah ini, termasuk yang sudah

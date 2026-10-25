@@ -87,7 +87,7 @@ const DAY_ORDER = Object.keys(DAY_LABELS);
 const byDayThenRoom = (a: IGetClassResponseBody, b: IGetClassResponseBody) =>
   DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day) ||
   a.room.localeCompare(b.room) ||
-  a.subject_name.localeCompare(b.subject_name);
+  a.subjectName.localeCompare(b.subjectName);
 
 const byDay = (a: ISessionResponseBody, b: ISessionResponseBody) =>
   DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day);
@@ -277,7 +277,7 @@ function SessionRow({
         number: Number(tidy.number),
         startAt: tidy.startAt,
         endAt: tidy.endAt,
-        also_days: ticked.map((sibling) => sibling.day),
+        alsoDays: ticked.map((sibling) => sibling.day),
       }),
     );
 
@@ -373,7 +373,7 @@ function SessionRow({
                     <span className="w-[56px]">{formatDay(sibling.day)}</span>
                     <span className="text-xs font-normal text-[#5E6278]">
                       sekarang {sibling.startAt} – {sibling.endAt}
-                      {sibling.is_active ? "" : ", nonaktif"}
+                      {sibling.isActive ? "" : ", nonaktif"}
                     </span>
                   </>
                 }
@@ -404,9 +404,9 @@ function SessionRow({
         </p>
         <p>
           <span
-            className={`rounded-md px-2 py-1 text-xs ${session.is_active ? "bg-[#E8FFF3] text-[#50CD89]" : "bg-[#F1F1F2] text-[#181C32]"}`}
+            className={`rounded-md px-2 py-1 text-xs ${session.isActive ? "bg-[#E8FFF3] text-[#50CD89]" : "bg-[#F1F1F2] text-[#181C32]"}`}
           >
-            {session.is_active ? "Aktif" : "Nonaktif"}
+            {session.isActive ? "Aktif" : "Nonaktif"}
           </span>
         </p>
         {session.classes > 0 ? (
@@ -464,18 +464,18 @@ function SessionRow({
               </button>
               <button
                 type="button"
-                aria-label={`${session.is_active ? "Nonaktifkan" : "Aktifkan"} ${label}`}
+                aria-label={`${session.isActive ? "Nonaktifkan" : "Aktifkan"} ${label}`}
                 disabled={isBusy}
                 onClick={() =>
                   run(() =>
                     updateSession(session.id, {
-                      is_active: !session.is_active,
+                      isActive: !session.isActive,
                     }),
                   )
                 }
                 className={`${buttonClassName} w-[110px] bg-[#F1F1F2] text-[#5E6278]`}
               >
-                {session.is_active ? "Nonaktifkan" : "Aktifkan"}
+                {session.isActive ? "Nonaktifkan" : "Aktifkan"}
               </button>
               {session.classes === 0 ? (
                 <button
@@ -514,7 +514,7 @@ function SessionRow({
                 href={`/dashboard/praktikum/${subjectClass.id}`}
                 className="text-[#1D1D1D] hover:text-[#3272CA]"
               >
-                {subjectClass.subject_name} — Kelas {subjectClass.name}
+                {subjectClass.subjectName} — Kelas {subjectClass.name}
               </Link>{" "}
               · {formatDay(subjectClass.day)} · {subjectClass.room}
             </li>
@@ -565,7 +565,7 @@ function DayCard({ room, day }: { room: string; day: string }) {
       number: Number(tidy.number),
       startAt: tidy.startAt,
       endAt: tidy.endAt,
-      also_days: alsoDays,
+      alsoDays,
     });
     setIsSaving(false);
     placeAt("add")(result);

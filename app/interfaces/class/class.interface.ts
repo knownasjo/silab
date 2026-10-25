@@ -4,7 +4,7 @@ export interface IGetClassResponseBody {
   id: string;
   subjectId: string;
   name: string;
-  subject_name: string;
+  subjectName: string;
   quota: number;
   day: string;
   startAt: string;
@@ -18,8 +18,8 @@ export interface IGetClassByIdResponseBody {
   id: string;
   subjectId: string;
   name: string;
-  subject_code: string;
-  subject_name: string;
+  subjectCode: string;
+  subjectName: string;
   semester: string;
   lecturer: string;
   quota: number;
@@ -30,7 +30,7 @@ export interface IGetClassByIdResponseBody {
   sessionId: string | null;
   participants: number;
   meetings: number;
-  recorded_meetings: number;
+  recordedMeetings: number;
   period: IClassPeriod | null;
 }
 

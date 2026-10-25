@@ -25,7 +25,7 @@ export default function OpenAttendancesButton({
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState<boolean>(false);
 
   const currentMeeting = meeting?.find((m) => m.id === selectedMeeting);
-  const isOpen = currentMeeting?.is_open === true;
+  const isOpen = currentMeeting?.isOpen === true;
   const isDisabled = !classId || !currentMeeting || isLoading;
 
   const handleToggleAttendance = async () => {

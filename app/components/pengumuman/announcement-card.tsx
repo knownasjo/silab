@@ -33,7 +33,7 @@ import {
 } from "@/app/utils/announcement";
 
 const audienceOf = (announcement: IGetAllAnnouncementsResponseBody) =>
-  announcement.for_all === false
+  announcement.forAll === false
     ? announcement.subjects.map((subject) => subject.id)
     : null;
 
@@ -150,7 +150,7 @@ export default function AnnouncementCard({
             <AnnouncementTypeBadge type={announcement.type} />
           </div>
           <p className="text-[16px] font-light">
-            {formatPostedAt(announcement.created_at)} oleh {announcement.author}
+            {formatPostedAt(announcement.createdAt)} oleh {announcement.author}
           </p>
           <p className="mt-1 break-words text-[14px] font-semibold text-[#5E6278]">
             Untuk: {audienceLabel(announcement)}

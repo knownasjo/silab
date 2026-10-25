@@ -1,17 +1,17 @@
 export interface IGetActivationResponseBody {
   id: string;
-  user_id: string;
+  userId: string;
   nim: string;
   student: string;
   status: boolean;
-  subject_id: string;
+  subjectId: string;
   subjects: IActivationSubjects[];
-  registered_class: IRegisteredClass | null;
-  available_classes: IAvailableClass[];
+  registeredClass: IRegisteredClass | null;
+  availableClasses: IAvailableClass[];
 }
 
 interface IActivationSubjects {
-  subject_name: string;
+  subjectName: string;
   semester: string;
 }
 
@@ -24,15 +24,15 @@ export interface IAvailableClass {
   id: string;
   name: string;
   day: string;
-  session_time: string;
+  sessionTime: string;
   room: string;
   quota: number;
-  registered_students: number;
-  is_full: boolean;
+  registeredStudents: number;
+  isFull: boolean;
 }
 
 export interface IStudentActivations {
-  user_id: string;
+  userId: string;
   nim: string;
   student: string;
   paid: number;

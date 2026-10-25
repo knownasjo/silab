@@ -94,9 +94,9 @@ export default function PeriodeAkademik() {
             <p className="text-base font-bold text-[#1D1D1D]">{period.name}</p>
             <p>
               <span
-                className={`rounded-md px-2 py-1 ${period.is_active ? "bg-[#E8FFF3] text-[#50CD89]" : "bg-[#F1F1F2]"}`}
+                className={`rounded-md px-2 py-1 ${period.isActive ? "bg-[#E8FFF3] text-[#50CD89]" : "bg-[#F1F1F2]"}`}
               >
-                {period.is_active ? "Aktif" : "Selesai"}
+                {period.isActive ? "Aktif" : "Selesai"}
               </span>
             </p>
             <p>{period.classes}</p>
@@ -104,7 +104,7 @@ export default function PeriodeAkademik() {
             <button
               type="button"
               aria-label={`Lihat kelas ${period.name}`}
-              onClick={() => openPeriod(period.id, period.is_active)}
+              onClick={() => openPeriod(period.id, period.isActive)}
               className="w-fit rounded-full border-2 border-[#BFD9EF] px-4 py-1 text-xs font-semibold text-[#3272CA]"
             >
               Lihat

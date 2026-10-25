@@ -34,7 +34,7 @@ export default function AnnouncementAudienceField({
   const subjects = [...subjectsData].sort(
     (a, b) =>
       Number(a.semester) - Number(b.semester) ||
-      a.subject_name.localeCompare(b.subject_name),
+      a.subjectName.localeCompare(b.subjectName),
   );
 
   const toggle = (subjectId: string) =>
@@ -129,9 +129,9 @@ export default function AnnouncementAudienceField({
                     </svg>
                   </span>
                   <span className="min-w-0 break-words">
-                    {subject.subject_name}{" "}
+                    {subject.subjectName}{" "}
                     <span className="text-xs font-normal text-[#5E6278]">
-                      {subject.subject_code} · Semester {subject.semester}
+                      {subject.subjectCode} · Semester {subject.semester}
                     </span>
                   </span>
                 </label>

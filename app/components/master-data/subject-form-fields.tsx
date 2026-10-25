@@ -4,37 +4,37 @@ import LecturerListBox from "@/app/components/master-data/lecturer-listbox";
 import SemestersListBox from "@/app/components/semesters-listbox";
 
 export type SubjectForm = {
-  subject_code: string;
-  subject_name: string;
+  subjectCode: string;
+  subjectName: string;
   semester: string;
-  lecturer_id: string;
+  lecturerId: string;
 };
 
 export const emptySubjectForm: SubjectForm = {
-  subject_code: "",
-  subject_name: "",
+  subjectCode: "",
+  subjectName: "",
   semester: "",
-  lecturer_id: "",
+  lecturerId: "",
 };
 
 const tidy = (value: string) => value.trim().replace(/\s+/g, " ");
 
 export const tidySubjectForm = (form: SubjectForm): SubjectForm => ({
-  subject_code: tidy(form.subject_code),
-  subject_name: tidy(form.subject_name),
+  subjectCode: tidy(form.subjectCode),
+  subjectName: tidy(form.subjectName),
   semester: form.semester,
-  lecturer_id: form.lecturer_id,
+  lecturerId: form.lecturerId,
 });
 
 export const validateSubjectForm = (form: SubjectForm) => {
   const body = tidySubjectForm(form);
 
-  if (!body.subject_code) return "Kode mata kuliah wajib diisi.";
-  if (!/^\d{9}$/.test(body.subject_code))
+  if (!body.subjectCode) return "Kode mata kuliah wajib diisi.";
+  if (!/^\d{9}$/.test(body.subjectCode))
     return "Kode mata kuliah harus 9 angka.";
-  if (!body.subject_name) return "Nama mata kuliah wajib diisi.";
+  if (!body.subjectName) return "Nama mata kuliah wajib diisi.";
   if (!body.semester) return "Pilih semester.";
-  if (!body.lecturer_id) return "Pilih dosen pengampu.";
+  if (!body.lecturerId) return "Pilih dosen pengampu.";
   return null;
 };
 
@@ -67,10 +67,10 @@ export default function SubjectFormFields({
             inputMode="numeric"
             autoComplete="off"
             placeholder="9 angka"
-            value={form.subject_code}
+            value={form.subjectCode}
             onChange={(event) =>
               onChange(
-                "subject_code",
+                "subjectCode",
                 event.target.value.replace(/\D/g, "").slice(0, 9),
               )
             }
@@ -94,13 +94,13 @@ export default function SubjectFormFields({
           type="text"
           autoComplete="off"
           maxLength={100}
-          value={form.subject_name}
-          onChange={(event) => onChange("subject_name", event.target.value)}
+          value={form.subjectName}
+          onChange={(event) => onChange("subjectName", event.target.value)}
         />
       </div>
       <LecturerListBox
-        value={form.lecturer_id}
-        onLecturerChange={(value) => onChange("lecturer_id", value)}
+        value={form.lecturerId}
+        onLecturerChange={(value) => onChange("lecturerId", value)}
       />
     </div>
   );

@@ -124,8 +124,8 @@ const useMeetingStore = create<MeetingState & MeetingActions>((set, get) => ({
           qrToken: {
             meetingId,
             token: res.data.token,
-            periodSeconds: res.data.period_seconds,
-            expiresAt: Date.now() + res.data.expires_in_ms,
+            periodSeconds: res.data.periodSeconds,
+            expiresAt: Date.now() + res.data.expiresInMs,
           },
           qrError: null,
         });

@@ -3,9 +3,9 @@ import { getRequestToken, refreshOnce } from "../satellite";
 export interface RealtimeEvent {
   type: string;
   data: {
-    class_id?: string;
-    meeting_id?: string;
-    announcement_id?: string;
+    classId?: string;
+    meetingId?: string;
+    announcementId?: string;
     action?: string;
   };
 }

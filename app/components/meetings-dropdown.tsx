@@ -30,7 +30,7 @@ export default function MeetingsDropDown({
         <p className="whitespace-nowrap">
           {selectedMeeting &&
             meetingsData?.find((meeting) => meeting.id === selectedMeeting)
-              ?.meeting_name}
+              ?.meetingName}
           {!selectedMeeting && "Pilih Pertemuan"}
         </p>
         <div className="relative size-[20px]">
@@ -54,8 +54,8 @@ export default function MeetingsDropDown({
               className={`w-full cursor-pointer p-3 data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
             >
               <p className="flex w-full flex-row items-center justify-between space-x-3">
-                <span className="text-left">{meeting.meeting_name}</span>
-                {meeting.is_open && (
+                <span className="text-left">{meeting.meetingName}</span>
+                {meeting.isOpen && (
                   <span className="rounded-md bg-[#E8FFF3] px-2 py-0.5 text-xs text-[#50CD89]">
                     Dibuka
                   </span>

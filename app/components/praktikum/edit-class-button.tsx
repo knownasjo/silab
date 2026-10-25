@@ -128,7 +128,7 @@ export default function EditClassButton({
                 Ubah Kelas
               </DialogTitle>
               <p className="text-sm font-semibold text-[#5E6278]">
-                {data.subject_name} — Kelas {data.name}. Mata kuliah tidak bisa
+                {data.subjectName} — Kelas {data.name}. Mata kuliah tidak bisa
                 diubah.
               </p>
             </div>

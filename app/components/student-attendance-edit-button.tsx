@@ -30,19 +30,19 @@ export default function StudentAttendanceEditButton({
   const [presenceStatus, setPresenceStatus] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const hasRecord = student.submitted_at !== null;
+  const hasRecord = student.submittedAt !== null;
 
   useEffect(() => {
     if (isDialogOpen) {
-      setPresenceStatus(hasRecord && student.is_attended === true);
+      setPresenceStatus(hasRecord && student.isAttended === true);
       setErrorMessage("");
     }
-  }, [isDialogOpen, hasRecord, student.is_attended]);
+  }, [isDialogOpen, hasRecord, student.isAttended]);
 
   const handleSave = async () => {
     await updateStudentAttendance(
       meetingId,
-      student.student_id,
+      student.studentId,
       presenceStatus,
       classId,
     );
@@ -62,7 +62,7 @@ export default function StudentAttendanceEditButton({
   };
 
   const handleReset = async () => {
-    await resetStudentAttendance(meetingId, student.student_id, classId);
+    await resetStudentAttendance(meetingId, student.studentId, classId);
 
     const { error } = useMeetingStore.getState();
 
@@ -78,7 +78,7 @@ export default function StudentAttendanceEditButton({
     <>
       <button
         onClick={() => setIsDialogOpen(true)}
-        aria-label={`Ubah presensi ${student.student_name}`}
+        aria-label={`Ubah presensi ${student.studentName}`}
         className="relative flex h-6 w-2/12 items-center justify-center"
       >
         <Image
@@ -112,7 +112,7 @@ export default function StudentAttendanceEditButton({
                     Nama Lengkap
                   </p>
                   <p className="text-sm font-bold text-[#1D1D1D]">
-                    {student.student_name}
+                    {student.studentName}
                   </p>
                 </div>
                 <div className="flex flex-col">

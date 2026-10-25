@@ -5,7 +5,7 @@ export interface IPeriodResponseBody {
   year: string;
   term: AcademicTerm;
   name: string;
-  is_active: boolean;
+  isActive: boolean;
   classes: number;
   activations: number;
 }
@@ -18,11 +18,11 @@ export interface IStartPeriodRequestBody {
 export interface IStartPeriodResponseBody {
   id: string;
   name: string;
-  closed_meetings: number;
+  closedMeetings: number;
 }
 
 export interface IClassPeriod {
   id: string;
   name: string;
-  is_active: boolean;
+  isActive: boolean;
 }

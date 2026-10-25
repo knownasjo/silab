@@ -13,7 +13,7 @@ import { IPeriodResponseBody } from "@/app/interfaces/period/period.interface";
 import usePeriodStore, { usePeriodView } from "@/app/store/usePeriodStore";
 
 const optionLabel = (period: IPeriodResponseBody) =>
-  period.is_active ? `${period.name} (aktif)` : period.name;
+  period.isActive ? `${period.name} (aktif)` : period.name;
 
 export default function PeriodSelector() {
   const { periodsData, isLoaded, getPeriods, refreshPeriods, selectPeriod } =
@@ -37,7 +37,7 @@ export default function PeriodSelector() {
         value={viewedPeriod.id}
         onChange={(id: string) =>
           selectPeriod(
-            periodsData.find((period) => period.id === id)?.is_active
+            periodsData.find((period) => period.id === id)?.isActive
               ? null
               : id,
           )

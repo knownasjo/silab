@@ -63,7 +63,7 @@ export default function Praktikum() {
           {[...classesData]
             .sort(
               (a, b) =>
-                a.subject_name.localeCompare(b.subject_name) ||
+                a.subjectName.localeCompare(b.subjectName) ||
                 a.name.localeCompare(b.name),
             )
             .map((subjectClass) => (

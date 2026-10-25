@@ -57,13 +57,13 @@ await runWebTest("Tambah Mata Kuliah", data, async (browser) => {
     })
   ).json.data.accessToken;
   const countSubjects = () =>
-    db.mst_subject.count({ where: { deleted_at: null } });
+    db.mst_subject.count({ where: { deletedAt: null } });
   const countPerSemester = async () =>
     Object.fromEntries(
       (
         await db.mst_subject.groupBy({
           by: ["semester"],
-          where: { deleted_at: null },
+          where: { deletedAt: null },
           _count: { _all: true },
         })
       ).map((row) => [row.semester, row._count._all]),
@@ -220,9 +220,9 @@ await runWebTest("Tambah Mata Kuliah", data, async (browser) => {
     "  klik Semester 3 membuka isinya urut abjad, semester lain tetap tertutup",
     !!third?.open &&
       thirdNames.length === perSemester["3"] &&
-      thirdNames.indexOf(analisis.subject_name) >= 0 &&
-      thirdNames.indexOf(analisis.subject_name) <
-        thirdNames.indexOf(basisData.subject_name) &&
+      thirdNames.indexOf(analisis.subjectName) >= 0 &&
+      thirdNames.indexOf(analisis.subjectName) <
+        thirdNames.indexOf(basisData.subjectName) &&
       opened.groups.filter((group) => group.open).length === 1,
     JSON.stringify({
       third,
@@ -232,11 +232,11 @@ await runWebTest("Tambah Mata Kuliah", data, async (browser) => {
     }),
   );
   const analisisRow = third?.subjects.find(
-    (row) => row[0] === analisis.subject_name,
+    (row) => row[0] === analisis.subjectName,
   );
   check(
     "  setiap mata kuliah menulis kode dan dosen pengampu",
-    !!analisisRow?.includes(analisis.subject_code) &&
+    !!analisisRow?.includes(analisis.subjectCode) &&
       !!analisisRow?.includes(`Dosen pengampu: ${data.lecturer.fullname}`),
     JSON.stringify(analisisRow),
   );
@@ -431,10 +431,10 @@ await runWebTest("Tambah Mata Kuliah", data, async (browser) => {
   const added = await call("POST", "/subject", {
     token,
     body: {
-      subject_code: data.nextCode(),
-      subject_name: "Uji Matkul Dari Laboran Lain",
+      subjectCode: data.nextCode(),
+      subjectName: "Uji Matkul Dari Laboran Lain",
       semester: "6",
-      lecturer_id: data.lecturer.id,
+      lecturerId: data.lecturer.id,
     },
   });
   const appeared = await waitFor(
@@ -451,7 +451,7 @@ await runWebTest("Tambah Mata Kuliah", data, async (browser) => {
   );
   const renamed = await call("PUT", `/subject/${algoritma.id}`, {
     token,
-    body: { subject_name: "Uji Matkul Algoritma Lanjut" },
+    body: { subjectName: "Uji Matkul Algoritma Lanjut" },
   });
   const renamedShown = await waitFor(
     bodyHas("Uji Matkul Algoritma Lanjut"),
@@ -485,7 +485,7 @@ await runWebTest("Tambah Mata Kuliah", data, async (browser) => {
   )
     await realClick(semesterThree);
   await realClick(
-    `document.querySelector('[aria-label="Ubah mata kuliah ${basisData.subject_name}"]')`,
+    `document.querySelector('[aria-label="Ubah mata kuliah ${basisData.subjectName}"]')`,
   );
   await waitFor(bodyHas("Ubah Mata Kuliah"), 5000);
   await typeInto('[role="dialog"] #subject-name', "Uji Matkul Basis Data Baru");
@@ -512,8 +512,8 @@ await runWebTest("Tambah Mata Kuliah", data, async (browser) => {
   await waitFor(`!!(${browser.visibleButton("Pilih mata kuliah")})`, 20000);
   await sleep(500);
   await realClick(browser.visibleButton("Pilih mata kuliah"));
-  await waitFor(`!!(${option(withClass.subject_name)})`, 5000);
-  await realClick(option(withClass.subject_name));
+  await waitFor(`!!(${option(withClass.subjectName)})`, 5000);
+  await realClick(option(withClass.subjectName));
   await waitFor(`!!document.querySelector("form")`, 5000);
   await sleep(500);
   const formLabels = await evaluate(`(() => {

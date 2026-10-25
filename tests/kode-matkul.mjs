@@ -16,7 +16,7 @@ const MUST_BE_9 = "Kode mata kuliah harus 9 angka.";
 await runWebTest("Kode mata kuliah di web", data, async (browser) => {
   const { evaluate, waitFor, realClick, clickText, typeInto } = browser;
   const subject = await data.subject(NAME, { semester: "8" });
-  const code = subject.subject_code;
+  const code = subject.subjectCode;
   const cls = await data.classOf(subject, "C", "MONDAY", 1);
   const student = await data.student();
   await data.activate(student, subject, true);
@@ -121,7 +121,7 @@ await runWebTest("Kode mata kuliah di web", data, async (browser) => {
     "  kode 9 angka dikirim ke server",
     writes.length === 1 &&
       writes[0].method === "PUT" &&
-      writes[0].body.subject_code === newCode,
+      writes[0].body.subjectCode === newCode,
     JSON.stringify(writes),
   );
   check(
@@ -131,7 +131,7 @@ await runWebTest("Kode mata kuliah di web", data, async (browser) => {
   check(
     "  tersimpan di database",
     (await db.mst_subject.findUnique({ where: { id: subject.id } }))
-      .subject_code === newCode,
+      .subjectCode === newCode,
   );
   writes.length = 0;
 

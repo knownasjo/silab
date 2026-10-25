@@ -58,7 +58,7 @@ export default function ClassFormFields({
       form.day && form.room
         ? sessions.filter(
             (session) =>
-              (session.is_active || session.id === currentSessionId) &&
+              (session.isActive || session.id === currentSessionId) &&
               session.day === form.day &&
               session.room === form.room,
           )

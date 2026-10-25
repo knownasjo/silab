@@ -67,7 +67,7 @@ export default function Pembayaran() {
   );
 
   const selectedStudent = students.find(
-    (student) => student.user_id === selectedUserId,
+    (student) => student.userId === selectedUserId,
   );
 
   const countByStatus = (paid: boolean) =>
@@ -177,10 +177,10 @@ export default function Pembayaran() {
 
           return (
             <div
-              key={student.user_id}
+              key={student.userId}
               onClick={() => {
                 setFeedback(null);
-                setSelectedUserId(student.user_id);
+                setSelectedUserId(student.userId);
               }}
               className={`${ROW_GRID} cursor-pointer border-b border-[#F1F1F2] py-2 text-sm font-semibold text-[#5E6278] last:border-b-0 hover:bg-[#F5F8FA]`}
             >

@@ -9,8 +9,8 @@ export const groupActivationsByStudent = (
   const students = new Map<string, IStudentActivations>();
 
   for (const activation of activations) {
-    const student = students.get(activation.user_id) ?? {
-      user_id: activation.user_id,
+    const student = students.get(activation.userId) ?? {
+      userId: activation.userId,
       nim: activation.nim,
       student: activation.student,
       paid: 0,
@@ -19,7 +19,7 @@ export const groupActivationsByStudent = (
 
     student.activations.push(activation);
     if (activation.status) student.paid += 1;
-    students.set(activation.user_id, student);
+    students.set(activation.userId, student);
   }
 
   const grouped = Array.from(students.values());
@@ -76,4 +76,4 @@ export const summarizePayment = (student: IStudentActivations) => {
 };
 
 export const activationSubjectName = (activation: IGetActivationResponseBody) =>
-  activation.subjects.map((subject) => subject.subject_name).join(", ");
+  activation.subjects.map((subject) => subject.subjectName).join(", ");

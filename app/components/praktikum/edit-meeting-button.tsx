@@ -29,17 +29,17 @@ export default function EditMeetingButton({
   onSaved,
 }: EditMeetingButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [meetingName, setMeetingName] = useState(meeting.meeting_name);
+  const [meetingName, setMeetingName] = useState(meeting.meetingName);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const { updateMeeting } = useMeetingStore();
 
   const tidied = tidyMeetingName(meetingName);
-  const isUnchanged = tidied === meeting.meeting_name;
+  const isUnchanged = tidied === meeting.meetingName;
 
   const open = () => {
-    setMeetingName(meeting.meeting_name);
+    setMeetingName(meeting.meetingName);
     setFeedback(null);
     setIsOpen(true);
   };
@@ -77,7 +77,7 @@ export default function EditMeetingButton({
       <button
         type="button"
         onClick={open}
-        aria-label={`Ubah judul ${meeting.meeting_name}`}
+        aria-label={`Ubah judul ${meeting.meetingName}`}
         className="h-fit content-center rounded-full bg-[#D2E3F1] p-3 text-sm font-semibold text-[#3272CA]"
       >
         Ubah
@@ -91,7 +91,7 @@ export default function EditMeetingButton({
                 Ubah Judul Pertemuan
               </DialogTitle>
               <p className="text-sm font-semibold text-[#5E6278]">
-                {meeting.meeting_name}
+                {meeting.meetingName}
               </p>
             </div>
             <form

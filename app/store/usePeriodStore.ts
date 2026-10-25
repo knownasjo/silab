@@ -47,7 +47,7 @@ const keepSelection = (
   periods: IPeriodResponseBody[],
   selectedPeriodId: string | null,
 ) =>
-  periods.some((period) => period.id === selectedPeriodId && !period.is_active)
+  periods.some((period) => period.id === selectedPeriodId && !period.isActive)
     ? selectedPeriodId
     : null;
 
@@ -102,7 +102,7 @@ const usePeriodStore = create<PeriodState & PeriodActions>((set, get) => ({
 
 export const usePeriodView = () => {
   const { periodsData, selectedPeriodId } = usePeriodStore();
-  const activePeriod = periodsData.find((period) => period.is_active) ?? null;
+  const activePeriod = periodsData.find((period) => period.isActive) ?? null;
   const viewedPeriod =
     periodsData.find((period) => period.id === selectedPeriodId) ??
     activePeriod;
@@ -111,7 +111,7 @@ export const usePeriodView = () => {
     activePeriod,
     viewedPeriod,
     viewedPeriodId: selectedPeriodId ?? undefined,
-    isArchive: !!viewedPeriod && !viewedPeriod.is_active,
+    isArchive: !!viewedPeriod && !viewedPeriod.isActive,
   };
 };
 

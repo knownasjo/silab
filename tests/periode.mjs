@@ -23,8 +23,8 @@ await runWebTest("Periode akademik di web", data, async (browser) => {
   const realOpenMeetings = await db.trn_meetings.count({
     where: {
       status: true,
-      deleted_at: null,
-      class: { subject: { subject_code: { not: { startsWith: "999" } } } },
+      deletedAt: null,
+      class: { subject: { subjectCode: { not: { startsWith: "999" } } } },
     },
   });
   if (

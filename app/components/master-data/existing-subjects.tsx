@@ -40,7 +40,7 @@ export default function ExistingSubjects({
     .map(([semester, list]) => ({
       semester,
       subjects: [...list].sort((a, b) =>
-        a.subject_name.localeCompare(b.subject_name),
+        a.subjectName.localeCompare(b.subjectName),
       ),
     }));
   const onlySemester = groups.length === 1 ? groups[0].semester : null;
@@ -140,10 +140,10 @@ export default function ExistingSubjects({
                       >
                         <div className="flex flex-row flex-wrap items-baseline gap-x-3">
                           <p className="break-words font-bold text-[#1D1D1D]">
-                            {subject.subject_name}
+                            {subject.subjectName}
                           </p>
                           <p className="text-sm font-semibold text-[#5E6278]">
-                            {subject.subject_code}
+                            {subject.subjectCode}
                           </p>
                         </div>
                         <p className="break-words text-sm text-[#1D1D1D]/70">

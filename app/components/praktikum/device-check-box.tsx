@@ -25,7 +25,7 @@ export default function DeviceCheckBox({
   const [isSending, setIsSending] = useState<boolean>(false);
 
   const flagged = students.filter(
-    (student) => student.device_check === "TIDAK_BIASA",
+    (student) => student.deviceCheck === "TIDAK_BIASA",
   );
 
   if (flagged.length === 0) return null;
@@ -35,7 +35,7 @@ export default function DeviceCheckBox({
 
     setIsSending(true);
     onAnswered(
-      await checkStudentDevice(meetingId, student.student_id, present, classId),
+      await checkStudentDevice(meetingId, student.studentId, present, classId),
     );
     setIsSending(false);
   };
@@ -56,18 +56,18 @@ export default function DeviceCheckBox({
       </div>
       {flagged.map((student) => (
         <div
-          key={student.student_id}
+          key={student.studentId}
           className="flex flex-row items-center justify-between rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#5E6278]"
         >
           <p>
-            {student.nim} &middot; {student.student_name}
+            {student.nim} &middot; {student.studentName}
           </p>
           {canManage && (
             <div className="flex flex-row space-x-2">
               <button
                 onClick={() => answer(student, true)}
                 disabled={isSending}
-                aria-label={`Ada: ${student.student_name}`}
+                aria-label={`Ada: ${student.studentName}`}
                 className="rounded-full bg-[#E8FFF3] px-4 py-2 text-[#50CD89] disabled:opacity-50"
               >
                 Ada
@@ -75,7 +75,7 @@ export default function DeviceCheckBox({
               <button
                 onClick={() => answer(student, false)}
                 disabled={isSending}
-                aria-label={`Tidak ada: ${student.student_name}`}
+                aria-label={`Tidak ada: ${student.studentName}`}
                 className="rounded-full bg-[#FFF5F8] px-4 py-2 text-[#F1416C] disabled:opacity-50"
               >
                 Tidak ada

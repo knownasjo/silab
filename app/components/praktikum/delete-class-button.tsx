@@ -28,7 +28,7 @@ export default function DeleteClassButton({
 
   const { removeClass } = useClassStore();
 
-  const isBlocked = data.recorded_meetings > 0;
+  const isBlocked = data.recordedMeetings > 0;
   const impacts = [
     data.participants > 0 &&
       `${data.participants} peserta kembali ke status lunas tanpa kelas dan bisa memilih kelas lain.`,
@@ -79,7 +79,7 @@ export default function DeleteClassButton({
                 Hapus Kelas
               </DialogTitle>
               <p className="text-sm font-semibold text-[#5E6278]">
-                {data.subject_name} — Kelas {data.name}
+                {data.subjectName} — Kelas {data.name}
               </p>
             </div>
 
@@ -88,7 +88,7 @@ export default function DeleteClassButton({
                 role="alert"
                 className="rounded-xl bg-[#FFF5F8] p-3 text-sm font-semibold text-[#F1416C]"
               >
-                Kelas ini sudah punya presensi di {data.recorded_meetings}{" "}
+                Kelas ini sudah punya presensi di {data.recordedMeetings}{" "}
                 pertemuan, jadi tidak bisa dihapus. Ubah kelasnya bila ada data
                 yang salah.
               </p>

@@ -79,11 +79,11 @@ await runWebTest(
     );
     check(
       "  pilihan mata kuliah memuat mata kuliah uji",
-      subjects.some((o) => o.includes(subject.subject_name)),
+      subjects.some((o) => o.includes(subject.subjectName)),
       JSON.stringify(subjects),
     );
     await realClick(
-      `[...document.querySelectorAll('[role="option"]')].find((o) => o.innerText.includes(${JSON.stringify(subject.subject_name)}))`,
+      `[...document.querySelectorAll('[role="option"]')].find((o) => o.innerText.includes(${JSON.stringify(subject.subjectName)}))`,
     );
     check(
       "  form kelas muncul setelah mata kuliah dipilih",

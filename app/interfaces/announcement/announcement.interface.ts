@@ -14,18 +14,18 @@ export interface IAddAnnouncementRequestBody {
 
 export interface IAnnouncementSubject {
   id: string;
-  subject_name: string;
-  subject_code: string;
+  subjectName: string;
+  subjectCode: string;
 }
 
 export interface IGetAllAnnouncementsResponseBody {
   id: string;
   title: string;
   body: string;
-  created_at: string;
+  createdAt: string;
   type: AnnouncementTypeEnum;
   author: string;
-  for_all: boolean;
+  forAll: boolean;
   subjects: IAnnouncementSubject[];
   period: string | null;
 }

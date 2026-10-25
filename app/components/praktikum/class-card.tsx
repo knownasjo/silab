@@ -31,8 +31,8 @@ const ClassCard: React.FC<IClassCardProps> = ({ subjectClass }) => {
         </div>
       </div>
       <div className="flex flex-col text-white">
-        <p className="line-clamp-2 text-lg" title={subjectClass.subject_name}>
-          {subjectClass.subject_name}
+        <p className="line-clamp-2 text-lg" title={subjectClass.subjectName}>
+          {subjectClass.subjectName}
         </p>
         <p className="text-sm">
           {formatDay(subjectClass.day)}, {subjectClass.startAt} -{" "}

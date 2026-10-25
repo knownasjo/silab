@@ -66,7 +66,7 @@ await runWebTest("Halaman Tambah Praktikum", data, async (browser) => {
       number: data.sessionFrom + 7,
       startAt: "06.00",
       endAt: "06.40",
-      created_by: data.laboran.id,
+      createdBy: data.laboran.id,
     },
   });
 
@@ -478,15 +478,15 @@ await runWebTest("Halaman Tambah Praktikum", data, async (browser) => {
     await call("POST", "/subject", {
       token,
       body: {
-        subject_code: data.nextCode(),
-        subject_name: GAMMA,
+        subjectCode: data.nextCode(),
+        subjectName: GAMMA,
         semester: "4",
-        lecturer_id: data.lecturer.id,
+        lecturerId: data.lecturer.id,
       },
     }),
     await call("PUT", `/subject/${alfa.id}`, {
       token,
-      body: { subject_name: ALFA_NEW },
+      body: { subjectName: ALFA_NEW },
     }),
     await call("DELETE", `/subject/${empty.id}`, { token }),
   ];

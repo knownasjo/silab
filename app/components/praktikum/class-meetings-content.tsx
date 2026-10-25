@@ -50,7 +50,7 @@ export default function ClassMeetingsContent({
     (meeting) => meeting.id === pickedMeeting,
   );
   const fallbackMeeting =
-    meetingData.find((meeting) => meeting.is_open) ??
+    meetingData.find((meeting) => meeting.isOpen) ??
     meetingData[meetingData.length - 1];
   const currentMeeting = pickedInList ?? fallbackMeeting;
   const selectedMeeting = currentMeeting?.id ?? "";
@@ -152,7 +152,7 @@ export default function ClassMeetingsContent({
               {canManage && (
                 <ShowQrCodeButton
                   meetingId={selectedMeeting}
-                  meetingName={currentMeeting.meeting_name}
+                  meetingName={currentMeeting.meetingName}
                 />
               )}
               <Link
@@ -163,23 +163,23 @@ export default function ClassMeetingsContent({
                     meetingId: selectedMeeting,
                   },
                 }}
-                title={`Rekap ${currentMeeting.meeting_name}`}
-                aria-label={`Rekap ${currentMeeting.meeting_name}`}
+                title={`Rekap ${currentMeeting.meetingName}`}
+                aria-label={`Rekap ${currentMeeting.meetingName}`}
                 className="flex flex-row items-center space-x-3 rounded-2xl bg-[#3272CA] p-3"
               >
                 <Image alt="" src={"/pdf.png"} width={32} height={32} />
               </Link>
               <p className="text-base font-bold">
-                {currentMeeting.meeting_name}
+                {currentMeeting.meetingName}
               </p>
               <p
                 className={`rounded-md p-2 text-xs font-semibold ${
-                  currentMeeting.is_open
+                  currentMeeting.isOpen
                     ? "bg-[#E8FFF3] text-[#50CD89]"
                     : "bg-[#F1F1F2] text-[#181C32]"
                 }`}
               >
-                {currentMeeting.is_open
+                {currentMeeting.isOpen
                   ? "Presensi Dibuka"
                   : "Presensi Ditutup"}
               </p>
@@ -219,14 +219,14 @@ export default function ClassMeetingsContent({
 
                   return (
                     <div
-                      key={student.student_id}
+                      key={student.studentId}
                       className="flex w-full flex-row items-center border-b border-[#F1F1F2] py-3 text-sm font-semibold text-[#5E6278] last:border-b-0 xl:text-base"
                     >
                       <p className="flex w-3/12 items-center justify-center whitespace-nowrap px-2 text-center xl:w-2/12">
                         {student.nim}
                       </p>
                       <p className="flex w-4/12 min-w-0 items-center justify-center break-words px-2 text-center xl:w-5/12">
-                        {student.student_name}
+                        {student.studentName}
                       </p>
                       <div className="flex w-3/12 items-center justify-center">
                         <div className="relative">
@@ -235,7 +235,7 @@ export default function ClassMeetingsContent({
                           >
                             {status}
                           </p>
-                          {student.device_check === "TIDAK_BIASA" && (
+                          {student.deviceCheck === "TIDAK_BIASA" && (
                             <Image
                               src={"/warning-yellow.png"}
                               alt="HP tidak biasa"

@@ -25,7 +25,7 @@ export default function AnnouncementDetails() {
 
   useRealtimeEvents(({ type, data }) => {
     if (type === "ready") refreshAnnouncementById(params.id);
-    if (type !== "announcement" || data.announcement_id !== params.id) return;
+    if (type !== "announcement" || data.announcementId !== params.id) return;
 
     if (data.action === "deleted") {
       router.replace("/dashboard/pengumuman/list-pengumuman");
@@ -86,7 +86,7 @@ export default function AnnouncementDetails() {
               Tanggal / Waktu Posting
             </p>
             <p className="w-1/3 text-lg font-bold text-[#1D1D1D]">
-              {formatPostedAt(announcement.created_at)}
+              {formatPostedAt(announcement.createdAt)}
             </p>
           </div>
         </div>

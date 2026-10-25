@@ -32,13 +32,13 @@ export const NEED_TARGET_SUBJECT = "Pilih minimal satu mata kuliah tujuan.";
 export const audienceLabel = (
   announcement: Pick<
     IGetAllAnnouncementsResponseBody,
-    "for_all" | "subjects" | "period"
+    "forAll" | "subjects" | "period"
   >,
 ) => {
-  if (announcement.for_all !== false) return "Semua mahasiswa";
+  if (announcement.forAll !== false) return "Semua mahasiswa";
 
   const subjects = announcement.subjects?.length
-    ? announcement.subjects.map((subject) => subject.subject_name).join(", ")
+    ? announcement.subjects.map((subject) => subject.subjectName).join(", ")
     : "mata kuliah yang sudah dihapus";
 
   return announcement.period

@@ -64,9 +64,9 @@ export default function StudentPaymentDialog({
   const openEdit = (activation: IGetActivationResponseBody) => {
     setPaymentStatus(activation.status);
     setSelectedClass(
-      activation.registered_class
-        ? (activation.available_classes.find(
-            (c) => c.id === activation.registered_class!.id,
+      activation.registeredClass
+        ? (activation.availableClasses.find(
+            (c) => c.id === activation.registeredClass!.id,
           ) ?? null)
         : null,
     );
@@ -111,7 +111,7 @@ export default function StudentPaymentDialog({
   const handleSave = async () => {
     if (!editing) return;
 
-    const currentClass = editing.registered_class;
+    const currentClass = editing.registeredClass;
     const statusChanged = paymentStatus !== editing.status;
 
     if (!currentClass) {
@@ -244,8 +244,8 @@ export default function StudentPaymentDialog({
                         )}
                       </div>
                       <p className="text-center">
-                        {activation.registered_class
-                          ? activation.registered_class.name
+                        {activation.registeredClass
+                          ? activation.registeredClass.name
                           : "-"}
                       </p>
                       <p
@@ -397,12 +397,12 @@ export default function StudentPaymentDialog({
                           Sudah Bayar
                         </p>
                       </div>
-                      {editing.registered_class &&
+                      {editing.registeredClass &&
                         editing.status &&
                         !paymentStatus && (
                           <p className="mt-2 text-xs font-semibold text-[#F1416C]">
                             Mahasiswa akan dikeluarkan dari kelas{" "}
-                            {editing.registered_class.name} bila belum punya
+                            {editing.registeredClass.name} bila belum punya
                             presensi.
                           </p>
                         )}
@@ -411,11 +411,11 @@ export default function StudentPaymentDialog({
                       <p className="text-xs font-semibold text-[#5E6278]">
                         Kelas Praktikum
                       </p>
-                      {editing.registered_class && (
+                      {editing.registeredClass && (
                         <p className="mt-1 text-xs text-[#5E6278]">
                           Kelas sekarang:{" "}
                           <span className="font-bold text-[#1D1D1D]">
-                            {editing.registered_class.name}
+                            {editing.registeredClass.name}
                           </span>
                         </p>
                       )}
@@ -426,7 +426,7 @@ export default function StudentPaymentDialog({
                         <ListboxButton className="mt-2 flex w-full flex-row items-center justify-between rounded-2xl border-2 border-[#BFD9EF] p-3 text-left text-sm font-semibold text-[#3272CA] disabled:cursor-not-allowed disabled:opacity-60">
                           <span>
                             {selectedClass
-                              ? `Kelas ${selectedClass.name} — ${formatDay(selectedClass.day)}, ${selectedClass.session_time}`
+                              ? `Kelas ${selectedClass.name} — ${formatDay(selectedClass.day)}, ${selectedClass.sessionTime}`
                               : "Pilih Kelas"}
                           </span>
                           <Image
@@ -437,13 +437,13 @@ export default function StudentPaymentDialog({
                           />
                         </ListboxButton>
                         <ListboxOptions className="mt-1 w-full overflow-hidden rounded-2xl border-2 border-[#BFD9EF] bg-white">
-                          {editing.available_classes.length === 0 && (
+                          {editing.availableClasses.length === 0 && (
                             <p className="px-3 py-2 text-sm text-[#5E6278]">
                               Belum ada kelas untuk mata kuliah ini.
                             </p>
                           )}
-                          {!editing.registered_class &&
-                            editing.available_classes.length > 0 && (
+                          {!editing.registeredClass &&
+                            editing.availableClasses.length > 0 && (
                               <ListboxOption
                                 value={null}
                                 className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#5E6278] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
@@ -451,25 +451,25 @@ export default function StudentPaymentDialog({
                                 Kosongkan (mahasiswa memilih sendiri)
                               </ListboxOption>
                             )}
-                          {editing.available_classes.map((availableClass) => {
+                          {editing.availableClasses.map((availableClass) => {
                             const isCurrent =
-                              editing.registered_class?.id ===
+                              editing.registeredClass?.id ===
                               availableClass.id;
 
                             return (
                               <ListboxOption
                                 key={availableClass.id}
                                 value={availableClass}
-                                disabled={availableClass.is_full && !isCurrent}
+                                disabled={availableClass.isFull && !isCurrent}
                                 className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#1D1D1D] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40 data-[focus]:bg-[#3272CA] data-[focus]:text-white"
                               >
                                 Kelas {availableClass.name} —{" "}
                                 {formatDay(availableClass.day)},{" "}
-                                {availableClass.session_time} (
-                                {availableClass.registered_students}/
+                                {availableClass.sessionTime} (
+                                {availableClass.registeredStudents}/
                                 {availableClass.quota})
                                 {isCurrent && " — kelas sekarang"}
-                                {availableClass.is_full &&
+                                {availableClass.isFull &&
                                   !isCurrent &&
                                   " — Penuh"}
                               </ListboxOption>
@@ -477,7 +477,7 @@ export default function StudentPaymentDialog({
                           })}
                         </ListboxOptions>
                       </Listbox>
-                      {!editing.registered_class && (
+                      {!editing.registeredClass && (
                         <p className="mt-2 text-xs text-[#5E6278]">
                           Kosongkan bila mahasiswa memilih kelas sendiri di
                           aplikasi.

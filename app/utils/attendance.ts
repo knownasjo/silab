@@ -11,7 +11,7 @@ export const statusStyle: Record<AttendanceStatus, string> = {
 export const getAttendanceStatus = (
   student: IMeetingParticipants,
 ): AttendanceStatus => {
-  if (student.submitted_at === null) return "Belum Presensi";
+  if (student.submittedAt === null) return "Belum Presensi";
 
-  return student.is_attended ? "Hadir" : "Tidak Hadir";
+  return student.isAttended ? "Hadir" : "Tidak Hadir";
 };

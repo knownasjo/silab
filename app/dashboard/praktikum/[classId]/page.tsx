@@ -37,7 +37,7 @@ const ClassDetails: React.FC = () => {
     getMeetings(params.classId);
   }, [getClassById, getMeetings, params.classId, getClassCollaborators]);
 
-  const readOnly = classData?.period?.is_active === false;
+  const readOnly = classData?.period?.isActive === false;
 
   useRealtimeEvents(({ type, data }) => {
     if (type === "period") {
@@ -46,7 +46,7 @@ const ClassDetails: React.FC = () => {
     }
 
     const isReady = type === "ready";
-    if (!isReady && data.class_id !== params.classId) return;
+    if (!isReady && data.classId !== params.classId) return;
 
     if (type === "class" && data.action === "deleted") {
       setIsDeleted(true);

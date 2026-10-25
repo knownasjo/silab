@@ -37,7 +37,7 @@ await runWebTest("Jam Sesi", data, async (browser) => {
         number,
         startAt,
         endAt,
-        created_by: data.laboran.id,
+        createdBy: data.laboran.id,
       },
     });
   const first = await extra(
@@ -60,7 +60,7 @@ await runWebTest("Jam Sesi", data, async (browser) => {
   const gone = await data.classOf(subject, "B", "MONDAY", 2);
   await db.mst_class.update({
     where: { id: gone.id },
-    data: { deleted_at: new Date() },
+    data: { deletedAt: new Date() },
   });
   const networkClass = await db.mst_class.create({
     data: {
@@ -73,7 +73,7 @@ await runWebTest("Jam Sesi", data, async (browser) => {
       sessionId: sbtiEarly.id,
       startAt: sbtiEarly.startAt,
       endAt: sbtiEarly.endAt,
-      created_by: data.laboran.id,
+      createdBy: data.laboran.id,
     },
   });
   const student = await data.student("Uji Jam Sesi Peserta");
@@ -367,7 +367,7 @@ await runWebTest("Jam Sesi", data, async (browser) => {
   check(
     "  centang Selasa lalu Simpan: nomor dan jam Senin serta Selasa berubah, Jumat tetap",
     both &&
-      JSON.stringify(puts[0]?.also_days) === '["TUESDAY"]' &&
+      JSON.stringify(puts[0]?.alsoDays) === '["TUESDAY"]' &&
       [mondayAfter, tuesdayAfter].every(
         (session) => session.number === freeF && session.startAt === "19.35",
       ) &&
@@ -416,7 +416,7 @@ await runWebTest("Jam Sesi", data, async (browser) => {
   check(
     "  centang Rabu membuat sesi di Senin dan Rabu, lalu centangnya kosong lagi",
     addedMany &&
-      JSON.stringify(posts[0]?.also_days) === '["WEDNESDAY"]' &&
+      JSON.stringify(posts[0]?.alsoDays) === '["WEDNESDAY"]' &&
       JSON.stringify(addedRows.map((s) => s.day).sort()) ===
         '["MONDAY","WEDNESDAY"]' &&
       resetTicks,

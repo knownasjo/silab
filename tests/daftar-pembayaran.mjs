@@ -110,7 +110,7 @@ await runWebTest("Daftar Pembayaran", data, async (browser) => {
   };
   const periodCount = (status) =>
     db.trn_activations.count({
-      where: { periodId: data.period.id, deleted_at: null, status },
+      where: { periodId: data.period.id, deletedAt: null, status },
     });
 
   check("login laboran", await browser.login(data.laboran, data.password));
@@ -135,9 +135,9 @@ await runWebTest("Daftar Pembayaran", data, async (browser) => {
     "  pop-up: mata kuliah urut semester, lalu abjad",
     JSON.stringify(subjects) ===
       JSON.stringify([
-        basis.subject_name,
-        web.subject_name,
-        analisis.subject_name,
+        basis.subjectName,
+        web.subjectName,
+        analisis.subjectName,
       ]),
     JSON.stringify(subjects),
   );
@@ -219,7 +219,7 @@ await runWebTest("Daftar Pembayaran", data, async (browser) => {
     JSON.stringify(filtered),
   );
   const real = (await call("GET", "/activation", { token })).json.data.filter(
-    (activation) => ours.includes(activation.user_id),
+    (activation) => ours.includes(activation.userId),
   );
   fake = real.map((activation) => ({ ...activation, status: true }));
   await open();
@@ -344,7 +344,7 @@ await runWebTest("Daftar Pembayaran", data, async (browser) => {
   );
   await waitFor(bodyHas("Status Pembayaran Mahasiswa"), 5000);
   await realClick(
-    `document.querySelector('[aria-label="Ubah ${analisis.subject_name}"]')`,
+    `document.querySelector('[aria-label="Ubah ${analisis.subjectName}"]')`,
   );
   await waitFor(bodyHas("Ubah Data Aktivasi Mahasiswa"), 5000);
   check(

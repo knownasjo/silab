@@ -17,7 +17,7 @@ const ClassTitleHeader: React.FC<IClassTitleHeaderProps> = ({
           Semester {data.semester} · Kelas {data.name}
         </p>
         <p className="text-[26px] font-bold text-black xl:text-[32px]">
-          Praktikum {data.subject_name}
+          Praktikum {data.subjectName}
         </p>
       </div>
       {children && (

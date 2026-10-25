@@ -47,16 +47,16 @@ export const buildRecap = (
   const rows = students.map((student) => {
     const statuses = meetings.map((meeting) => {
       const record = meeting.students?.find(
-        (s) => s.student_id === student.student_id,
+        (s) => s.studentId === student.studentId,
       );
 
       return record ? getAttendanceStatus(record) : "Belum Presensi";
     });
 
     return {
-      studentId: student.student_id,
+      studentId: student.studentId,
       nim: student.nim,
-      studentName: student.student_name,
+      studentName: student.studentName,
       statuses,
       attendedCount: statuses.filter((status) => status === "Hadir").length,
     };
@@ -64,8 +64,8 @@ export const buildRecap = (
 
   const columns = meetings.map((meeting, index) => ({
     meetingId: meeting.id,
-    label: toColumnLabel(meeting.meeting_name),
-    meetingName: meeting.meeting_name,
+    label: toColumnLabel(meeting.meetingName),
+    meetingName: meeting.meetingName,
     attendedCount: rows.filter((row) => row.statuses[index] === "Hadir").length,
   }));
 

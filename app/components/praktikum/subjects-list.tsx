@@ -45,8 +45,8 @@ const groupBySemester = (subjects: IGetSubjectResponseBody[]) => {
       semester,
       subjects: [...subjects].sort(
         (a, b) =>
-          a.subject_name.localeCompare(b.subject_name) ||
-          a.subject_code.localeCompare(b.subject_code),
+          a.subjectName.localeCompare(b.subjectName) ||
+          a.subjectCode.localeCompare(b.subjectCode),
       ),
     }));
 };
@@ -180,10 +180,10 @@ const SubjectsList: React.FC<SubjectsListProps> = ({ emptyMessage }) => {
                           className={`flex h-fit w-full flex-row flex-wrap items-baseline gap-x-3 text-left`}
                         >
                           <p className="text-lg font-bold text-[#1d1d1d]">
-                            {subject.subject_name}
+                            {subject.subjectName}
                           </p>
                           <p className="text-sm font-semibold text-[#5E6278]">
-                            {subject.subject_code}
+                            {subject.subjectCode}
                           </p>
                         </button>
                         {canEdit && (

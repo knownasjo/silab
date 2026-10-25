@@ -29,9 +29,9 @@ export default function DeleteMeetingButton({
   const { removeMeeting } = useMeetingStore();
 
   const recorded = (meeting.students ?? []).filter(
-    (student) => student.submitted_at,
+    (student) => student.submittedAt,
   ).length;
-  const blocker = meeting.is_open
+  const blocker = meeting.isOpen
     ? "Sesi presensi pertemuan ini sedang dibuka. Tutup sesinya dulu sebelum menghapus."
     : recorded > 0
       ? `Pertemuan ini sudah punya ${recorded} presensi, jadi tidak bisa dihapus. Hapus presensinya dulu atau ubah judulnya.`
@@ -68,7 +68,7 @@ export default function DeleteMeetingButton({
       <button
         type="button"
         onClick={open}
-        aria-label={`Hapus ${meeting.meeting_name}`}
+        aria-label={`Hapus ${meeting.meetingName}`}
         className="h-fit content-center rounded-full bg-[#FFD9D9] p-3 text-sm font-semibold text-[#FE2F60]"
       >
         Hapus
@@ -78,7 +78,7 @@ export default function DeleteMeetingButton({
         <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
           <DialogPanel className="flex w-[500px] max-w-[95vw] flex-col space-y-5 rounded-2xl bg-white p-10">
             <DialogTitle className="font-bold text-[#1d1d1d]">
-              Hapus {meeting.meeting_name}?
+              Hapus {meeting.meetingName}?
             </DialogTitle>
 
             {blocker ? (

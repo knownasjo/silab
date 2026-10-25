@@ -88,7 +88,7 @@ export default function RecapAttendancesContent({
 
   useRealtimeEvents(({ type, data }) => {
     const reconnected = type === "ready";
-    if (!reconnected && data.class_id !== classId) return;
+    if (!reconnected && data.classId !== classId) return;
 
     if (type === "class" && data.action === "deleted") {
       setIsDeleted(true);
@@ -155,13 +155,13 @@ export default function RecapAttendancesContent({
     setIsDownloading(true);
     try {
       await downloadRecapPdf(recap, {
-        subjectCode: classInfo.subject_code,
-        subjectName: classInfo.subject_name,
+        subjectCode: classInfo.subjectCode,
+        subjectName: classInfo.subjectName,
         className: classInfo.name,
         semester: classInfo.semester,
         periodName: classInfo.period?.name,
         lecturer: classInfo.lecturer,
-        meetingName: singleMeeting?.meeting_name,
+        meetingName: singleMeeting?.meetingName,
       });
     } finally {
       setIsDownloading(false);
@@ -181,8 +181,8 @@ export default function RecapAttendancesContent({
           {classInfo && (
             <>
               <p className="text-base font-semibold text-[#5E6278]">
-                Praktikum {classInfo.subject_name} · Kelas {classInfo.name}
-                {singleMeeting && ` · ${singleMeeting.meeting_name}`}
+                Praktikum {classInfo.subjectName} · Kelas {classInfo.name}
+                {singleMeeting && ` · ${singleMeeting.meetingName}`}
               </p>
               <p className="text-sm font-semibold text-[#5E6278]">
                 {classInfo.period && `Periode ${classInfo.period.name} · `}

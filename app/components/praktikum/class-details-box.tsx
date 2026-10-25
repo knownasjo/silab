@@ -54,7 +54,7 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
           {userData?.role === "LABORAN" && !readOnly && (
             <AddCollaboratorsButton
               classId={data.id}
-              classLabel={`${data.subject_name} — Kelas ${data.name}`}
+              classLabel={`${data.subjectName} — Kelas ${data.name}`}
             />
           )}
         </div>
