@@ -1,6 +1,6 @@
 import type { jsPDF } from "jspdf";
 import { AttendanceStatus } from "@/app/utils/attendance";
-import { Recap, statusCode, statusLegend } from "./recap";
+import { Recap, attendedLabel, statusCode, statusLegend } from "./recap";
 
 export interface RecapPdfInfo {
   subjectCode: string;
@@ -254,7 +254,7 @@ export const downloadRecapPdf = async (recap: Recap, info: RecapPdfInfo) => {
           color: statusColor[status],
         })),
         ...(showTotal
-          ? [{ lines: [`${row.attendedCount}/${meetingCount}`] }]
+          ? [{ lines: [attendedLabel(row, recap.heldCount)] }]
           : []),
       ],
       y,

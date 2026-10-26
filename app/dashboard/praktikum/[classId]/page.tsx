@@ -117,8 +117,14 @@ const ClassDetails: React.FC = () => {
         </>
       )}
       {!isLoading && !classData && error && (
-        <div className="flex w-full flex-1 items-center justify-center">
+        <div className="flex w-full flex-1 flex-col items-center justify-center space-y-3">
           <p className="text-base font-semibold text-[#5E6278]">{error}</p>
+          <Link
+            href="/dashboard/praktikum"
+            className="text-sm font-semibold text-[#3272CA] underline"
+          >
+            Kembali ke Praktikum
+          </Link>
         </div>
       )}
     </div>

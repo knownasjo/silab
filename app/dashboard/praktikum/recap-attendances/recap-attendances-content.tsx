@@ -5,7 +5,7 @@ import Link from "next/link";
 import useClassStore from "@/app/store/useClassStore";
 import useMeetingStore from "@/app/store/useMeetingStore";
 import { statusStyle } from "@/app/utils/attendance";
-import { buildRecap, statusCode, statusLegend } from "./recap";
+import { attendedLabel, buildRecap, statusCode, statusLegend } from "./recap";
 import { downloadRecapPdf } from "./recap-pdf";
 import useRealtimeEvents from "@/app/hooks/useRealtimeEvents";
 
@@ -283,7 +283,7 @@ export default function RecapAttendancesContent({
                       ))}
                       {showTotal && (
                         <td className={`${totalCell} z-10 ${line}`}>
-                          {row.attendedCount}/{recap.columns.length}
+                          {attendedLabel(row, recap.heldCount)}
                         </td>
                       )}
                     </tr>

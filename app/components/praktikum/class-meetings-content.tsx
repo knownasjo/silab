@@ -51,6 +51,7 @@ export default function ClassMeetingsContent({
   );
   const fallbackMeeting =
     meetingData.find((meeting) => meeting.isOpen) ??
+    meetingData.findLast((meeting) => meeting.isHeld) ??
     meetingData[meetingData.length - 1];
   const currentMeeting = pickedInList ?? fallbackMeeting;
   const selectedMeeting = currentMeeting?.id ?? "";

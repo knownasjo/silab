@@ -19,6 +19,7 @@ export interface RecapRow {
 export interface Recap {
   columns: RecapColumn[];
   rows: RecapRow[];
+  heldCount: number;
 }
 
 export const statusCode: Record<AttendanceStatus, string> = {
@@ -69,5 +70,12 @@ export const buildRecap = (
     attendedCount: rows.filter((row) => row.statuses[index] === "Hadir").length,
   }));
 
-  return { columns, rows };
+  return {
+    columns,
+    rows,
+    heldCount: meetings.filter((meeting) => meeting.isHeld).length,
+  };
 };
+
+export const attendedLabel = (row: RecapRow, heldCount: number) =>
+  heldCount ? `${row.attendedCount}/${heldCount}` : "-";

@@ -471,17 +471,22 @@ membuka URL kelas dosen lain pun ditolak.
 
 - Menu: Dashboard, Praktikum, dan Profil. Master Data dan Pengumuman tidak
   tampil.
-- **Dashboard**: empat kartu dari `GET /dashboard/dosen`, yaitu Jumlah Kelas,
-  Jumlah Mahasiswa, Jumlah Pertemuan, dan Rata-rata Kehadiran (misal "63%" dengan
-  keterangan "5 dari 8 kesempatan hadir"; "-" dan "Belum ada data presensi" bila
-  belum ada pertemuan). Kartu ikut berubah saat ada event `class`, `subject`,
-  `meeting`, atau `attendance`. Dashboard dosen tidak memanggil `/activation`.
-  `useDashboardStore` memilih data laboran atau dosen setelah peran diketahui
-  dari `GET /auth/me`.
+- **Dashboard**: tiga kartu dari `GET /dashboard/dosen` dalam satu baris di
+  semua lebar layar, yaitu Jumlah Kelas, Jumlah Mahasiswa, dan Jumlah
+  Pertemuan. Jumlah Pertemuan hanya menghitung pertemuan yang sudah berjalan:
+  presensinya sedang dibuka, atau sudah punya data presensi (scan HP atau
+  diisi laboran/asisten). Pertemuan yang dibuat lebih dulu untuk minggu-minggu
+  berikutnya tidak ikut dihitung. Kartu Rata-rata Kehadiran dihapus pada
+  26 Oktober 2026 atas permintaan pengguna. Kartu ikut berubah saat ada event
+  `class`, `subject`, `meeting`, atau `attendance`. Dashboard dosen tidak
+  memanggil `/activation`. `useDashboardStore` memilih data laboran atau dosen
+  setelah peran diketahui dari `GET /auth/me`.
 - **Praktikum**: daftar per semester yang sama dengan laboran, tetapi hanya
   berisi mata kuliah yang ia ampu dan tanpa tombol Tambah Praktikum. Dosen yang
   belum mengampu mata kuliah apa pun melihat pesan "Anda belum tercatat sebagai
-  dosen pengampu mata kuliah praktikum mana pun."
+  dosen pengampu mata kuliah praktikum mana pun." Banner di atas daftar baru
+  tampil setelah peran diketahui, jadi dosen dan laboran tidak lagi sempat
+  melihat tulisan asisten "Berikut adalah daftar kelas praktikum Anda".
 - **Detail kelas**: info kelas, asisten, pilihan pertemuan beserta tabel
   presensinya, Rekap All, dan rekap per pertemuan. Tombol Tambah Pertemuan,
   Buka/Tutup Presensi, QR, ubah presensi, dan kelola asisten disembunyikan
@@ -490,7 +495,14 @@ membuka URL kelas dosen lain pun ditolak.
 - Kelas dosen lain yang dibuka lewat URL menampilkan pesan backend "Kelas ini
   bukan mata kuliah yang Anda ampu." `getClassById` di `useClassStore` kini
   mengosongkan data kelas sebelumnya dan menyimpan pesan error, sehingga tidak
-  ada data kelas lama yang tertinggal di layar.
+  ada data kelas lama yang tertinggal di layar. Di bawah pesan itu (dan pesan
+  gagal memuat kelas lainnya) ada tautan **Kembali ke Praktikum**, sama
+  seperti saat kelas sudah dihapus.
+- Pembayaran yang dibuka lewat URL oleh dosen atau asisten hanya menulis
+  "Hanya laboran yang dapat melihat data pembayaran.", sama seperti halaman
+  khusus laboran lain. Sebelumnya dosen melihat seluruh halaman dengan pesan
+  merah, dan asisten melihat data pembayarannya sendiri beserta tombol Ubah
+  dan Hapus.
 
 ### Tambah Praktikum dan Jam Sesi
 
@@ -964,9 +976,12 @@ diperbaiki pada 21 Oktober 2026:
 - Pertemuan langsung terpilih saat halaman dibuka, tanpa tulisan "Pilih
   Pertemuan untuk Melihat Daftar Presensi!". Urutannya: pilihan terakhir di
   tab ini, lalu pertemuan yang presensinya sedang dibuka, lalu pertemuan
-  terakhir di daftar. Pilihan disimpan di `sessionStorage` dengan kunci
-  `pertemuan-terpilih:<classId>`, jadi tetap sama setelah membuka Rekap lalu
-  kembali, selama tab itu belum ditutup.
+  terakhir yang sudah berjalan (`isHeld`, sejak 26 Oktober 2026), lalu
+  pertemuan terakhir di daftar. Jadi kelas yang pertemuannya dibuat sekaligus
+  (misalnya Pertemuan 1–15) membuka pertemuan terakhir yang sudah ada
+  presensinya, bukan Pertemuan 15 yang masih kosong. Pilihan disimpan di
+  `sessionStorage` dengan kunci `pertemuan-terpilih:<classId>`, jadi tetap
+  sama setelah membuka Rekap lalu kembali, selama tab itu belum ditutup.
 - Daftar pilihan pertemuan memberi tanda hijau **Dibuka** pada pertemuan yang
   sesi presensinya sedang dibuka.
 - Kelas tanpa pertemuan menulis "Belum ada pertemuan. Klik Tambah Pertemuan
@@ -1024,8 +1039,8 @@ pada 22 Oktober 2026:
 ```
 ┌──────────────────────────────────────────────────────┐
 │ No  NIM         Nama            │ P6  P7  P8 │ Hadir │ ← judul kolom tetap di atas
-│ 1   2999970003  Mahasiswa Uji 3 │ A   H   H  │ 4/15  │
-│ 4   2999970006  Muhammad Fadhil │ -   A   H  │ 5/15  │
+│ 1   2999970003  Mahasiswa Uji 3 │ A   H   H  │ 4/10  │
+│ 4   2999970006  Muhammad Fadhil │ -   A   H  │ 5/10  │
 │                 Ramadhan Saputra│            │       │
 │                 Jumlah hadir    │ 4/8 4/8 4/8│       │ ← tetap di bawah
 │ ═══════════════▬▬▬▬▬▬▬═══════════════════════════    │ ← scrollbar tipis
@@ -1082,6 +1097,13 @@ pada 22 Oktober 2026:
 - Baris Jumlah hadir menghitung mahasiswa yang hadir di tiap pertemuan
   (`attendedCount` pada setiap kolom hasil `buildRecap`). Keterangan H/A/-
   berada di luar area gulir, jadi selalu terlihat.
+- Sejak 26 Oktober 2026 kolom **Hadir** membagi dengan jumlah pertemuan yang
+  sudah berjalan (`heldCount`, dari `isHeld` di `GET /meeting/:classId`),
+  bukan semua pertemuan. Kelas dengan Pertemuan 1–4 yang baru berjalan dua
+  menulis "2/2" untuk mahasiswa yang selalu hadir, bukan "2/4". Pertemuan yang
+  belum berjalan tetap tampil sebagai kolom berisi "-", dan bila belum ada
+  pertemuan yang berjalan sama sekali kolom Hadir berisi "-". PDF memakai
+  angka yang sama (`attendedLabel` di `recap.ts`).
 - Di bawah judul tampil "Periode 2026/2027 Ganjil · Dosen pengampu: ...",
   dari `period.name` dan `lecturer` di `GET /class/:id`.
 - Tombol Kembali dan Unduh PDF tidak ikut menyempit
@@ -1401,7 +1423,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 23 menit
+npm test                    # semua tes browser, sekitar 24 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
@@ -1430,6 +1452,7 @@ node tests/login.mjs        # satu tes saja
 | `detail-kelas` | Loading... saat memuat; pertemuan yang presensinya dibuka langsung terpilih, tanpa itu pertemuan terakhir; tanda Dibuka di daftar pertemuan; pilihan tetap setelah kembali dari Rekap; Belum ada mahasiswa / Belum ada pertemuan; Tambah Pertemuan: Batal tidak menyimpan, Enter menyimpan, pertemuan baru langsung terpilih; QR: Layar Penuh memperbesar QR, Keluar Layar Penuh, Tutup; Ubah Status Presensi: jarak di layar 720 px dan Batal tanpa mengirim apa pun; layar 1024 px: tombol satu baris, NIM dan nama tidak saling menimpa, nama dosen utuh; pesan error bila `GET /meeting/:classId` gagal | 24 |
 | `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
 | `profil` | judul Profil 32 px; Loading... bergaya halaman lain saat memuat; data akun gagal dimuat: hanya judul dan pesan merah, lalu Coba lagi memuat form; nama 100 karakter di Data Akun pindah baris di spasi di 1024 dan 1366 px; Ubah Nama: (maks: 100 karakter), penghitung 11/100 dan 16/100, 120 huruf berhenti di 100, nama sama atau beda spasi saja dibalas Tidak ada perubahan tanpa mengirim, pesan hilang saat mengetik, isian terkunci selama menyimpan dan ketikan saat itu tidak masuk, nama baru di isian, menu samping, dan database; Ganti Password: tombol mata di tiga kolom hanya menampilkan kolomnya sendiri dan tidak menyimpan form, pesan hilang saat mengetik, isian dan tombol mata terkunci selama menyimpan, setelah berhasil kolom kosong dan tersembunyi lagi, password baru bisa dipakai masuk dan halaman tetap masuk; asisten melihat judul dan data akun tanpa form | 27 |
+| `dosen` | Dashboard dosen: tiga kartu tanpa Rata-rata Kehadiran, Jumlah Pertemuan hanya menghitung pertemuan yang sudah berjalan, kartu satu baris dan tulisan di dalam kartu di 1024, 1366, 1440 px, angka berubah tanpa dimuat ulang saat presensi diisi laboran; Praktikum tanpa tulisan asisten sesaat saat memuat; Detail Kelas memilih pertemuan terakhir yang sudah berjalan, kelas dosen lain menampilkan pesan dan tautan Kembali ke Praktikum; Rekap: kolom Hadir 2/2, 1/2, 0/2 di layar dan PDF, "-" bila belum ada pertemuan berjalan; Pembayaran lewat alamat untuk dosen dan asisten hanya tulisan Hanya laboran; banner asisten menulis Anda | 18 |
 | `dropdown` | sorotan opsi pertama dan terakhir menempel sampai tepi daftar dengan latar biru dan tulisan putih di 12 dropdown: Jenis Pengumuman, Dosen Pengampu, Semester, Mata Kuliah, Hari, Ruangan, Sesi Kelas, Periode, Pilih Pertemuan, menu titik tiga pengumuman (Hapus merah), Jenis Pengumuman di pop-up Edit, Pilih Kelas di Pembayaran; Pilih Pertemuan dengan keyboard: sorotan biru dan Enter memilih | 17 |
 | `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; sorotan biru opsi menempel sampai tepi daftar; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; Sesi Kelas menulis "Pilih ruangan dulu" sampai ruangan dipilih, hanya berisi sesi hari dan ruangan itu, dan kosong lagi saat ruangan diganti; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 34 |
 | `rekap-presensi` | layar 1024 px dengan 15 pertemuan: kolom Hadir terlihat tanpa menggeser, No, NIM, dan Nama tetap di kiri setelah digeser ke ujung (hanya kolom pertemuan yang bergeser), scrollbar 6 px hanya di bawah kolom pertemuan, hanya tampil saat digeser dan hilang lagi setelah diam (dicek dari piksel screenshot), kolom Nama minimal 200 px, tombol Unduh PDF satu baris; layar 1366 px: No, NIM, dan Nama tetap di kiri, baris Jumlah hadir, periode dan dosen pengampu; kelas 40 mahasiswa: keterangan dan Jumlah hadir terlihat tanpa menggulir, judul kolom tetap di atas setelah digulir; PDF: nama panjang utuh, judul kolom Responsi Akhir per kata, Jumlah hadir, periode dan dosen, semua tulisan rekap satu pertemuan berjudul panjang muat di kertas; data kelas gagal dimuat lalu pulih lewat event; kelas dihapus saat terbuka; Detail Kelas urut NIM dan keterangan ikon rekap | 29 |

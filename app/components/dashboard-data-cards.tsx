@@ -13,13 +13,6 @@ interface DashboardDataCardsProps {
   lecturerSummary: ILecturerDashboardResponseBody | null;
 }
 
-const attendanceNote = (summary: ILecturerDashboardResponseBody | null) => {
-  if (!summary) return "Kehadiran mahasiswa di pertemuan";
-  if (!summary.totalExpectedAttendance) return "Belum ada data presensi";
-
-  return `${summary.totalAttended} dari ${summary.totalExpectedAttendance} kesempatan hadir`;
-};
-
 export default function DashboardDataCards({
   totalSubject,
   totalClass,
@@ -32,7 +25,9 @@ export default function DashboardDataCards({
   const columns =
     userData?.role === "MAHASISWA"
       ? "grid-cols-2"
-      : "grid-cols-2 xl:grid-cols-4";
+      : userData?.role === "DOSEN"
+        ? "grid-cols-3"
+        : "grid-cols-2 xl:grid-cols-4";
 
   return (
     <div className={`mt-6 grid w-full gap-5 ${columns}`}>
@@ -78,12 +73,6 @@ export default function DashboardDataCards({
             data={lecturerSummary?.totalMeeting ?? null}
             title="Jumlah Pertemuan"
             subTitle="Pertemuan yang sudah berjalan"
-          />
-          <DashboardDataContainer
-            data={lecturerSummary?.attendanceRate ?? null}
-            suffix="%"
-            title="Rata-rata Kehadiran"
-            subTitle={attendanceNote(lecturerSummary)}
           />
         </>
       )}

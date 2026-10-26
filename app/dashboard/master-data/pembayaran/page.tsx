@@ -17,6 +17,7 @@ import PeriodSelector from "@/app/components/period/period-selector";
 import ArchiveNotice from "@/app/components/period/archive-notice";
 import NoPeriodNotice from "@/app/components/period/no-period-notice";
 import { usePeriodView } from "@/app/store/usePeriodStore";
+import useAuthStore from "@/app/store/useAuthStore";
 
 type PaymentFilter = "all" | "paid" | "unpaid";
 
@@ -44,6 +45,7 @@ export default function Pembayaran() {
     setPeriodQuery,
   } = useActivationStore();
   const { viewedPeriod, viewedPeriodId, isArchive } = usePeriodView();
+  const { userData } = useAuthStore();
 
   useEffect(() => {
     setFeedback(null);
@@ -91,6 +93,16 @@ export default function Pembayaran() {
       ? "Semua mahasiswa sudah bayar."
       : "Belum ada mahasiswa yang lunas.";
   };
+
+  if (userData && userData.role !== "LABORAN") {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <p className="text-base font-semibold text-[#5E6278]">
+          Hanya laboran yang dapat melihat data pembayaran.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full w-full flex-col space-y-5 overflow-auto overscroll-contain">
