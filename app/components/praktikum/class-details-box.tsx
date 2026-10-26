@@ -2,6 +2,7 @@ import { formatDay } from "@/app/utils/day";
 import AddCollaboratorsButton from "@/app/components/praktikum/add-collaborators-button";
 import { IGetClassByIdResponseBody } from "@/app/interfaces/class/class.interface";
 import useAuthStore from "@/app/store/useAuthStore";
+import useCollaboratorStore from "@/app/store/useCollaboratorStore";
 import { IGetCollaboratorsResponseBody } from "@/app/interfaces/collaborator/collaborator.interface";
 interface IClassDetailBox {
   data: IGetClassByIdResponseBody;
@@ -19,6 +20,10 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
   readOnly = false,
 }) => {
   const { userData } = useAuthStore();
+  const { collaboratorsClassId, isLoaded, loadError } = useCollaboratorStore();
+  const isListCurrent = collaboratorsClassId === data.id;
+  const listError = isListCurrent && loadError;
+  const isListLoaded = isListCurrent && isLoaded;
 
   return (
     <div className="grid min-h-[150px] w-full shrink-0 grid-cols-3 gap-x-6 gap-y-5 rounded-[20px] bg-white p-5 xl:flex xl:flex-row xl:gap-0 xl:space-x-6">
@@ -59,7 +64,17 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
           )}
         </div>
         <div className="flex flex-col space-y-2">
-          {assistant.length !== 0 &&
+          {listError && (
+            <p className="text-[16px] font-semibold text-[#F1416C]">
+              Daftar asisten gagal dimuat.
+            </p>
+          )}
+          {!listError && !isListLoaded && (
+            <p className="text-sm font-semibold text-[#5E6278]">Loading...</p>
+          )}
+          {!listError &&
+            isListLoaded &&
+            assistant.length !== 0 &&
             assistant.map((assistant, idx) => (
               <div className="flex flex-row space-x-[10px]" key={idx}>
                 <div className="w-[6px] shrink-0 self-stretch rounded-full bg-[#D2E3F1]"></div>
@@ -68,7 +83,7 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
                 </p>
               </div>
             ))}
-          {assistant.length === 0 && (
+          {!listError && isListLoaded && assistant.length === 0 && (
             <div className="flex flex-row space-x-[10px]">
               <p className="text-[18px] font-semibold text-black">
                 Asisten Praktikum Belum Ditambahkan

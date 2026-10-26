@@ -17,8 +17,9 @@ export default function OpenAttendancesButton({
   meeting,
   selectedMeeting,
 }: OpenAttendancesButtonProps) {
-  const { updateMeetingStatus, isLoading } = useMeetingStore();
+  const { updateMeetingStatus } = useMeetingStore();
 
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const [dialogMessage, setDialogMessage] = useState<string>("");
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] =
     useState<boolean>(false);
@@ -26,12 +27,14 @@ export default function OpenAttendancesButton({
 
   const currentMeeting = meeting?.find((m) => m.id === selectedMeeting);
   const isOpen = currentMeeting?.isOpen === true;
-  const isDisabled = !classId || !currentMeeting || isLoading;
+  const isDisabled = !classId || !currentMeeting || isSaving;
 
   const handleToggleAttendance = async () => {
     if (!classId || !currentMeeting) return;
 
+    setIsSaving(true);
     await updateMeetingStatus(currentMeeting.id, !isOpen, classId);
+    setIsSaving(false);
 
     const { error, message } = useMeetingStore.getState();
 
@@ -57,7 +60,7 @@ export default function OpenAttendancesButton({
               : "bg-[#3272CA]"
         }`}
       >
-        {isLoading
+        {isSaving
           ? "Memproses..."
           : isOpen
             ? "Tutup Presensi"

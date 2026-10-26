@@ -138,8 +138,9 @@ export default function RecapAttendancesContent({
   const showTotal = recap.columns.length > 1;
 
   const emptyMessage = (() => {
+    if (!classInfo && classError) return classError;
     if (loadError) return loadError;
-    if (!classInfo) return classError ?? "Loading...";
+    if (!classInfo) return "Loading...";
     if (meetingsData.length === 0)
       return "Kelas ini belum punya pertemuan. Tambahkan pertemuan dulu sebelum membuat rekap.";
     if (meetings.length === 0) return "Pertemuan tidak ditemukan.";

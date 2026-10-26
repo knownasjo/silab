@@ -12,6 +12,9 @@ import { coalesce } from "../utils/coalesce";
 
 type CollaboratorState = GlobalState & {
   collaboratorsData: IGetCollaboratorsResponseBody[];
+  collaboratorsClassId: string | null;
+  isLoaded: boolean;
+  loadError: string | null;
 };
 
 type CollaboratorResult = { ok: boolean; message: string };
@@ -32,6 +35,9 @@ const initialState = {
   isLoading: false,
   error: null,
   collaboratorsData: [],
+  collaboratorsClassId: null,
+  isLoaded: false,
+  loadError: null,
 };
 
 const useCollaboratorStore = create<CollaboratorState & CollaboratorActions>(
@@ -77,22 +83,33 @@ const useCollaboratorStore = create<CollaboratorState & CollaboratorActions>(
     refreshClassCollaborators: coalesce(async (id: string) => {
       const res = await getClassCollaborators(id);
 
-      if (res.status && res.data) set({ collaboratorsData: res.data });
+      if (get().collaboratorsClassId === id && res.status && res.data)
+        set({ collaboratorsData: res.data, isLoaded: true, loadError: null });
     }),
 
     getClassCollaborators: async (id) => {
-      set({ isLoading: true, error: null });
+      if (id !== get().collaboratorsClassId)
+        set({ collaboratorsData: [], isLoaded: false });
+      set({
+        isLoading: true,
+        error: null,
+        loadError: null,
+        collaboratorsClassId: id,
+      });
 
       try {
         const res = await getClassCollaborators(id);
 
+        if (get().collaboratorsClassId !== id) return;
+
         if (res.status && res.data) {
-          set({ collaboratorsData: res.data });
+          set({ collaboratorsData: res.data, isLoaded: true });
         } else {
-          set({ error: res.message });
+          set({ loadError: res.message });
         }
-      } catch {
-        console.log(get().error);
+      } catch (error: any) {
+        if (get().collaboratorsClassId === id)
+          set({ loadError: error?.message ?? "Terjadi kesalahan" });
       } finally {
         set({ isLoading: false });
       }

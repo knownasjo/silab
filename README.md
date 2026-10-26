@@ -462,6 +462,22 @@ README backend). Di web:
   presensi, dan melihat rekap; backend menolak aksi di kelas lain.
 - Menambah/menghapus asisten memicu event `class`, jadi daftar kelas asisten
   ikut berubah tanpa refresh.
+- Kelas yang bukan pegangannya, termasuk kelas tempat ia ikut praktikum
+  sebagai mahasiswa, bila dibuka lewat alamat hanya menulis "Anda bukan
+  asisten kelas ini." beserta tautan **Kembali ke Praktikum**, baik di detail
+  kelas maupun di Rekap Presensi (backend menolak `GET /class/:id` dan
+  `GET /collaborator/:id`). Sebelum 26 Oktober 2026 halaman itu tampil lengkap
+  dengan tombol Tambah Pertemuan, Buka Presensi, Ubah, Hapus, dan QR yang
+  semuanya gagal saat diklik, dan kelas tempat ia ikut praktikum menulis
+  "Belum ada mahasiswa di kelas ini." padahal ada pesertanya.
+- Bila laboran mencabut asisten saat halaman kelasnya masih terbuka, event
+  `class` membuat halaman memuat ulang data kelas. Balasan 403 langsung
+  mengganti detail kelas dan Rekap Presensi dengan pesan yang sama. Dulu
+  halamannya tidak berubah dan setiap klik dibalas "Hanya laboran atau asisten
+  kelas ini yang dapat melakukannya!".
+- Detail kelas hanya menampilkan data kelas yang id-nya sama dengan alamat
+  (`currentClass` di `app/dashboard/praktikum/[classId]/page.tsx`), jadi saat
+  pindah kelas tanpa memuat ulang, data kelas sebelumnya tidak sempat tampil.
 
 ### Dosen
 
@@ -666,6 +682,14 @@ Kotak Hari/Jam, Ruangan, Dosen, Asisten Praktikum, dan Kuota di detail kelas
   per huruf. Kotak juga diberi `shrink-0`, karena `min-h-[150px]`
   membuatnya boleh menyusut sampai 150 px di halaman yang pendek, sehingga
   nama asisten keluar dari kotak dan menimpa tombol di bawahnya.
+- Kolom Asisten Praktikum (26 Oktober 2026) menulis "Loading..." sampai
+  daftar asisten kelas itu termuat, dan "Daftar asisten gagal dimuat." bila
+  `GET /collaborator/:id` gagal. Dulu kegagalan itu tertulis "Asisten
+  Praktikum Belum Ditambahkan", dan setelah pindah dari kelas lain tanpa
+  memuat ulang bisa tampil daftar asisten kelas sebelumnya.
+  `useCollaboratorStore` kini menyimpan `collaboratorsClassId`, `isLoaded`,
+  dan `loadError`, mengosongkan daftar saat berganti kelas, dan mengabaikan
+  balasan untuk kelas lain.
 
 ### Ubah dan Hapus Kelas
 
@@ -994,6 +1018,16 @@ diperbaiki pada 21 Oktober 2026:
   `loadError` yang sama. `getMeetings` mengosongkan daftar saat berganti
   kelas dan mengabaikan balasan untuk kelas lain, jadi pertemuan kelas
   sebelumnya tidak sempat terpilih.
+- Server hanya mengizinkan satu sesi presensi terbuka per kelas (26 Oktober
+  2026). Buka Presensi untuk pertemuan lain saat masih ada yang terbuka
+  menampilkan pop-up "Presensi Pertemuan 1 masih dibuka. Tutup dulu sebelum
+  membuka Pertemuan 3.", jadi pertemuan yang otomatis terpilih karena sesinya
+  dibuka selalu satu-satunya sesi terbuka di kelas itu.
+- Tombol Buka/Tutup Presensi menulis "Memproses..." hanya setelah tombol itu
+  sendiri ditekan (`isSaving` lokal di `components/open-attendance-button.tsx`).
+  Dulu tombol memakai `isLoading` bersama di `useMeetingStore`, sehingga ikut
+  abu-abu bertuliskan "Memproses..." saat asisten menyimpan presensi
+  mahasiswa atau menambah pertemuan.
 - Pop-up kode QR punya tombol **Layar Penuh** (Fullscreen API pada panel
   dialog; QR membesar sampai 70% sisi layar yang lebih pendek) dan
   **Tutup**. Pop-up Ubah Status Presensi punya tombol **Batal**, tingginya
@@ -1112,8 +1146,11 @@ pada 22 Oktober 2026:
   `action: "deleted"`) menampilkan "Kelas ini sudah dihapus." dan tautan
   Kembali ke Praktikum, sama seperti detail kelas. Bila data kelas gagal
   dimuat, pesan errornya tampil tanpa tabel dan Kembali menuju daftar
-  Praktikum. Data kelas dimuat ulang saat koneksi real-time tersambung lagi
-  atau ada event `class` untuk kelas itu.
+  Praktikum. Pesan kelas didahulukan dari pesan gagal memuat pertemuan, jadi
+  asisten yang membuka rekap kelas lain membaca "Anda bukan asisten kelas
+  ini.", bukan "Anda tidak terdaftar di kelas ini!". Data kelas dimuat ulang
+  saat koneksi real-time tersambung lagi atau ada event `class` untuk kelas
+  itu.
 - PDF (`recap-pdf.ts`):
   - Nama panjang turun baris dan baris tabelnya meninggi, tidak lagi dipotong
     "...". Kolom Nama selebar nama terpanjang bila kertas masih cukup
@@ -1423,7 +1460,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 24 menit
+npm test                    # semua tes browser, sekitar 26 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
@@ -1453,6 +1490,7 @@ node tests/login.mjs        # satu tes saja
 | `password-spasi` | Profil laboran: password baru dengan spasi di tengah, awal, atau akhir terketik apa adanya, lalu ditolak dengan pesan tanpa mengirim `PUT /auth/me/password`; password tanpa spasi tetap tersimpan | 11 |
 | `profil` | judul Profil 32 px; Loading... bergaya halaman lain saat memuat; data akun gagal dimuat: hanya judul dan pesan merah, lalu Coba lagi memuat form; nama 100 karakter di Data Akun pindah baris di spasi di 1024 dan 1366 px; Ubah Nama: (maks: 100 karakter), penghitung 11/100 dan 16/100, 120 huruf berhenti di 100, nama sama atau beda spasi saja dibalas Tidak ada perubahan tanpa mengirim, pesan hilang saat mengetik, isian terkunci selama menyimpan dan ketikan saat itu tidak masuk, nama baru di isian, menu samping, dan database; Ganti Password: tombol mata di tiga kolom hanya menampilkan kolomnya sendiri dan tidak menyimpan form, pesan hilang saat mengetik, isian dan tombol mata terkunci selama menyimpan, setelah berhasil kolom kosong dan tersembunyi lagi, password baru bisa dipakai masuk dan halaman tetap masuk; asisten melihat judul dan data akun tanpa form | 27 |
 | `dosen` | Dashboard dosen: tiga kartu tanpa Rata-rata Kehadiran, Jumlah Pertemuan hanya menghitung pertemuan yang sudah berjalan, kartu satu baris dan tulisan di dalam kartu di 1024, 1366, 1440 px, angka berubah tanpa dimuat ulang saat presensi diisi laboran; Praktikum tanpa tulisan asisten sesaat saat memuat; Detail Kelas memilih pertemuan terakhir yang sudah berjalan, kelas dosen lain menampilkan pesan dan tautan Kembali ke Praktikum; Rekap: kolom Hadir 2/2, 1/2, 0/2 di layar dan PDF, "-" bila belum ada pertemuan berjalan; Pembayaran lewat alamat untuk dosen dan asisten hanya tulisan Hanya laboran; banner asisten menulis Anda | 18 |
+| `asisten` | kelas asisten lain dan kelas tempat asisten ikut praktikum lewat alamat: hanya "Anda bukan asisten kelas ini." dan Kembali ke Praktikum tanpa data kelas dan tombol kelola, tautannya membuka Praktikum; Rekap kedua kelas itu: pesan yang sama tanpa tabel, Unduh PDF mati, Kembali ke Praktikum; asisten dicabut laboran saat detail kelas dan saat Rekap terbuka: langsung berganti ke pesan itu; Buka Presensi untuk Pertemuan 3 saat Pertemuan 1 masih dibuka menampilkan alasan penolakan dan Pertemuan 3 tetap tertutup; daftar asisten gagal dimuat menulis Daftar asisten gagal dimuat (langsung dan sesudah pindah dari kelas lain tanpa memuat ulang, tanpa daftar kelas sebelumnya); jaringan lambat: Loading... lalu tiga asisten; tombol Buka Presensi tidak menjadi Memproses... saat menyimpan presensi mahasiswa, tetapi menjadi Memproses... lalu Tutup Presensi saat ditekan sendiri | 16 |
 | `dropdown` | sorotan opsi pertama dan terakhir menempel sampai tepi daftar dengan latar biru dan tulisan putih di 12 dropdown: Jenis Pengumuman, Dosen Pengampu, Semester, Mata Kuliah, Hari, Ruangan, Sesi Kelas, Periode, Pilih Pertemuan, menu titik tiga pengumuman (Hapus merah), Jenis Pengumuman di pop-up Edit, Pilih Kelas di Pembayaran; Pilih Pertemuan dengan keyboard: sorotan biru dan Enter memilih | 17 |
 | `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; sorotan biru opsi menempel sampai tepi daftar; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; Sesi Kelas menulis "Pilih ruangan dulu" sampai ruangan dipilih, hanya berisi sesi hari dan ruangan itu, dan kosong lagi saat ruangan diganti; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 34 |
 | `rekap-presensi` | layar 1024 px dengan 15 pertemuan: kolom Hadir terlihat tanpa menggeser, No, NIM, dan Nama tetap di kiri setelah digeser ke ujung (hanya kolom pertemuan yang bergeser), scrollbar 6 px hanya di bawah kolom pertemuan, hanya tampil saat digeser dan hilang lagi setelah diam (dicek dari piksel screenshot), kolom Nama minimal 200 px, tombol Unduh PDF satu baris; layar 1366 px: No, NIM, dan Nama tetap di kiri, baris Jumlah hadir, periode dan dosen pengampu; kelas 40 mahasiswa: keterangan dan Jumlah hadir terlihat tanpa menggulir, judul kolom tetap di atas setelah digulir; PDF: nama panjang utuh, judul kolom Responsi Akhir per kata, Jumlah hadir, periode dan dosen, semua tulisan rekap satu pertemuan berjudul panjang muat di kertas; data kelas gagal dimuat lalu pulih lewat event; kelas dihapus saat terbuka; Detail Kelas urut NIM dan keterangan ikon rekap | 29 |

@@ -37,7 +37,8 @@ const ClassDetails: React.FC = () => {
     getMeetings(params.classId);
   }, [getClassById, getMeetings, params.classId, getClassCollaborators]);
 
-  const readOnly = classData?.period?.isActive === false;
+  const currentClass = classData?.id === params.classId ? classData : null;
+  const readOnly = currentClass?.period?.isActive === false;
 
   useRealtimeEvents(({ type, data }) => {
     if (type === "period") {
@@ -81,42 +82,42 @@ const ClassDetails: React.FC = () => {
 
   return (
     <div className="flex h-full w-full flex-col space-y-10 overflow-auto overscroll-contain">
-      {isLoading && !classData && (
+      {isLoading && !currentClass && (
         <p className="text-sm font-semibold text-[#5E6278]">Loading...</p>
       )}
-      {!isLoading && classData && (
+      {!isLoading && currentClass && (
         <>
-          <ClassTitleHeader data={classData}>
+          <ClassTitleHeader data={currentClass}>
             {userData?.role === "LABORAN" && !readOnly && (
               <>
                 <EditClassButton
-                  data={classData}
+                  data={currentClass}
                   onSaved={(message) => setNotice({ ok: true, message })}
                 />
                 <DeleteClassButton
-                  data={classData}
+                  data={currentClass}
                   assistants={collaboratorsData.length}
                 />
               </>
             )}
           </ClassTitleHeader>
-          {readOnly && classData.period && (
-            <ArchiveNotice name={classData.period.name} />
+          {readOnly && currentClass.period && (
+            <ArchiveNotice name={currentClass.period.name} />
           )}
           <FeedbackBox feedback={notice} />
           <ClassDetailsBox
-            data={classData}
+            data={currentClass}
             assistant={collaboratorsData}
             readOnly={readOnly}
           />
           <ClassMeetingsContent
-            classId={classData.id}
+            classId={currentClass.id}
             meetingData={meetingsData}
             readOnly={readOnly}
           />
         </>
       )}
-      {!isLoading && !classData && error && (
+      {!isLoading && !currentClass && error && (
         <div className="flex w-full flex-1 flex-col items-center justify-center space-y-3">
           <p className="text-base font-semibold text-[#5E6278]">{error}</p>
           <Link
