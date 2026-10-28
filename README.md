@@ -23,6 +23,8 @@ npm run lint                # periksa kode dengan ESLint
 npm test                    # tes di browser, lihat Pengujian otomatis
 ```
 
+**Memakai Node.js 26 LTS**, sama dengan backend.
+
 ESLint memakai aturan standar Next.js (`next/core-web-vitals` di
 `.eslintrc.json`). `next build` juga menjalankan lint, jadi build gagal bila
 ada temuan berstatus error. Aturan TypeScript yang lebih ketat
