@@ -201,6 +201,7 @@ await runWebTest("List dan Detail Pengumuman", data, async (browser) => {
     "Uji Daftar Satu Baru",
   );
   await latency(2500);
+  const savedAt = Date.now();
   await clickText("Simpan Perubahan");
   await sleep(300);
   const lockedTitle = await evaluate(`!!${DIALOG_TITLE}?.matches(":disabled")`);
@@ -213,14 +214,37 @@ await runWebTest("List dan Detail Pengumuman", data, async (browser) => {
     JSON.stringify({ lockedTitle, typedWhileSaving }),
   );
   const closed = await waitFor(`!${bodyHas("Edit Pengumuman")}`, 30000);
+  const closedAfterMs = Date.now() - savedAt;
   await latency(0);
+  const saved =
+    closed &&
+    (await waitFor(
+      `!!document.querySelector('main [role="status"]')?.innerText.includes("Pengumuman berhasil diperbarui") && !!(${cardOf("Uji Daftar Satu Baru")})`,
+      10000,
+    ));
   check(
     "  tersimpan: pop-up tertutup, kotak hijau tampil, kartu menyebut judul baru",
-    closed &&
-      (await waitFor(
-        `!!document.querySelector('main [role="status"]')?.innerText.includes("Pengumuman berhasil diperbarui") && !!(${cardOf("Uji Daftar Satu Baru")})`,
-        10000,
-      )),
+    saved,
+    saved
+      ? ""
+      : JSON.stringify({
+          closed,
+          closedAfterMs,
+          page: await evaluate(`(() => ({
+            dialogMessages: [...document.querySelectorAll('[role="dialog"] [role="alert"], [role="dialog"] [role="status"]')].map((el) => el.innerText),
+            notices: [...document.querySelectorAll('main [role="status"], main [role="alert"]')].map((el) => el.innerText),
+            titles: [...document.querySelectorAll("main p")].map((p) => p.innerText).filter((text) => text.startsWith("Uji Daftar Satu")),
+          }))()`),
+          stored: (
+            await db.mst_announcement.findFirst({
+              where: {
+                author: data.laboran.id,
+                title: { startsWith: "Uji Daftar Satu" },
+              },
+              select: { title: true },
+            })
+          )?.title,
+        }),
   );
 
   await openList();
