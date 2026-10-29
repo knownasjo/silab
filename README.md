@@ -9,7 +9,7 @@ berjalan.
 
 ## Stack
 
-- Next.js 15 (App Router, Turbopack), React 19, TypeScript
+- Next.js 16 (App Router, Turbopack), React 19.3, TypeScript
 - TailwindCSS 3 + DaisyUI, @headlessui/react
 - Zustand untuk state, Axios untuk HTTP
 - react-hook-form + Zod, react-qr-code, jsPDF
@@ -25,11 +25,37 @@ npm test                    # tes di browser, lihat Pengujian otomatis
 
 **Memakai Node.js 26 LTS**, sama dengan backend.
 
-ESLint memakai aturan standar Next.js (`next/core-web-vitals` di
-`.eslintrc.json`). `next build` juga menjalankan lint, jadi build gagal bila
-ada temuan berstatus error. Aturan TypeScript yang lebih ketat
-(`next/typescript`) belum dipakai karena menandai 37 `catch (error: any)` di
-store sebagai error.
+ESLint 9 memakai aturan standar Next.js (`eslint-config-next/core-web-vitals`)
+lewat `eslint.config.mjs`. Next.js 16 tidak lagi menjalankan lint saat build,
+jadi skrip `build` menjalankan `eslint .` lebih dulu; build tetap gagal bila
+ada temuan berstatus error, sama seperti sebelumnya. Aturan TypeScript yang
+lebih ketat (`next/typescript`) belum dipakai karena menandai 37
+`catch (error: any)` di store sebagai error.
+
+Pindah ke Next.js 16 (29 Oktober 2026) dibuat tanpa mengubah tampilan maupun
+perilaku: 13 halaman dashboard dan halaman login difoto berdampingan dengan
+Next.js 15 dan identik sampai piksel, dan semua tes browser lulus. Hal yang
+sengaja dipertahankan:
+
+- 15 aturan lint yang baru ikut di `eslint-config-next` 16 dimatikan di
+  `eslint.config.mjs`, sehingga aturan yang berlaku tetap 47 aturan yang sama
+  dengan sebelumnya. Empat belas di antaranya aturan React Compiler dari
+  `eslint-plugin-react-hooks` 7 (bila dinyalakan, `set-state-in-effect`
+  menandai 12 tempat dan `incompatible-library` 1 tempat di kode lama), satu
+  lagi `@next/next/no-location-assign-relative-destination`.
+- `images.imageSizes` di `next.config.js` tetap berisi 16. Next.js 16
+  menghapusnya dari bawaan, sehingga ikon 16 px (panah `down.png` yang
+  diputar) dimuat dari gambar 32 px dan beberapa piksel tepinya berubah.
+- `logging.browserToTerminal: false` dan `logging.serverFunctions: false`.
+  Bawaan Next.js 16 meneruskan peringatan konsol browser ke terminal (ratusan
+  saran `next/image` di tes) dan mencatat setiap pemanggilan server action
+  beserta argumennya, termasuk token login di `setToken()`.
+- `middleware.ts` berganti nama menjadi `proxy.ts` (nama lama sudah usang di
+  Next.js 16). Isinya sama, kini berjalan di runtime Node.js, bukan edge.
+
+ESLint 10 belum dipakai karena `eslint-plugin-react`, `eslint-plugin-import`,
+dan `eslint-plugin-jsx-a11y` yang dibawa `eslint-config-next` baru mendukung
+sampai ESLint 9.
 
 ### Environment
 
@@ -82,7 +108,7 @@ IP kampus (`10.4.52.201:3001`) yang sudah mati, dan sudah digantikan
   tidak pernah diisi. Ikut dihapus: `getUserData()`, `setUserRole()`, dan type
   `UserDetails`, jadi root layout tidak membaca cookie lagi.
 - Halaman awal `/` (gambar sambutan + tombol Login). Gambar yang sama sudah ada
-  di `/auth`, dan `middleware.ts` kini langsung mengalihkan `/` ke `/dashboard`
+  di `/auth`, dan `proxy.ts` kini langsung mengalihkan `/` ke `/dashboard`
   bila ada cookie sesi, atau ke `/auth`.
 - Dependensi `html2canvas`, `cookie`, `jose`, `jwt-decode`, dan
   `@types/jsonwebtoken`. `html2canvas` tetap terpasang sebagai bagian opsional
@@ -98,12 +124,13 @@ dibutuhkan karena mendeklarasikan type global `GlobalState` untuk semua store.
    MAHASISWA, `GET /class` harus berisi minimal satu kelas yang ia pegang
    sebagai asisten. Bila kosong, login ditolak dengan pesan "Web hanya untuk
    laboran, dosen, dan asisten." Pemeriksaan ini sengaja dilakukan sebelum
-   cookie disimpan, karena begitu cookie ada, `middleware.ts` langsung
+   cookie disimpan, karena begitu cookie ada, `proxy.ts` langsung
    memindahkan halaman `/auth` ke `/dashboard`
 2. `setToken()` dan `setRefreshToken()` (server action) menyimpan cookie
    `accessToken` dan `refreshToken`; masa berlakunya di-decode dari payload
    JWT. Cookie `refreshToken` bersifat `httpOnly` karena hanya dibaca server
-3. `middleware.ts` memblokir `/dashboard*` bila kedua cookie tidak ada
+3. `proxy.ts` (dulu `middleware.ts`) memblokir `/dashboard*` bila kedua
+   cookie tidak ada
 4. Interceptor axios membaca cookie **langsung dari `document.cookie`**, dengan
    `getToken()` sebagai cadangan
 
@@ -143,7 +170,7 @@ Access token berlaku 15 menit dan diperbarui sendiri (`app/utils/cookie.ts`):
   berakhir, silakan masuk kembali.", sama dengan aplikasi mobile. Sign Out
   biasa dan `/auth` yang dibuka langsung tidak memakai parameter ini, jadi
   pesannya tidak muncul. Bila cookie sudah kedaluwarsa sebelum halaman dibuka
-  (misalnya keesokan harinya), `middleware.ts` mengalihkan ke `/auth` tanpa
+  (misalnya keesokan harinya), `proxy.ts` mengalihkan ke `/auth` tanpa
   pesan karena tidak bisa membedakannya dari pengguna yang belum masuk.
 
 Lupa password tidak punya alur di web. Halaman `/auth` hanya menulis "Lupa
@@ -1427,15 +1454,14 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
       `httpOnly` tetapi belum `secure` karena lab masih memakai HTTP
 - [ ] `next.config.js` masih menunjuk hostname Supabase lama bila project ref
       berubah
-- [ ] `npm audit` masih melaporkan 2 celah di postcss bawaan Next.js 15.5.
-      postcss itu hanya dipakai saat build untuk CSS milik sendiri, dan baru
-      diganti di Next.js 16. Pindah ke Next.js 16 juga perlu mengganti
-      `next lint` dengan ESLint CLI. Celah lain sudah ditutup 29 Oktober 2026:
-      Next.js 15.5.28 (eksekusi kode jarak jauh lewat optimasi gambar SVG dan
-      DoS di Server Actions), zod 4 bersama `@hookform/resolvers` 5.9, dan
-      `npm audit fix` untuk dompurify, follow-redirects, brace-expansion,
-      source-map-js, dan postcss-selector-parser. Pesan validasi Log In tetap
-      sama karena kedua kolomnya memakai pesan sendiri
+- [x] `npm audit` bersih (0 celah) sejak 29 Oktober 2026. Next.js 15.5.28
+      menutup eksekusi kode jarak jauh lewat optimasi gambar SVG dan DoS di
+      Server Actions; zod 4 bersama `@hookform/resolvers` 5.9 dan
+      `npm audit fix` (dompurify, follow-redirects, brace-expansion,
+      source-map-js, postcss-selector-parser) menutup sisanya kecuali 2 celah
+      postcss bawaan Next.js 15.5, yang hilang setelah pindah ke Next.js 16.
+      Pesan validasi Log In tetap sama karena kedua kolomnya memakai pesan
+      sendiri
 - [ ] Paket yang sengaja belum dinaikkan pada pembaruan versi kecil
       29 Oktober 2026 (yang lain sudah: react-hook-form 7.91, react-qr-code
       2.2 dengan gambar QR identik, tailwindcss 3.4.19 dengan CSS setara,
@@ -1450,7 +1476,7 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
         `app/services/realtime/events.ts` karena tipe aliran data berubah;
         tetap 5.5.4 sampai pindah ke TypeScript 6
       - `prettier` 3.9 akan merapikan ulang 3 file lagi (`recap-pdf.ts`,
-        `satellite/index.ts`, `middleware.ts`); tetap 3.3.3
+        `satellite/index.ts`, `proxy.ts`); tetap 3.3.3
 
 ## Pengujian otomatis
 
