@@ -1430,7 +1430,12 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
 - [ ] `npm audit` masih melaporkan 2 celah di postcss bawaan Next.js 15.5.
       postcss itu hanya dipakai saat build untuk CSS milik sendiri, dan baru
       diganti di Next.js 16. Pindah ke Next.js 16 juga perlu mengganti
-      `next lint` dengan ESLint CLI
+      `next lint` dengan ESLint CLI. Celah lain sudah ditutup 29 Oktober 2026:
+      Next.js 15.5.28 (eksekusi kode jarak jauh lewat optimasi gambar SVG dan
+      DoS di Server Actions), zod 4 bersama `@hookform/resolvers` 5.9, dan
+      `npm audit fix` untuk dompurify, follow-redirects, brace-expansion,
+      source-map-js, dan postcss-selector-parser. Pesan validasi Log In tetap
+      sama karena kedua kolomnya memakai pesan sendiri
 
 ## Pengujian otomatis
 
