@@ -11,7 +11,12 @@ import {
   updateMe,
 } from "../services/auth/api";
 import { getAllClass } from "../services/class/api";
-import { deleteToken, setRefreshToken, setToken } from "../utils/cookie";
+import {
+  deleteToken,
+  setRefreshToken,
+  setToken,
+  setTokens,
+} from "../utils/cookie";
 
 type AuthState = GlobalState & {
   userData: IMeResponseBody | null;
@@ -123,10 +128,8 @@ const useAuthStore = create<AuthState & AuthActions>((set) => ({
     try {
       const res = await changeMyPassword(body);
 
-      if (res.data) {
-        await setToken(res.data.accessToken);
-        await setRefreshToken(res.data.refreshToken);
-      }
+      if (res.data)
+        await setTokens(res.data.accessToken, res.data.refreshToken);
 
       return { ok: true, message: res.message };
     } catch (error: any) {

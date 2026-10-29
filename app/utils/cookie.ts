@@ -89,6 +89,14 @@ export async function setRefreshToken(token: string): Promise<void> {
   }
 }
 
+export async function setTokens(
+  accessToken: string,
+  refreshToken: string,
+): Promise<void> {
+  await setToken(accessToken);
+  await setRefreshToken(refreshToken);
+}
+
 export async function deleteToken(): Promise<void> {
   const cookie = await cookies();
 

@@ -216,17 +216,28 @@ mahasiswa (termasuk asisten) mengelola akunnya di aplikasi mobile.
   baru (min. 8, tanpa spasi, harus berbeda), dan konfirmasi. Isian diperiksa
   dulu di browser; password baru berspasi di mana pun dibalas "Password baru
   tidak boleh mengandung spasi." tanpa mengirim apa pun, dan server juga
-  menolaknya (aturan sejak 1 Oktober 2026, lihat README backend). Server membalas token baru yang langsung disimpan ke cookie, jadi
-  browser ini tetap masuk, sedangkan browser/HP lain dengan akun yang sama
-  kembali ke `/auth` sekitar 1,5 detik kemudian. Ketiga kolom punya tombol
-  mata seperti halaman Log In (label "Tampilkan password lama" dan
-  seterusnya); setelah berhasil, kolom kosong dan tersembunyi lagi.
+  menolaknya (aturan sejak 1 Oktober 2026, lihat README backend). Server
+  membalas token baru, dan keduanya langsung disimpan ke cookie dalam satu
+  server action (`setTokens()`), jadi browser ini tetap masuk, sedangkan
+  browser/HP lain dengan akun yang sama kembali ke `/auth` sekitar 1,5 detik
+  kemudian. Ketiga kolom punya tombol mata seperti halaman Log In (label
+  "Tampilkan password lama" dan seterusnya); setelah berhasil, kolom kosong
+  dan tersembunyi lagi.
 - Batasan yang dibiarkan: bila satu permintaan butuh lebih dari 1 detik
   (jaringan sangat lambat), tab lain di browser yang sama bisa ikut kembali ke
   `/auth` setelah ganti password. Tab itu menyambung ulang real-time 1 detik
   setelah server memutusnya, masih dengan token lama, karena token baru belum
   sempat tersimpan. Tab tempat password diganti tetap masuk, dan tab lain bisa
   langsung dibuka lagi tanpa login. Pada jeda 0, 300, dan 700 ms tidak terjadi.
+- Sebelum 29 Oktober 2026 kedua token disimpan terpisah (`setToken()` lalu
+  `setRefreshToken()`). Di jaringan lambat, real-time tab ini sendiri
+  menyambung ulang dengan token lama tepat di antara keduanya:
+  `refreshAccessToken()` menukar refresh token lama, ditolak, lalu menghapus
+  semua cookie, termasuk token akses yang baru tersimpan. Pengguna tetap
+  masuk, tetapi isi dashboard hilang sekitar 2 detik dan pesan "Password
+  berhasil diganti" ikut hilang. Ini terlihat pada jeda 2,5 detik dengan
+  backend Prisma 6, dan sudah pada jeda 1,5 detik (jeda tes `profil`) setelah
+  backend memakai Prisma 7 yang lebih cepat.
 - Kedua form terkunci (`<fieldset disabled>`) selama menyimpan, jadi ketikan
   saat itu tidak hilang ditimpa hasil simpan. Pesan berhasil atau gagal hilang
   begitu isian diketik lagi.
@@ -1462,7 +1473,7 @@ Syarat sebelum menjalankan:
   terbuka.
 
 ```bash
-npm test                    # semua tes browser, sekitar 26 menit
+npm test                    # semua tes browser, sekitar 20 menit
 npm test -- pembayaran      # hanya tes yang namanya mengandung "pembayaran"
 node tests/login.mjs        # satu tes saja
 ```
