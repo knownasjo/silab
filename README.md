@@ -1436,6 +1436,21 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
       `npm audit fix` untuk dompurify, follow-redirects, brace-expansion,
       source-map-js, dan postcss-selector-parser. Pesan validasi Log In tetap
       sama karena kedua kolomnya memakai pesan sendiri
+- [ ] Paket yang sengaja belum dinaikkan pada pembaruan versi kecil
+      29 Oktober 2026 (yang lain sudah: react-hook-form 7.91, react-qr-code
+      2.2 dengan gambar QR identik, tailwindcss 3.4.19 dengan CSS setara,
+      axios, zustand, postcss, eslint 8.57, @types/lodash, @types/node 20):
+      - `@headlessui/react` 2.2.10 mengubah sorotan pilihan dropdown dan
+        kadang tidak mencatat klik pada item menu (8 cek gagal di tes
+        `dropdown`, `buat-pengumuman`, dan `halaman`); tetap 2.2.2
+      - `daisyui` 4.12.24 membuat animasi titik-titik loading bergerak
+        linear, tidak lagi melambat di ujung; tetap 4.12.10 sampai pindah ke
+        daisyUI 5
+      - `typescript` 5.9 menolak `pipeThrough(new TextDecoderStream())` di
+        `app/services/realtime/events.ts` karena tipe aliran data berubah;
+        tetap 5.5.4 sampai pindah ke TypeScript 6
+      - `prettier` 3.9 akan merapikan ulang 3 file lagi (`recap-pdf.ts`,
+        `satellite/index.ts`, `middleware.ts`); tetap 3.3.3
 
 ## Pengujian otomatis
 
