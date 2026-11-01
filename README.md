@@ -9,7 +9,7 @@ berjalan.
 
 ## Stack
 
-- Next.js 16 (App Router, Turbopack), React 19.3, TypeScript
+- Next.js 16 (App Router, Turbopack), React 19.3, TypeScript 6
 - Tailwind CSS 4 + daisyUI 5, @headlessui/react
 - Zustand untuk state, Axios untuk HTTP
 - react-hook-form + Zod, react-qr-code, jsPDF
@@ -138,6 +138,28 @@ Yang sengaja dipertahankan:
   sama, misalnya `shadow-sm` → `shadow-xs`, `outline-none` →
   `outline-hidden`, `break-words` → `wrap-break-word`, `data-[focus]:` →
   `data-focus:`, dan `w-[var(--button-width)]` → `w-(--button-width)`.
+
+Pindah ke TypeScript 6.0 (1 November 2026) tidak mengubah kode yang
+dijalankan. Hasil `next build` dibandingkan file demi file dengan TypeScript
+5.5 dan semua file JavaScript-nya identik; yang berbeda hanya salinan teks kode
+sumber di satu file source map. Bawaan baru TypeScript 6 dipakai apa adanya,
+tanpa pengaturan yang mengembalikan perilaku lama: tipe Node.js tetap terbawa
+lewat tipe Next.js, dan `import "./globals.css"` dikenali lewat deklarasi
+`*.css` milik Next.js. Yang berubah:
+
+- `app/services/realtime/events.ts`: aliran data realtime kini bertipe
+  `ReadableStream<Uint8Array<ArrayBuffer>>`, sama dengan tipe `response.body`
+  di TypeScript 6, karena tipe lama (`ReadableStream<Uint8Array>`) ditolak saat
+  dialirkan ke `TextDecoderStream`.
+- `dom.iterable` dihapus dari `lib` di `tsconfig.json`. Di TypeScript 6 isinya
+  sudah menjadi bagian `dom` dan filenya tinggal kosong.
+
+Pengaturan lain di `tsconfig.json` tetap karena diwajibkan atau diisi otomatis
+oleh Next.js. Misalnya bila `"strict": true` dihapus (TypeScript 6 sudah ketat
+secara bawaan), Next.js menulis `"strict": false` saat `npm run dev`.
+Versinya ditulis `~6.0.3`, bukan `^`, karena `typescript-eslint` yang dibawa
+`eslint-config-next` hanya mendukung TypeScript di bawah 6.1. Karena itu pula
+TypeScript 7 yang dipakai backend belum bisa dipakai di sini.
 
 ### Environment
 
@@ -1554,11 +1576,13 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
       - `@headlessui/react` 2.2.10 mengubah sorotan pilihan dropdown dan
         kadang tidak mencatat klik pada item menu (8 cek gagal di tes
         `dropdown`, `buat-pengumuman`, dan `halaman`); tetap 2.2.2
-      - `typescript` 5.9 menolak `pipeThrough(new TextDecoderStream())` di
-        `app/services/realtime/events.ts` karena tipe aliran data berubah;
-        tetap 5.5.4 sampai pindah ke TypeScript 6
       - `prettier` 3.9 akan merapikan ulang 3 file lagi (`recap-pdf.ts`,
         `satellite/index.ts`, `proxy.ts`); tetap 3.3.3
+- [ ] Pindah ke TypeScript 7 setelah `typescript-eslint` (dibawa
+      `eslint-config-next`) mendukungnya. TypeScript 7.0 belum punya API untuk
+      alat lain, jadi `npm run lint` berhenti dengan "typescript-eslint does
+      not support TS 7.0"; dukungannya direncanakan mulai TypeScript 7.1.
+      Next.js 16.4 sendiri sudah bisa memeriksa tipe dengan TypeScript 7
 
 ## Pengujian otomatis
 

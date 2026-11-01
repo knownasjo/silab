@@ -79,7 +79,7 @@ async function connect(signal: AbortSignal) {
 }
 
 async function readEvents(
-  body: ReadableStream<Uint8Array>,
+  body: ReadableStream<Uint8Array<ArrayBuffer>>,
   onEvent: (event: RealtimeEvent) => void,
 ) {
   const reader = body.pipeThrough(new TextDecoderStream()).getReader();
