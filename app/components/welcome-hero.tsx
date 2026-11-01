@@ -17,7 +17,7 @@ export default function WelcomeHero() {
           Selamat datang di Dashboard{" "}
           <span className="font-semibold text-[#3272CA]">SILAB.</span>
         </p>
-        <p className="mt-3 text-xl font-semibold leading-snug text-[#5E6278] xl:text-2xl">
+        <p className="mt-3 text-xl font-semibold leading-snug text-[#5E6278] xl:text-2xl xl:leading-8">
           Atur dan pantau semua informasi praktikum dengan mudah di sini.
         </p>
       </div>

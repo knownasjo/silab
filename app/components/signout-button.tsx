@@ -32,7 +32,7 @@ export default function SignOutButton({
         onClick={() => setIsOpen(true)}
         title={collapsed ? "Sign Out" : undefined}
         aria-label={collapsed ? "Sign Out" : undefined}
-        className={`flex w-full flex-row rounded-full py-3 font-semibold text-[#FE2F60] transition-all duration-300 group-hover/sidebaritem:bg-[#FBEFEF] ${collapsed ? "justify-center" : "space-x-3 px-4"}`}
+        className={`flex w-full flex-row rounded-full py-3 font-semibold text-[#FE2F60] transition-all duration-300 group-hover/sidebaritem:bg-[#FBEFEF] ${collapsed ? "justify-center" : "px-4"}`}
       >
         <Image
           className={
@@ -46,7 +46,7 @@ export default function SignOutButton({
           alt={"logout"}
         />
         {!collapsed && (
-          <p className="whitespace-nowrap transition-all duration-300 group-hover/sidebaritem:translate-x-3">
+          <p className="ml-3 whitespace-nowrap transition-all duration-300 group-hover/sidebaritem:translate-x-3">
             Sign Out
           </p>
         )}

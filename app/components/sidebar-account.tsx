@@ -56,7 +56,7 @@ export default function SidebarAccount({
       href="/dashboard/profil"
       title={collapsed ? `Profil ${userData.name}` : undefined}
       aria-label={`Profil ${userData.name}`}
-      className={`${className} transition-all duration-300 hover:bg-[#3285CA] hover:bg-opacity-10 ${isActive ? "bg-[#3285CA] bg-opacity-30" : ""}`}
+      className={`${className} transition-all duration-300 hover:bg-[#3285CA]/10 ${isActive ? "bg-[#3285CA]/30" : ""}`}
     >
       {content}
     </Link>

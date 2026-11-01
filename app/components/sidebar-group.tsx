@@ -38,7 +38,7 @@ export default function SidebarGroup({
   const isActive = pathName.startsWith(basePath);
 
   const linkClassName = (href: string) =>
-    `flex h-full w-full flex-row items-center space-x-2 rounded-full px-3 py-2 hover:bg-[#3285CA] hover:bg-opacity-10 ${pathName.startsWith(href) ? "bg-[#3285CA] bg-opacity-30" : ""}`;
+    `flex h-full w-full flex-row items-center space-x-2 rounded-full px-3 py-2 hover:bg-[#3285CA]/10 ${pathName.startsWith(href) ? "bg-[#3285CA]/30" : ""}`;
 
   const linkContent = (link: SidebarGroupLink) => (
     <>
@@ -57,7 +57,7 @@ export default function SidebarGroup({
         <PopoverButton
           title={title}
           aria-label={title}
-          className={`flex w-full items-center justify-center rounded-full py-3 outline-none transition-all duration-300 hover:bg-[#3285CA] hover:bg-opacity-10 ${isActive ? "bg-[#3285CA] bg-opacity-30" : ""}`}
+          className={`flex w-full items-center justify-center rounded-full py-3 outline-hidden transition-all duration-300 hover:bg-[#3285CA]/10 ${isActive ? "bg-[#3285CA]/30" : ""}`}
         >
           <Image src={icon} alt="" width={24} height={24} />
         </PopoverButton>
@@ -87,7 +87,7 @@ export default function SidebarGroup({
     <div className="group/sidebaritem w-full">
       <Disclosure defaultOpen={isActive}>
         <DisclosureButton
-          className={`group flex w-full flex-row items-center justify-between rounded-full py-3 pl-4 pr-6 transition-all duration-300 group-hover/sidebaritem:bg-[#3285CA] group-hover/sidebaritem:bg-opacity-10 ${isActive ? "bg-[#3285CA] bg-opacity-30" : ""}`}
+          className={`group flex w-full flex-row items-center justify-between rounded-full py-3 pl-4 pr-6 transition-all duration-300 group-hover/sidebaritem:bg-[#3285CA]/10 ${isActive ? "bg-[#3285CA]/30" : ""}`}
         >
           <div className="flex flex-row space-x-3 transition-all duration-300 group-hover/sidebaritem:translate-x-3">
             <Image src={icon} alt="" width={24} height={24} />
@@ -101,7 +101,7 @@ export default function SidebarGroup({
               alt=""
               fill
               style={{ objectFit: "contain" }}
-              className="duration-300 group-hover/sidebaritem:translate-x-3 group-data-[open]:rotate-180"
+              className="duration-300 group-hover/sidebaritem:translate-x-3 group-data-open:rotate-180"
             />
           </div>
         </DisclosureButton>

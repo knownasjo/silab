@@ -30,7 +30,7 @@ export default function SideBarItem({
         href={route}
         title={collapsed ? title : undefined}
         aria-label={collapsed ? title : undefined}
-        className={`flex w-full flex-row rounded-full py-3 font-semibold text-[#5E6278] ${collapsed ? "justify-center" : "space-x-3 px-4"} ${isActive ? "bg-[#3285CA] bg-opacity-30" : ""} transition-all duration-300 group-hover/sidebaritem:bg-[#3285CA] group-hover/sidebaritem:bg-opacity-10`}
+        className={`flex w-full flex-row rounded-full py-3 font-semibold text-[#5E6278] ${collapsed ? "justify-center" : "px-4"} ${isActive ? "bg-[#3285CA]/30" : ""} transition-all duration-300 group-hover/sidebaritem:bg-[#3285CA]/10`}
       >
         <Image
           className={
@@ -45,7 +45,7 @@ export default function SideBarItem({
           priority
         />
         {!collapsed && (
-          <p className="whitespace-nowrap transition-all duration-300 group-hover/sidebaritem:translate-x-3">
+          <p className="ml-3 whitespace-nowrap transition-all duration-300 group-hover/sidebaritem:translate-x-3">
             {title}
           </p>
         )}

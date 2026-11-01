@@ -226,7 +226,7 @@ export default function ClassMeetingsContent({
                       <p className="flex w-3/12 items-center justify-center whitespace-nowrap px-2 text-center xl:w-2/12">
                         {student.nim}
                       </p>
-                      <p className="flex w-4/12 min-w-0 items-center justify-center break-words px-2 text-center xl:w-5/12">
+                      <p className="flex w-4/12 min-w-0 items-center justify-center wrap-break-word px-2 text-center xl:w-5/12">
                         {student.studentName}
                       </p>
                       <div className="flex w-3/12 items-center justify-center">

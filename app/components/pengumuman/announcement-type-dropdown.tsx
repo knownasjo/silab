@@ -29,13 +29,13 @@ export default function AnnouncementTypeDropdown({
         </MenuButton>
         <MenuItems
           anchor="bottom"
-          className={`w-[var(--button-width)] space-y-3 rounded-lg bg-[#f5f5f5]`}
+          className={`w-(--button-width) space-y-3 rounded-lg bg-[#f5f5f5]`}
         >
           {ANNOUNCEMENT_TYPES.map((announcement) => (
             <MenuItem key={announcement.value}>
               <button
                 onClick={() => onAnnouncementTypeChange(announcement.value)}
-                className="flex w-full flex-row items-start justify-start px-[15px] py-2 font-semibold text-[#1D1D1D] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
+                className="flex w-full flex-row items-start justify-start px-[15px] py-2 font-semibold text-[#1D1D1D] data-focus:bg-[#3272CA] data-focus:text-white"
               >
                 {announcement.title}
               </button>

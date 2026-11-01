@@ -126,11 +126,11 @@ export default function StudentAttendanceEditButton({
                     <Switch
                       checked={presenceStatus}
                       onChange={setPresenceStatus}
-                      className="group relative flex h-7 w-14 cursor-pointer rounded-full bg-[#D9D9D9] p-1 transition-colors duration-200 ease-in-out focus:outline-none data-[checked]:bg-[#3272CA] data-[focus]:outline-1 data-[focus]:outline-white"
+                      className="group relative flex h-7 w-14 cursor-pointer rounded-full bg-[#D9D9D9] p-1 transition-colors duration-200 ease-in-out focus:not-data-focus:outline-hidden data-checked:bg-[#3272CA] data-focus:outline-1 data-focus:outline-offset-2 outline-white"
                     >
                       <span
                         aria-hidden="true"
-                        className="pointer-events-none inline-block size-5 translate-x-0 rounded-full bg-[white] shadow-lg ring-0 transition duration-200 ease-in-out group-data-[checked]:translate-x-7"
+                        className="pointer-events-none inline-block size-5 translate-x-0 rounded-full bg-[white] shadow-lg ring-0 transition duration-200 ease-in-out group-data-checked:translate-x-7"
                       />
                     </Switch>
                     <p className="text-sm font-bold text-[#1D1D1D]">Hadir</p>

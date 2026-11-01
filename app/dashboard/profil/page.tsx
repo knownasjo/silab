@@ -231,13 +231,13 @@ export default function Profile() {
           <h2 className="font-bold text-[#1d1d1d]">Data Akun</h2>
           <dl className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {[
-              ["Nama lengkap", userData.name, "break-words"],
+              ["Nama lengkap", userData.name, "wrap-break-word"],
               [numberLabel, userData.nim, "break-all"],
               ["Email", userData.email, "break-all"],
               [
                 "Peran",
                 ROLE_LABELS[userData.role] ?? userData.role,
-                "break-words",
+                "wrap-break-word",
               ],
             ].map(([term, value, wrap]) => (
               <div key={term} className="flex min-w-0 flex-col space-y-1">

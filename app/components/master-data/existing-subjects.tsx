@@ -139,14 +139,14 @@ export default function ExistingSubjects({
                         className="flex flex-col border-t border-[#F1F1F2] py-3 first:border-t-0"
                       >
                         <div className="flex flex-row flex-wrap items-baseline gap-x-3">
-                          <p className="break-words font-bold text-[#1D1D1D]">
+                          <p className="wrap-break-word font-bold text-[#1D1D1D]">
                             {subject.subjectName}
                           </p>
                           <p className="text-sm font-semibold text-[#5E6278]">
                             {subject.subjectCode}
                           </p>
                         </div>
-                        <p className="break-words text-sm text-[#1D1D1D]/70">
+                        <p className="wrap-break-word text-sm text-[#1D1D1D]/70">
                           Dosen pengampu: {subject.lecturer}
                         </p>
                       </div>

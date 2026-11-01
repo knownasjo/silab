@@ -181,12 +181,12 @@ export default function AnnouncementEditDialog({
                     height={20}
                   />
                 </ListboxButton>
-                <ListboxOptions className="mt-1 w-[var(--button-width)] overflow-hidden rounded-2xl bg-[#F5F5F5]">
+                <ListboxOptions className="mt-1 w-(--button-width) overflow-hidden rounded-2xl bg-[#F5F5F5]">
                   {ANNOUNCEMENT_TYPES.map((option) => (
                     <ListboxOption
                       key={option.value}
                       value={option.value}
-                      className="cursor-pointer px-5 py-2 font-semibold text-[#1D1D1D] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
+                      className="cursor-pointer px-5 py-2 font-semibold text-[#1D1D1D] data-focus:bg-[#3272CA] data-focus:text-white"
                     >
                       {option.title}
                     </ListboxOption>

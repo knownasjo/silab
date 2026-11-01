@@ -46,12 +46,12 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
       <Divider />
       <div className="col-start-1 row-start-2 flex min-w-0 flex-1 flex-col space-y-4">
         <p className="text-[16px] font-semibold text-[#5E6278]">Dosen</p>
-        <p className="break-words text-[18px] font-semibold text-black">
+        <p className="wrap-break-word text-[18px] font-semibold text-black">
           {data.lecturer}
         </p>
       </div>
       <Divider />
-      <div className="col-span-2 col-start-2 row-start-2 flex min-w-0 flex-[2] flex-col space-y-4">
+      <div className="col-span-2 col-start-2 row-start-2 flex min-w-0 flex-2 flex-col space-y-4">
         <div className="flex flex-row items-center space-x-2">
           <p className="text-[16px] font-semibold text-[#5E6278]">
             Asisten Praktikum
@@ -78,7 +78,7 @@ const ClassDetailsBox: React.FC<IClassDetailBox> = ({
             assistant.map((assistant, idx) => (
               <div className="flex flex-row space-x-[10px]" key={idx}>
                 <div className="w-[6px] shrink-0 self-stretch rounded-full bg-[#D2E3F1]"></div>
-                <p className="min-w-0 break-words text-[18px] font-semibold text-black">
+                <p className="min-w-0 wrap-break-word text-[18px] font-semibold text-black">
                   {assistant.fullname}
                 </p>
               </div>

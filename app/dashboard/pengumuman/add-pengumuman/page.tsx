@@ -162,7 +162,7 @@ export default function Pengumuman() {
               <input
                 id="announcement-title"
                 required
-                className="h-[46px] w-full rounded-2xl bg-[#F5F5F5] px-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]"
+                className="mt-3 h-[46px] w-full rounded-2xl bg-[#F5F5F5] px-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]"
                 placeholder="Judul pengumuman"
                 maxLength={MAX_TITLE_LENGTH}
                 onChange={(e) => updateForm("title", e.target.value)}
@@ -196,7 +196,7 @@ export default function Pengumuman() {
               <textarea
                 id="announcement-body"
                 required
-                className="h-[220px] w-full resize-none rounded-2xl bg-[#F5F5F5] px-5 pt-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]"
+                className="mt-3 h-[220px] w-full resize-none rounded-2xl bg-[#F5F5F5] px-5 pt-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]"
                 placeholder="Deskripsi pengumuman"
                 maxLength={MAX_BODY_LENGTH}
                 inputMode="text"
@@ -209,7 +209,7 @@ export default function Pengumuman() {
             </div>
           </fieldset>
           <FeedbackBox feedback={feedback} />
-          <div className="my-10 h-[1px] w-full bg-[#1D1D1D]/30" />
+          <div className="h-px w-full bg-[#1D1D1D]/30" />
           <div className="flex w-full flex-row justify-end space-x-6">
             <button
               type="button"

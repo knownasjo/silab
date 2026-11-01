@@ -62,22 +62,22 @@ export default function AnnouncementDetails() {
         <p className="text-sm font-semibold text-[#5E6278]">Loading...</p>
       ) : (
         <div className="flex w-full flex-col rounded-2xl bg-white p-8 text-[#1D1D1D]">
-          <p className="break-words text-[22px] font-bold">
+          <p className="wrap-break-word text-[22px] font-bold">
             {announcement.title}
           </p>
-          <p className="mt-6 whitespace-pre-line break-words text-[18px] font-semibold">
+          <p className="mt-6 whitespace-pre-line wrap-break-word text-[18px] font-semibold">
             {announcement.body}
           </p>
-          <div className="my-8 h-[1px] w-full bg-[#1D1D1D]/20" />
+          <div className="my-8 h-px w-full bg-[#1D1D1D]/20" />
           <div className="grid grid-cols-[240px_minmax(0,1fr)] gap-x-6 gap-y-6 text-lg font-bold">
             <p className="text-[#1D1D1D]/50">Jenis Pengumuman</p>
             <div>
               <AnnouncementTypeBadge type={announcement.type} />
             </div>
             <p className="text-[#1D1D1D]/50">Untuk</p>
-            <p className="break-words">{audienceLabel(announcement)}</p>
+            <p className="wrap-break-word">{audienceLabel(announcement)}</p>
             <p className="text-[#1D1D1D]/50">Dibuat oleh</p>
-            <p className="break-words">{announcement.author}</p>
+            <p className="wrap-break-word">{announcement.author}</p>
             <p className="text-[#1D1D1D]/50">Tanggal / Waktu Posting</p>
             <p>{formatPostedAt(announcement.createdAt)}</p>
           </div>

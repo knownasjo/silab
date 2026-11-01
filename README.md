@@ -10,7 +10,7 @@ berjalan.
 ## Stack
 
 - Next.js 16 (App Router, Turbopack), React 19.3, TypeScript
-- TailwindCSS 3 + DaisyUI, @headlessui/react
+- Tailwind CSS 4 + daisyUI 5, @headlessui/react
 - Zustand untuk state, Axios untuk HTTP
 - react-hook-form + Zod, react-qr-code, jsPDF
 
@@ -56,6 +56,88 @@ sengaja dipertahankan:
 ESLint 10 belum dipakai karena `eslint-plugin-react`, `eslint-plugin-import`,
 dan `eslint-plugin-jsx-a11y` yang dibawa `eslint-config-next` baru mendukung
 sampai ESLint 9.
+
+Pindah ke Tailwind CSS 4 dan daisyUI 5 (1 November 2026) juga dibuat tanpa
+mengubah tampilan, kecuali dua hal yang sengaja diterima (warna bawaan Tailwind
+dan titik-titik loading, lihat di bawah).
+Setiap elemen di 13 halaman dashboard laboran, 8 halaman dosen, dan halaman
+login dibandingkan dengan Tailwind CSS 3: posisi, ukuran, warna, dan foto
+halamannya sama. Yang ikut dibandingkan: semua bagian lipat dibuka, kursor di
+atas elemen, fokus keyboard, dropdown dan pop-up terbuka, lebar layar 1100,
+1366, dan 1920 px, laptop dalam mode gelap, hasil `next build`, dan foto di
+tengah animasi (menu samping diciutkan dan dibuka, kursor di atas menu,
+sakelar, garis fokus). Warna semi-transparan (misalnya `bg-[#3285CA]/30`)
+kini dihitung lewat `color-mix`: bidang warnanya bisa berbeda paling banyak 1
+dari 255 tingkat, dan beberapa piksel di tepi bentuk lengkung (misalnya ujung
+kapsul menu aktif di menu samping) paling banyak 3. Versi lama sendiri berbeda
+sebesar itu setiap kali halaman dimuat ulang, dan tidak terlihat mata.
+Warna bawaan Tailwind sengaja memakai nilai Tailwind 4 yang sedikit berbeda:
+abu-abu 400 untuk teks contoh di kolom isian (156/163/175 menjadi
+153/161/175), abu-abu 500 untuk tulisan "e.g Pertemuan 1" di pop-up Tambah
+Pertemuan, serta abu-abu 600 dan 700 untuk tombol Tutup di pop-up sukses
+(misalnya abu-abu 700 `#374151` menjadi `#364153`). Warna lain di SILAB
+ditulis langsung dengan kode hex, jadi tidak berubah.
+Urutan font cadangan dan jarak baris ukuran teks bawaan (`text-xs` sampai
+`text-3xl`) juga memakai nilai Tailwind 4. Teks SILAB memakai font Manrope, dan
+dibanding nilai Tailwind 3 tidak ada teks yang bergeser di semua halaman, lebar
+layar, dan kondisi interaktif yang dibandingkan.
+Titik-titik loading di tombol (`loading loading-dots loading-sm`/`loading-md`)
+sengaja memakai daisyUI 5 apa adanya. daisyUI hanya dipasang untuk komponen itu
+(`@plugin "daisyui" { themes: false; include: loading; }` di
+`app/globals.css`), jadi gaya dasar daisyUI lain tidak ikut. Dibanding
+daisyUI 4: titiknya naik-turun dengan kecepatan rata (dulu memantul halus),
+posisinya 4–5 px lebih rendah, tombol Simpan yang tingginya mengikuti isi
+menjadi 2 px lebih pendek selama loading, dan geraknya 3 kali lebih lambat bila
+mode "kurangi gerakan" aktif di komputer.
+Tailwind CSS 4 butuh Chrome/Edge 111, Safari 16.4, atau Firefox 128 ke atas.
+Yang sengaja dipertahankan:
+
+- `@import "tailwindcss" source("../app")`: Tailwind hanya membaca folder
+  `app/`, sama dengan `content` di `tailwind.config.ts` lama (file itu sudah
+  tidak ada). Tanpa itu Tailwind 4 ikut membaca README dan tes.
+- `drop-shadow-md` (kartu pengumuman) tetap dua bayangan tipis Tailwind 3.
+  Nilainya ada di `@theme inline`; di `@theme` biasa dua bayangan itu membuat
+  `filter` tidak sah dan bayangannya hilang.
+- Gaya dasar Tailwind 3 dikembalikan di `@layer base`: warna garis bawaan
+  abu-abu 200 dan warna placeholder abu-abu 400 (Tailwind 4 memakai warna
+  teks; abu-abunya kini nilai Tailwind 4), kursor tangan di tombol, kursor
+  biasa di elemen nonaktif, dan latar putih bawaan browser untuk kolom isian
+  (Tailwind 4 membuatnya transparan).
+- `space-x-*` dan `space-y-*` kini memberi jarak lewat margin kanan/bawah
+  setiap anak kecuali yang terakhir, bukan margin kiri/atas setiap anak
+  kecuali yang pertama, dan margin milik anak sendiri kini menang. Akibatnya
+  label tersembunyi (`sr-only`) dan label inline tidak lagi ikut memberi
+  jarak. Agar jaraknya tetap: kolom NIM dan Password di Log In diberi `mt-2`,
+  kolom judul dan deskripsi di Buat Pengumuman `mt-3`, kolom judul di pop-up
+  Tambah Pertemuan `mt-4`, lingkaran dan kotak pilihan penerima pengumuman
+  `ml-3`, dan judul "Untuk" `mb-6`. `mt-6` di kartu angka Dashboard dan
+  `my-10` di garis pemisah Buat Pengumuman dihapus karena di Tailwind 3 sudah
+  tertimpa jarak bawaan wadahnya. Teks di menu samping dan di tombol Sign Out
+  memakai `ml-3` menggantikan `space-x-3` di wadahnya: di Tailwind 4 jarak itu
+  pindah ke ikon, yang punya `transition-all`, sehingga jaraknya ikut
+  beranimasi saat menu samping dibuka.
+- `bg-opacity-*` sudah tidak ada di Tailwind 4. Sorotan menu samping kini
+  `bg-[#3285CA]/10` (saat kursor di atasnya) dan `bg-[#3285CA]/30` (menu
+  aktif), dengan warna yang sama.
+- `data-[closed]:transform-[scale(95%)]` di pop-up sukses dan gagal dihapus.
+  Di Tailwind 3 class itu tidak menghasilkan CSS; di Tailwind 4 ia aktif dan
+  membuat pop-up membesar dari 95% saat muncul.
+- Fokus keyboard pada tombol Tutup di pop-up sukses dan pada sakelar
+  (Switch) tetap garis putih 1 px berjarak 2 px:
+  `focus:not-data-focus:outline-hidden data-focus:outline-offset-2`.
+  `outline-hidden` di Tailwind 4 juga menghapus garis dari `outline-1`, jadi
+  ia hanya dipakai saat fokus bukan dari keyboard. Sakelar memakai
+  `outline-white` tanpa syarat karena `transition-colors` di Tailwind 4 ikut
+  menganimasikan warna garis. Karena itu juga tombol ciutkan/buka menu samping
+  memakai `transition-[color,background-color,border-color,text-decoration-color,fill,stroke]`,
+  daftar `transition-colors` Tailwind 3, supaya garis fokus birunya langsung
+  muncul dan tidak berubah dulu dari hitam ke biru.
+- Teks sambutan di halaman Log In memakai `xl:leading-8`. Di Tailwind 4,
+  `leading-snug` tidak lagi tertimpa `xl:text-2xl`.
+- Selebihnya nama class diganti alat resmi `@tailwindcss/upgrade` dengan hasil
+  sama, misalnya `shadow-sm` → `shadow-xs`, `outline-none` →
+  `outline-hidden`, `break-words` → `wrap-break-word`, `data-[focus]:` →
+  `data-focus:`, dan `w-[var(--button-width)]` → `w-(--button-width)`.
 
 ### Environment
 
@@ -210,7 +292,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
   (`subjectId` unik dari `GET /class`), bukan semua mata kuliah. Asisten tidak
   meminta `GET /subject` dan `GET /activation`.
 - Angka kartu selalu satu baris. Ukuran hurufnya mengikuti lebar kartu
-  (`[container-type:inline-size]` dengan satuan `cqi`), dan "/ total" lebih
+  (`@container` dengan satuan `cqi`), dan "/ total" lebih
   kecil. Kartu laboran dan dosen tampil 4 kolom mulai lebar 1280 px, dan 2 × 2
   di bawahnya. Sambutan memakai huruf lebih kecil di bawah 1280 px dan
   tingginya mengikuti isi, jadi tidak menimpa "Periode aktif".
@@ -229,9 +311,9 @@ mahasiswa (termasuk asisten) mengelola akunnya di aplikasi mobile.
   server mati), halaman hanya berisi judul; pesan merah "Data akun gagal
   dimuat" dengan tombol Coba lagi datang dari `account-load-notice.tsx` di
   layout.
-- Data Akun: nama dan peran pindah baris di spasi (`break-words`), jadi nama
-  panjang tidak terpotong di tengah kata. NIM/NIY dan email boleh terpotong di
-  mana saja (`break-all`) karena tidak punya spasi.
+- Data Akun: nama dan peran pindah baris di spasi (`wrap-break-word`), jadi
+  nama panjang tidak terpotong di tengah kata. NIM/NIY dan email boleh
+  terpotong di mana saja (`break-all`) karena tidak punya spasi.
 - **Ubah nama**: `PUT /auth/me`, 3–100 karakter, spasi berlebih dirapikan.
   Label menulis "(maks: 100 karakter)", penghitung di bawah isian menulis
   misalnya "11/100", dan isian berhenti di 100 karakter. Nama yang sama dengan
@@ -1083,7 +1165,7 @@ Sejak 22 Oktober 2026 semua dropdown memakai sorotan yang sama dengan pilihan
 Jenis Pengumuman di Buat Pengumuman:
 
 - Opsi yang disorot mouse atau dipilih dengan panah keyboard berlatar biru
-  `#3272CA` dengan tulisan putih (`data-[focus]:`), selebar daftar dan
+  `#3272CA` dengan tulisan putih (`data-focus:`), selebar daftar dan
   menempel sampai tepi atas dan bawah daftar. Daftar pilihan tidak diberi
   jarak dalam (padding) dan opsinya tidak berbentuk kapsul, jadi sorotan opsi
   pertama dan terakhir tidak menyisakan garis putih.
@@ -1156,11 +1238,14 @@ pada 22 Oktober 2026:
   - Jalur 6 px di bawah tabel tetap memakan tempat walau kosong, karena
     scrollbar yang digaya lewat `::-webkit-scrollbar` tidak bisa menumpang di
     atas isi seperti scrollbar bawaan macOS.
-  - Class itu mengembalikan `scrollbar-width` dan `scrollbar-color` ke `auto`.
-    Chrome mengabaikan gaya `::-webkit-scrollbar` bila salah satunya diisi,
-    padahal `globals.css` mengisi `scrollbar-width: none` dan gaya dasar
-    DaisyUI mengisi `scrollbar-color` untuk semua elemen. Tanpa itu yang
-    tampil scrollbar bawaan selebar tabel.
+  - Class itu mengembalikan `scrollbar-width` ke `auto`. Chrome mengabaikan
+    gaya `::-webkit-scrollbar` bila `scrollbar-width` atau `scrollbar-color`
+    diisi, padahal `globals.css` mengisi `scrollbar-width: none` untuk semua
+    elemen. Tanpa itu yang tampil scrollbar bawaan selebar tabel. Sampai
+    Oktober 2026 gaya dasar daisyUI juga mengisi `scrollbar-color` untuk semua
+    elemen dan saat kursor di atas elemen, sehingga class ini dulu ikut
+    mengembalikan `scrollbar-color`, termasuk untuk `:hover`. Sejak daisyUI 5
+    hanya dipasang untuk titik-titik loading, bagian itu dihapus.
   - Firefox tidak mengenal `::-webkit-scrollbar`, jadi di sana scrollbar tipis
     selebar tabel, berwarna transparan sampai tabel digeser
     (`@supports not selector(::-webkit-scrollbar)`).
@@ -1469,9 +1554,6 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
       - `@headlessui/react` 2.2.10 mengubah sorotan pilihan dropdown dan
         kadang tidak mencatat klik pada item menu (8 cek gagal di tes
         `dropdown`, `buat-pengumuman`, dan `halaman`); tetap 2.2.2
-      - `daisyui` 4.12.24 membuat animasi titik-titik loading bergerak
-        linear, tidak lagi melambat di ujung; tetap 4.12.10 sampai pindah ke
-        daisyUI 5
       - `typescript` 5.9 menolak `pipeThrough(new TextDecoderStream())` di
         `app/services/realtime/events.ts` karena tipe aliran data berubah;
         tetap 5.5.4 sampai pindah ke TypeScript 6

@@ -85,7 +85,7 @@ export default function AnnouncementAudienceField({
       />
       <span
         aria-hidden="true"
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#BFD9EF] bg-white transition-colors peer-checked:border-[#3272CA] peer-focus-visible:ring-2 peer-focus-visible:ring-[#3272CA]/40"
+        className="ml-3 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#BFD9EF] bg-white transition-colors peer-checked:border-[#3272CA] peer-focus-visible:ring-2 peer-focus-visible:ring-[#3272CA]/40"
       >
         <span
           className={`h-2.5 w-2.5 rounded-full transition-colors ${selected ? "bg-[#3272CA]" : "bg-transparent"}`}
@@ -97,7 +97,7 @@ export default function AnnouncementAudienceField({
 
   return (
     <fieldset className="flex flex-col space-y-3">
-      <legend className="mb-3 text-base font-semibold text-[#5E6278]">
+      <legend className="mb-6 text-base font-semibold text-[#5E6278]">
         Untuk
       </legend>
       <div className="flex flex-col space-y-3">
@@ -147,7 +147,7 @@ export default function AnnouncementAudienceField({
                     />
                     <span
                       aria-hidden="true"
-                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-[#BFD9EF] bg-white transition-colors peer-checked:border-[#3272CA] peer-checked:bg-[#3272CA] peer-focus-visible:ring-2 peer-focus-visible:ring-[#3272CA]/40"
+                      className="ml-3 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-[#BFD9EF] bg-white transition-colors peer-checked:border-[#3272CA] peer-checked:bg-[#3272CA] peer-focus-visible:ring-2 peer-focus-visible:ring-[#3272CA]/40"
                     >
                       <svg
                         viewBox="0 0 12 12"
@@ -163,7 +163,7 @@ export default function AnnouncementAudienceField({
                         />
                       </svg>
                     </span>
-                    <span className="min-w-0 break-words">
+                    <span className="min-w-0 wrap-break-word">
                       {subject.subjectName}{" "}
                       <span className="text-xs font-normal text-[#5E6278]">
                         {subject.subjectCode} · Semester {subject.semester}

@@ -233,7 +233,7 @@ export default function StudentPaymentDialog({
                       key={activation.id}
                       className={`${ROW_GRID} rounded-2xl border-2 border-[#F1F1F2] px-4 py-3 text-sm font-semibold text-[#5E6278]`}
                     >
-                      <div className="flex min-w-0 flex-col break-words">
+                      <div className="flex min-w-0 flex-col wrap-break-word">
                         <p className="font-bold text-[#1D1D1D]">
                           {activationSubjectName(activation)}
                         </p>
@@ -386,11 +386,11 @@ export default function StudentPaymentDialog({
                           checked={paymentStatus}
                           onChange={setPaymentStatus}
                           aria-label="Status pembayaran"
-                          className="group relative flex h-7 w-14 cursor-pointer rounded-full bg-[#D9D9D9] p-1 transition-colors duration-200 ease-in-out focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 data-[checked]:bg-[#3272CA] data-[focus]:outline-1 data-[focus]:outline-white"
+                          className="group relative flex h-7 w-14 cursor-pointer rounded-full bg-[#D9D9D9] p-1 transition-colors duration-200 ease-in-out focus:not-data-focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-60 data-checked:bg-[#3272CA] data-focus:outline-1 data-focus:outline-offset-2 outline-white"
                         >
                           <span
                             aria-hidden="true"
-                            className="pointer-events-none inline-block size-5 translate-x-0 rounded-full bg-[white] shadow-lg ring-0 transition duration-200 ease-in-out group-data-[checked]:translate-x-7"
+                            className="pointer-events-none inline-block size-5 translate-x-0 rounded-full bg-[white] shadow-lg ring-0 transition duration-200 ease-in-out group-data-checked:translate-x-7"
                           />
                         </Switch>
                         <p className="text-sm font-bold text-[#1D1D1D]">
@@ -446,7 +446,7 @@ export default function StudentPaymentDialog({
                             editing.availableClasses.length > 0 && (
                               <ListboxOption
                                 value={null}
-                                className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#5E6278] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
+                                className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#5E6278] data-focus:bg-[#3272CA] data-focus:text-white"
                               >
                                 Kosongkan (mahasiswa memilih sendiri)
                               </ListboxOption>
@@ -461,7 +461,7 @@ export default function StudentPaymentDialog({
                                 key={availableClass.id}
                                 value={availableClass}
                                 disabled={availableClass.isFull && !isCurrent}
-                                className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#1D1D1D] data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40 data-[focus]:bg-[#3272CA] data-[focus]:text-white"
+                                className="cursor-pointer px-3 py-2 text-sm font-semibold text-[#1D1D1D] data-disabled:cursor-not-allowed data-disabled:opacity-40 data-focus:bg-[#3272CA] data-focus:text-white"
                               >
                                 Kelas {availableClass.name} —{" "}
                                 {formatDay(availableClass.day)},{" "}

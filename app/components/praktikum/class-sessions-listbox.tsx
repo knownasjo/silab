@@ -47,13 +47,13 @@ export default function ClassSessionListbox({
         </ListboxButton>
         <ListboxOptions
           anchor="bottom"
-          className={`w-[var(--button-width)] space-y-3 rounded-lg bg-[#f5f5f5]`}
+          className={`w-(--button-width) space-y-3 rounded-lg bg-[#f5f5f5]`}
         >
           {sessions.map((session) => (
             <ListboxOption
               value={session.id}
               key={session.id}
-              className={`flex h-[54px] cursor-pointer items-center justify-center px-[15px] font-semibold text-[#1d1d1d] data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
+              className={`flex h-[54px] cursor-pointer items-center justify-center px-[15px] font-semibold text-[#1d1d1d] data-focus:bg-[#3272CA] data-focus:text-white`}
             >
               Sesi {session.number}, {session.startAt} - {session.endAt}
             </ListboxOption>

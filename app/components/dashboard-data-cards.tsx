@@ -30,7 +30,7 @@ export default function DashboardDataCards({
         : "grid-cols-2 xl:grid-cols-4";
 
   return (
-    <div className={`mt-6 grid w-full gap-5 ${columns}`}>
+    <div className={`grid w-full gap-5 ${columns}`}>
       {userData?.role === "LABORAN" && (
         <>
           <DashboardDataContainer

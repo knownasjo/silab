@@ -63,7 +63,7 @@ export default function AnnouncementDeleteDialog({
             <FeedbackBox feedback={{ ok: false, message: ANNOUNCEMENT_GONE }} />
           ) : (
             <>
-              <p className="break-words text-sm font-semibold text-[#5E6278]">
+              <p className="wrap-break-word text-sm font-semibold text-[#5E6278]">
                 Pengumuman{" "}
                 <span className="font-bold text-[#1D1D1D]">
                   {announcement.title}

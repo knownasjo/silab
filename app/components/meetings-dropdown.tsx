@@ -44,14 +44,14 @@ export default function MeetingsDropDown({
       </ListboxButton>
       <ListboxOptions
         anchor={{ to: "bottom", gap: 4, padding: 16 }}
-        className={`w-56 min-w-[var(--button-width)] rounded-2xl bg-[#D2E3F1] text-sm font-semibold text-[#3272CA]`}
+        className={`w-56 min-w-(--button-width) rounded-2xl bg-[#D2E3F1] text-sm font-semibold text-[#3272CA]`}
       >
         {meetingsData &&
           meetingsData.map((meeting) => (
             <ListboxOption
               key={meeting.id}
               value={meeting.id}
-              className={`w-full cursor-pointer p-3 data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
+              className={`w-full cursor-pointer p-3 data-focus:bg-[#3272CA] data-focus:text-white`}
             >
               <p className="flex w-full flex-row items-center justify-between space-x-3">
                 <span className="text-left">{meeting.meetingName}</span>

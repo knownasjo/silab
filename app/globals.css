@@ -1,27 +1,41 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" source("../app");
 
-:root {
-  --background-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-rgb: 255, 255, 255;
-  }
+@theme inline {
+  --drop-shadow-md: 0 4px 3px rgb(0 0 0 / 0.07), 0 2px 2px rgb(0 0 0 / 0.06);
 }
 
 @layer base {
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  :disabled {
+    cursor: default;
+  }
+
+  input:where(:not([type="button"], [type="reset"], [type="submit"])),
+  select,
+  optgroup,
+  textarea {
+    background-color: revert;
   }
 
   * {
     scrollbar-width: none;
-    -ms-overflow-style: none;
   }
 
   *::-webkit-scrollbar {
@@ -29,41 +43,39 @@
   }
 }
 
-@layer utilities {
-  .scrollbar-pertemuan,
-  .scrollbar-pertemuan:hover {
-    scrollbar-width: auto;
-    scrollbar-color: auto;
-  }
+@plugin "daisyui" {
+  themes: false;
+  include: loading;
+}
 
-  .scrollbar-pertemuan::-webkit-scrollbar {
+@utility scrollbar-pertemuan {
+  scrollbar-width: auto;
+
+  &::-webkit-scrollbar {
     display: block;
     width: 0;
     height: 6px;
   }
 
-  .scrollbar-pertemuan::-webkit-scrollbar-track {
+  &::-webkit-scrollbar-track {
     margin-left: var(--kolom-kiri, 0px);
     margin-right: var(--kolom-kanan, 0px);
   }
 
-  .scrollbar-pertemuan::-webkit-scrollbar-thumb {
+  &::-webkit-scrollbar-thumb {
     border-radius: 9999px;
     background: transparent;
   }
 
-  .scrollbar-pertemuan[data-bergeser]::-webkit-scrollbar-thumb {
+  &[data-bergeser]::-webkit-scrollbar-thumb {
     background: #a1a5b7;
   }
 
   @supports not selector(::-webkit-scrollbar) {
-    .scrollbar-pertemuan,
-    .scrollbar-pertemuan:hover {
-      scrollbar-width: thin;
-      scrollbar-color: transparent transparent;
-    }
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
 
-    .scrollbar-pertemuan[data-bergeser] {
+    &[data-bergeser] {
       scrollbar-color: #a1a5b7 transparent;
     }
   }

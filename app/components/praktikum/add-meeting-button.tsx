@@ -121,7 +121,7 @@ export default function AddMeetingButton({
                   required
                   autoComplete="off"
                   maxLength={50}
-                  className="h-[46px] w-full rounded-2xl bg-[#F5F5F5] px-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]"
+                  className="mt-4 h-[46px] w-full rounded-2xl bg-[#F5F5F5] px-5 placeholder:text-base placeholder:font-semibold placeholder:text-[#1D1D1D]/30 focus:outline-[#3272CA]"
                   placeholder="Judul pertemuan"
                   onChange={(e) => {
                     setMeetingName(e.target.value);

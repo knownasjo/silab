@@ -86,7 +86,7 @@ export default function Authentication({
                 type="text"
                 inputMode="numeric"
                 autoComplete="username"
-                className={inputClassName(!!errors.nim)}
+                className={`${inputClassName(!!errors.nim)} mt-2`}
                 placeholder="NIM / NIY"
                 aria-invalid={!!errors.nim}
                 {...register("nim")}
@@ -104,7 +104,7 @@ export default function Authentication({
               <label htmlFor="password" className="sr-only">
                 Password
               </label>
-              <div className="relative">
+              <div className="relative mt-2">
                 <input
                   id="password"
                   type={visible ? "text" : "password"}

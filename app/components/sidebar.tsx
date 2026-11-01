@@ -88,7 +88,7 @@ export default function SideBar({
         title={toggleLabel}
         aria-label={toggleLabel}
         aria-expanded={!collapsed}
-        className="absolute -right-4 top-14 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-[#E4E6EF] bg-white shadow-sm transition-colors hover:bg-[#F1F1F2]"
+        className="absolute -right-4 top-14 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-[#E4E6EF] bg-white shadow-xs transition-[color,background-color,border-color,text-decoration-color,fill,stroke] hover:bg-[#F1F1F2]"
       >
         <div
           className={`relative h-4 w-4 transition-transform duration-300 ${collapsed ? "-rotate-90" : "rotate-90"}`}

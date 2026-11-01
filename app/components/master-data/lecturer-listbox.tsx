@@ -67,11 +67,11 @@ export default function LecturerListBox({
         </ListboxButton>
         <ListboxOptions
           anchor={{ to: "bottom", gap: 8, padding: 16 }}
-          className="w-[var(--button-width)] rounded-lg bg-[#f5f5f5]"
+          className="w-(--button-width) rounded-lg bg-[#f5f5f5]"
         >
           {dosenData.map((lecturer) => (
             <ListboxOption
-              className="cursor-pointer px-[15px] py-3 font-semibold text-[#1D1D1D] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
+              className="cursor-pointer px-[15px] py-3 font-semibold text-[#1D1D1D] data-focus:bg-[#3272CA] data-focus:text-white"
               key={lecturer.id}
               value={lecturer}
             >

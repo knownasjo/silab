@@ -30,13 +30,13 @@ export default function ClassDayDropdown({
         </ListboxButton>
         <ListboxOptions
           anchor="bottom"
-          className={`w-[var(--button-width)] space-y-3 rounded-lg bg-[#f5f5f5]`}
+          className={`w-(--button-width) space-y-3 rounded-lg bg-[#f5f5f5]`}
         >
           {Object.entries(DAY_LABELS).map(([day, title]) => (
             <ListboxOption
               value={day}
               key={day}
-              className={`cursor-pointer px-[15px] py-2 font-semibold text-[#1d1d1d] data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
+              className={`cursor-pointer px-[15px] py-2 font-semibold text-[#1d1d1d] data-focus:bg-[#3272CA] data-focus:text-white`}
             >
               {title}
             </ListboxOption>

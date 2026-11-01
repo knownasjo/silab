@@ -147,7 +147,7 @@ export default function Pembayaran() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nama atau NIM"
             className={
-              "h-full w-full rounded-2xl pl-10 data-[focus]:outline-[#3272CA]"
+              "h-full w-full rounded-2xl pl-10 data-focus:outline-[#3272CA]"
             }
           />
         </Field>
@@ -200,7 +200,7 @@ export default function Pembayaran() {
             >
               <p className="hidden xl:block">{student.nim}</p>
               <div className="flex min-w-0 flex-col">
-                <p className="break-words">{student.student}</p>
+                <p className="wrap-break-word">{student.student}</p>
                 <p className="text-xs xl:hidden">{student.nim}</p>
               </div>
               <p>{student.activations.length} mata kuliah</p>

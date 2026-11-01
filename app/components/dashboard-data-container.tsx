@@ -14,7 +14,7 @@ export default function DashboardDataContainer({
   const isReady = data !== null && data !== undefined;
 
   return (
-    <div className="flex min-h-[clamp(200px,32vh,280px)] min-w-0 flex-col justify-between space-y-4 rounded-3xl bg-[#3272CA] p-5 [container-type:inline-size]">
+    <div className="flex min-h-[clamp(200px,32vh,280px)] min-w-0 flex-col justify-between space-y-4 rounded-3xl bg-[#3272CA] p-5 @container">
       <p className="whitespace-nowrap text-[clamp(40px,26cqi,72px)] font-bold leading-none text-[#FFBF01]">
         {!isReady && "-"}
         {isReady && data}
@@ -24,7 +24,7 @@ export default function DashboardDataContainer({
       </p>
       <div className="flex flex-col text-white">
         <p className="text-[clamp(16px,10.5cqi,24px)] font-bold">{title}</p>
-        <p className="min-h-[3.5rem] text-[clamp(14px,8.5cqi,18px)] font-semibold">
+        <p className="min-h-14 text-[clamp(14px,8.5cqi,18px)] font-semibold">
           {subTitle}
         </p>
       </div>

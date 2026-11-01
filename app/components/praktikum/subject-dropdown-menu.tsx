@@ -39,16 +39,16 @@ export default function SubjectDropdownMenu({
       </ListboxButton>
       <ListboxOptions
         anchor="bottom"
-        className={`w-[var(--button-width)] rounded-lg bg-white`}
+        className={`w-(--button-width) rounded-lg bg-white`}
       >
         {sortedSubjects.map((subject) => (
           <ListboxOption
             value={subject.id}
             key={subject.id}
-            className={`group cursor-pointer px-[15px] py-2 data-[focus]:bg-[#3272CA] data-[focus]:text-white`}
+            className={`group cursor-pointer px-[15px] py-2 data-focus:bg-[#3272CA] data-focus:text-white`}
           >
             <p>{subject.subjectName}</p>
-            <p className="text-xs font-semibold text-[#5E6278] group-data-[focus]:text-white">
+            <p className="text-xs font-semibold text-[#5E6278] group-data-focus:text-white">
               Semester {subject.semester}
             </p>
           </ListboxOption>

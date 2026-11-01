@@ -54,13 +54,13 @@ export default function PeriodSelector() {
         </ListboxButton>
         <ListboxOptions
           anchor={{ to: "bottom start", gap: 8, padding: 16 }}
-          className="z-50 w-[var(--button-width)] rounded-xl bg-white shadow-lg"
+          className="z-50 w-(--button-width) rounded-xl bg-white shadow-lg"
         >
           {periodsData.map((period) => (
             <ListboxOption
               key={period.id}
               value={period.id}
-              className="cursor-pointer px-4 py-3 text-sm font-semibold text-[#1D1D1D] data-[focus]:bg-[#3272CA] data-[focus]:text-white"
+              className="cursor-pointer px-4 py-3 text-sm font-semibold text-[#1D1D1D] data-focus:bg-[#3272CA] data-focus:text-white"
             >
               {optionLabel(period)}
             </ListboxOption>
