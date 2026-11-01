@@ -373,7 +373,7 @@ await runWebTest("List dan Detail Pengumuman", data, async (browser) => {
         heading: !!heading && getComputedStyle(heading).fontSize === "32px",
         back: !!main.querySelector('a[href="${LIST}"]'),
         share: value ? Math.round((value.getBoundingClientRect().width / box.getBoundingClientRect().width) * 100) / 100 : 0,
-        labelLines: [...main.querySelectorAll("p")].filter((p) => p.innerText.trim() === "Tanggal / Waktu Posting").map((p) => Math.round(p.getBoundingClientRect().height / parseFloat(getComputedStyle(p).lineHeight)))[0],
+        labelLines: [...main.querySelectorAll("p")].filter((p) => p.innerText.trim() === "Tanggal / Waktu Posting").map((p) => { const range = document.createRange(); range.selectNodeContents(p); return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size; })[0],
       };
     })()`);
     check(
