@@ -161,6 +161,11 @@ Versinya ditulis `~6.0.3`, bukan `^`, karena `typescript-eslint` yang dibawa
 `eslint-config-next` hanya mendukung TypeScript di bawah 6.1. Karena itu pula
 TypeScript 7 yang dipakai backend belum bisa dipakai di sini.
 
+Tipe Node.js (`@types/node`) naik dari versi 20 ke 26 (1 November 2026), sama
+dengan Node.js 26 yang dipakai, dan `lodash` serta `@types/lodash` dihapus
+karena tidak pernah dipakai di kode. Kode yang dijalankan tidak berubah: hasil
+`next build` identik file demi file dengan sebelumnya.
+
 ### Environment
 
 File `.env.local` di root (tidak di-commit; salin dari `.env.example`):
