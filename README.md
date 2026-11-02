@@ -172,6 +172,18 @@ resolver Effect dan TypeBox yang tidak dipakai di sini. File `zodResolver` dan
 fungsi bantunya di paket baru sama persis dengan versi 5.9, dan hasil
 `next build` identik file demi file dengan sebelumnya.
 
+`@headlessui/react`, paket untuk dropdown, menu, pop-up, sakelar, dan sidebar,
+naik dari versi 2.2.2 ke 2.2.10 (2 November 2026), bersama paket bawaannya
+`@react-aria/focus` 3.22 dan `@react-aria/interactions` 3.28 yang mengatur
+tanda hover dan fokus. Klik, keyboard, sorotan saat mouse digerakkan, klik di
+luar daftar, dropdown di dalam pop-up, popover sidebar, dan sakelar dicek
+berdampingan dengan versi lama dan hasilnya sama. Dua hal kecil berbeda. Saat
+sebuah dropdown pertama kali dibuka di suatu halaman, daftarnya muncul 1–2
+frame (0,02–0,03 detik) lebih lambat, karena `--button-width` baru diukur
+setelah daftar terbuka. Pilihan juga baru disorot setelah mouse bergerak di
+atasnya, sehingga daftar yang muncul atau bergulir di bawah mouse yang diam
+tidak ikut menyorot pilihan di bawahnya.
+
 ### Environment
 
 File `.env.local` di root (tidak di-commit; salin dari `.env.example`):
@@ -1584,9 +1596,6 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
       29 Oktober 2026 (yang lain sudah: react-hook-form 7.91, react-qr-code
       2.2 dengan gambar QR identik, tailwindcss 3.4.19 dengan CSS setara,
       axios, zustand, postcss, eslint 8.57, @types/lodash, @types/node 20):
-      - `@headlessui/react` 2.2.10 mengubah sorotan pilihan dropdown dan
-        kadang tidak mencatat klik pada item menu (8 cek gagal di tes
-        `dropdown`, `buat-pengumuman`, dan `halaman`); tetap 2.2.2
       - `prettier` 3.9 akan merapikan ulang 3 file lagi (`recap-pdf.ts`,
         `satellite/index.ts`, `proxy.ts`); tetap 3.3.3
 - [ ] Pindah ke TypeScript 7 setelah `typescript-eslint` (dibawa
