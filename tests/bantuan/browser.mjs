@@ -219,10 +219,24 @@ export const openBrowser = async () => {
   };
 
   const realClick = async (elementExpression) => {
-    const box = await evaluate(`(() => {
+    const box = await evaluate(`(async () => {
       const el = ${elementExpression};
       if (!el) return null;
       el.scrollIntoView({ block: "center" });
+      const frame = () => new Promise((done) => requestAnimationFrame(done));
+      let last = "";
+      let stableFrames = 0;
+      let since = performance.now();
+      for (const end = performance.now() + 1500; performance.now() < end; ) {
+        await frame();
+        const r = el.getBoundingClientRect();
+        const now = [r.left, r.top, r.width, r.height].join();
+        if (now !== last) {
+          last = now;
+          stableFrames = 0;
+          since = performance.now();
+        } else if (++stableFrames >= 6 && performance.now() - since >= 100) break;
+      }
       const r = el.getBoundingClientRect();
       return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     })()`);

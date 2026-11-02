@@ -62,11 +62,12 @@ await runWebTest("Sorotan semua dropdown", data, async (browser) => {
       const r = item.getBoundingClientRect();
       return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     })()`);
-    await send("Input.dispatchMouseEvent", {
-      type: "mouseMoved",
-      x: point.x,
-      y: point.y,
-    });
+    for (const step of [4, 2, 0])
+      await send("Input.dispatchMouseEvent", {
+        type: "mouseMoved",
+        x: point.x - step,
+        y: point.y,
+      });
     await sleep(300);
     return evaluate(`(() => {
       const panel = ${PANEL};

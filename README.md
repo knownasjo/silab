@@ -1620,6 +1620,16 @@ jaringan lambat itu bisa 9–12 detik dan data kadang sudah selesai dimuat lebih
 dulu, sehingga "Loading..." terlewat (1 dari 8 percobaan) dan tes gagal
 padahal halamannya benar.
 
+Klik di tes (`realClick` di `tests/bantuan/browser.mjs`) menunggu sampai
+elemen yang akan diklik diam: posisi dan ukurannya sama selama 6 frame
+berturut-turut dan paling sedikit 0,1 detik (paling lama 1,5 detik), baru
+mouse ditekan di tengahnya, seperti orang yang baru mengklik setelah
+pilihannya terlihat. Dulu titik klik dihitung seketika, sehingga klik pada
+pilihan dropdown yang baru saja terbuka bisa meleset bila daftarnya masih
+berubah ukuran di frame pertamanya. Tes `dropdown` menggerakkan mouse ke opsi
+dalam tiga langkah kecil (4 px, 2 px, lalu tepat di tengah), seperti mouse
+sungguhan yang selalu mengirim beberapa gerakan, bukan satu lompatan.
+
 Syarat sebelum menjalankan:
 
 - Backend jalan (`npm run dev` di `silab-backend`) dan web jalan
