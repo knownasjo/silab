@@ -184,6 +184,17 @@ setelah daftar terbuka. Pilihan juga baru disorot setelah mouse bergerak di
 atasnya, sehingga daftar yang muncul atau bergulir di bawah mouse yang diam
 tidak ikut menyorot pilihan di bawahnya.
 
+Prettier, alat perapi format kode, naik dari versi 3.3 ke 3.9.10
+(2 November 2026). Prettier tidak dipakai saat `npm run build`,
+`npm run lint`, atau saat aplikasi berjalan, jadi hasil `next build` identik
+file demi file. Kode sengaja tidak dirapikan ulang. Gaya versi baru sedikit
+berbeda untuk 3 file (`recap-pdf.ts`, `satellite/index.ts`, `proxy.ts`), hanya
+spasi dan pindah baris, sehingga ketiganya ikut terdaftar di
+`npx prettier --check .` dan baru berubah bila dirapikan, misalnya saat
+disimpan dengan format otomatis. `prettier-plugin-tailwindcss` terpasang sejak
+awal tetapi tidak aktif, karena tidak ada file pengaturan Prettier dan
+Prettier 3 tidak memuat plugin secara otomatis.
+
 ### Environment
 
 File `.env.local` di root (tidak di-commit; salin dari `.env.example`):
@@ -1592,12 +1603,12 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
       postcss bawaan Next.js 15.5, yang hilang setelah pindah ke Next.js 16.
       Pesan validasi Log In tetap sama karena kedua kolomnya memakai pesan
       sendiri
-- [ ] Paket yang sengaja belum dinaikkan pada pembaruan versi kecil
+- [x] Paket yang sengaja belum dinaikkan pada pembaruan versi kecil
       29 Oktober 2026 (yang lain sudah: react-hook-form 7.91, react-qr-code
       2.2 dengan gambar QR identik, tailwindcss 3.4.19 dengan CSS setara,
-      axios, zustand, postcss, eslint 8.57, @types/lodash, @types/node 20):
-      - `prettier` 3.9 akan merapikan ulang 3 file lagi (`recap-pdf.ts`,
-        `satellite/index.ts`, `proxy.ts`); tetap 3.3.3
+      axios, zustand, postcss, eslint 8.57, @types/lodash, @types/node 20)
+      kini sudah naik: `@headlessui/react` 2.2.10 dan `prettier` 3.9.10
+      (2 November 2026)
 - [ ] Pindah ke TypeScript 7 setelah `typescript-eslint` (dibawa
       `eslint-config-next`) mendukungnya. TypeScript 7.0 belum punya API untuk
       alat lain, jadi `npm run lint` berhenti dengan "typescript-eslint does
