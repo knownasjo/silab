@@ -166,6 +166,12 @@ dengan Node.js 26 yang dipakai, dan `lodash` serta `@types/lodash` dihapus
 karena tidak pernah dipakai di kode. Kode yang dijalankan tidak berubah: hasil
 `next build` identik file demi file dengan sebelumnya.
 
+`@hookform/resolvers`, penghubung form Log In dengan zod, naik dari versi 5.9
+ke 7.0 (2 November 2026). Perubahan besar di versi 6 dan 7 hanya untuk
+resolver Effect dan TypeBox yang tidak dipakai di sini. File `zodResolver` dan
+fungsi bantunya di paket baru sama persis dengan versi 5.9, dan hasil
+`next build` identik file demi file dengan sebelumnya.
+
 ### Environment
 
 File `.env.local` di root (tidak di-commit; salin dari `.env.example`):
