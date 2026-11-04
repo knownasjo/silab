@@ -195,6 +195,19 @@ disimpan dengan format otomatis. `prettier-plugin-tailwindcss` terpasang sejak
 awal tetapi tidak aktif, karena tidak ada file pengaturan Prettier dan
 Prettier 3 tidak memuat plugin secara otomatis.
 
+Next.js dan `eslint-config-next` naik dari versi 16.4.3 ke 16.4.5
+(4 November 2026). Versi 16.4.5 adalah rilis keamanan yang menutup tujuh celah
+tingkat sedang. Yang mengenai SILAB hanya satu: pengoptimal gambar
+`next/image`, yang dipakai untuk gambar dari Supabase Storage, kini memeriksa
+struktur file AVIF dan HEIC dengan benar, sehingga file teks seperti SVG tidak
+bisa lagi dikira gambar AVIF. Enam lainnya ada di fitur yang tidak dipakai di
+sini: `'use cache'` dan `unstable_cache`, fallback shell partial prerendering,
+respons `fetch` yang diteruskan, dan cookie internal middleware di runtime edge
+(`proxy.ts` hanya membaca cookie lalu mengalihkan halaman). Versi 16.4.4 di
+antaranya hanya berisi perbaikan internal Next.js. Kode SILAB di hasil
+`next build` identik modul demi modul dengan sebelumnya, dan 728 cek otomatis
+lulus, baik dengan `npm run dev` maupun `next start`.
+
 ### Environment
 
 File `.env.local` di root (tidak di-commit; salin dari `.env.example`):
