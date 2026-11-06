@@ -1663,6 +1663,16 @@ berubah ukuran di frame pertamanya. Tes `dropdown` menggerakkan mouse ke opsi
 dalam tiga langkah kecil (4 px, 2 px, lalu tepat di tengah), seperti mouse
 sungguhan yang selalu mengirim beberapa gerakan, bukan satu lompatan.
 
+Setelah tersambung ke Chrome, alat bantu membawa tab uji ke depan
+(`Page.bringToFront` di `tests/bantuan/browser.mjs`), seperti tab yang sedang
+dipakai orang. Chrome 157 tanpa layar menolak permintaan layar penuh dari tab
+yang belum dibawa ke depan dengan pesan "not granted", walaupun permintaannya
+berasal dari klik sungguhan. Dulu alat bantu tidak melakukannya, sehingga
+setelah Chrome diperbarui ke 157 cek "Layar Penuh memperbesar kode QR" di tes
+`detail-kelas` gagal padahal tombolnya benar. Di Chrome biasa yang tampil di
+layar, pengguna selalu mengklik di tab yang sedang terbuka, jadi tombol itu
+tidak terpengaruh.
+
 Syarat sebelum menjalankan:
 
 - Backend jalan (`npm run dev` di `silab-backend`) dan web jalan

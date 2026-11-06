@@ -352,6 +352,7 @@ export const openBrowser = async () => {
     behavior: "allow",
     downloadPath: browser.downloads,
   });
+  await send("Page.bringToFront");
   return browser;
 };
 
