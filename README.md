@@ -170,7 +170,10 @@ karena tidak pernah dipakai di kode. Kode yang dijalankan tidak berubah: hasil
 ke 7.0 (2 November 2026). Perubahan besar di versi 6 dan 7 hanya untuk
 resolver Effect dan TypeBox yang tidak dipakai di sini. File `zodResolver` dan
 fungsi bantunya di paket baru sama persis dengan versi 5.9, dan hasil
-`next build` identik file demi file dengan sebelumnya.
+`next build` identik file demi file dengan sebelumnya. Lalu naik ke 7.0.3
+(8 November 2026): perbaikan di 7.0.2 dan 7.0.3 hanya untuk resolver io-ts
+dan Effect. Folder `zod` dan file inti paketnya sama persis, dan hasil
+`next build` tetap identik file demi file.
 
 `@headlessui/react`, paket untuk dropdown, menu, pop-up, sakelar, dan sidebar,
 naik dari versi 2.2.2 ke 2.2.10 (2 November 2026), bersama paket bawaannya
