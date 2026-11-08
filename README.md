@@ -175,6 +175,12 @@ fungsi bantunya di paket baru sama persis dengan versi 5.9, dan hasil
 dan Effect. Folder `zod` dan file inti paketnya sama persis, dan hasil
 `next build` tetap identik file demi file.
 
+`zustand`, tempat state halaman di folder `store/`, naik dari versi 5.0.16 ke
+5.1.0 (8 November 2026). Perubahan 5.1.0 hanya di middleware `persist` dan
+`devtools`, yang tidak dipakai di sini karena semua store hanya memakai
+`create`. File inti paket yang dipakai web sama persis, dan hasil `next build`
+identik file demi file dengan sebelumnya.
+
 `@headlessui/react`, paket untuk dropdown, menu, pop-up, sakelar, dan sidebar,
 naik dari versi 2.2.2 ke 2.2.10 (2 November 2026), bersama paket bawaannya
 `@react-aria/focus` 3.22 dan `@react-aria/interactions` 3.28 yang mengatur
