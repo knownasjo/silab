@@ -1617,7 +1617,7 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
       `httpOnly` tetapi belum `secure` karena lab masih memakai HTTP
 - [ ] `next.config.js` masih menunjuk hostname Supabase lama bila project ref
       berubah
-- [x] `npm audit` bersih (0 celah) sejak 29 Oktober 2026. Next.js 15.5.28
+- [x] `npm audit` bersih (0 celah) pada 29 Oktober 2026. Next.js 15.5.28
       menutup eksekusi kode jarak jauh lewat optimasi gambar SVG dan DoS di
       Server Actions; zod 4 bersama `@hookform/resolvers` 5.9 dan
       `npm audit fix` (dompurify, follow-redirects, brace-expansion,
@@ -1625,6 +1625,20 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
       postcss bawaan Next.js 15.5, yang hilang setelah pindah ke Next.js 16.
       Pesan validasi Log In tetap sama karena kedua kolomnya memakai pesan
       sendiri
+- [ ] Sejak 31 Oktober 2026 `npm audit` kembali melaporkan 7 celah tingkat
+      sedang. Ketujuhnya satu celah yang sama di `minimatch` 10.2.6
+      (GHSA-g3hv-75wg-m249), dihitung sekali untuk `minimatch` dan sekali
+      untuk tiap paket `typescript-eslint` yang bergantung padanya. Paket ini
+      dibawa `eslint-config-next` dan hanya dipakai ESLint (`npm run lint`
+      dan awal `npm run build`), tidak ikut ke dashboard. Celahnya juga tidak
+      terbuka di sini: hanya terjadi bila `minimatch` diberi
+      `optimizationLevel` 2 ke atas, sedangkan `typescript-eslint` memakai
+      level bawaan dan baru memanggilnya bila opsi `projectService` aktif,
+      yang tidak dipakai SILAB. Saran `npm audit fix` dari npm hanya
+      menaikkan `typescript-eslint` ke 8.72.2, yang masih memakai `minimatch`
+      10, jadi ketujuh celah tetap ada. Celah ini tertutup setelah ada versi
+      stabil `typescript-eslint` yang memakai `minimatch` 11 (versi uji
+      8.72.3 sudah) dan `package-lock.json` diperbarui
 - [x] Paket yang sengaja belum dinaikkan pada pembaruan versi kecil
       29 Oktober 2026 (yang lain sudah: react-hook-form 7.91, react-qr-code
       2.2 dengan gambar QR identik, tailwindcss 3.4.19 dengan CSS setara,
