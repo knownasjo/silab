@@ -357,6 +357,22 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman, masing-masing dengan keterangan "Untuk: ..." |
 | `/dashboard/profil` | LABORAN/DOSEN: data akun, ubah nama, ganti password. Asisten: data akun saja + arahan memakai aplikasi mobile |
 
+Alamat yang tidak dikenal menampilkan halaman 404 dari `app/not-found.tsx`.
+Tampilannya sama persis dengan halaman 404 bawaan Next.js: "404 | This page
+could not be found." di tengah layar, terang atau gelap mengikuti pengaturan
+perangkat. Markup dan gayanya disalin dari halaman bawaan Next.js 16.4.5, jadi
+bila Next.js nanti mengubah tampilan bawaannya, halaman ini tetap sama. Judul
+tabnya "SILAB Admin" dari `app/layout.tsx`, sama seperti halaman lain, dan hanya
+ada satu. Sampai 12 November 2026 SILAB memakai halaman 404 bawaan Next.js, yang
+membawa judul sendiri, "404: This page could not be found.", selain "SILAB
+Admin". Akibatnya HTML halaman 404 punya dua `<title>` yang urutannya
+berubah-ubah antar build (dari 15 kali `next build`, 2 kali "SILAB Admin" yang
+di depan), dan setelah JavaScript berjalan jumlahnya menjadi tiga. Tab browser
+berakhir di "SILAB Admin" sekitar 0,04 detik setelah halaman terbuka, tetapi di
+kebanyakan build sempat menampilkan "404: This page could not be found." lebih
+dulu, dan pratinjau tautan yang membaca HTML tanpa JavaScript mendapat judul
+yang berbeda-beda antar build.
+
 ### Dashboard
 
 - Kartu laboran: Jumlah Praktikum (`GET /subject`), Jumlah Kelas di periode
@@ -1719,7 +1735,7 @@ node tests/login.mjs        # satu tes saja
 
 | Tes | Yang diperiksa | Cek |
 |---|---|---|
-| `halaman` | semua halaman laboran tampil tanpa error JavaScript; pilihan dosen, mata kuliah, hari, ruangan, dan jenis pengumuman terisi | 32 |
+| `halaman` | semua halaman laboran tampil tanpa error JavaScript; pilihan dosen, mata kuliah, hari, ruangan, dan jenis pengumuman terisi; alamat yang tidak dikenal menampilkan halaman 404 dengan satu judul tab | 35 |
 | `login` | pesan saat server tidak terjangkau, balasan error tanpa pesan, password salah, dan login benar; `/` langsung ke Dashboard atau login; tombol tetap loading sampai Dashboard terbuka; pesan "Sesi Anda berakhir" saat token ditolak server dan saat password diganti dari perangkat lain, tetapi tidak setelah Sign Out biasa atau saat login dibuka langsung | 22 |
 | `sesi-pulih` | token kedaluwarsa diperbarui diam-diam, server mati memunculkan pemberitahuan tanpa melempar ke login, halaman pulih sendiri saat server hidup, tombol Coba lagi, token rusak kembali ke login dan cookie dihapus | 15 |
 | `server-mati` | 13 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 29 |

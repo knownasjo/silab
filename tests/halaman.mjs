@@ -153,5 +153,20 @@ await runWebTest(
       check("halaman tampil", await visit(path, readyText));
       noErrors(label.toLowerCase());
     }
+
+    section("Alamat yang tidak dikenal");
+    check(
+      "halaman 404 tampil",
+      await visit("/alamat-tidak-ada", "This page could not be found."),
+    );
+    const titles = await evaluate(
+      `[...document.querySelectorAll("title:not(svg title)")].map((t) => t.textContent)`,
+    );
+    check(
+      '  judul tab hanya satu, "SILAB Admin"',
+      titles.length === 1 && titles[0] === "SILAB Admin",
+      JSON.stringify(titles),
+    );
+    noErrors("halaman 404");
   },
 );
