@@ -217,6 +217,17 @@ antaranya hanya berisi perbaikan internal Next.js. Kode SILAB di hasil
 `next build` identik modul demi modul dengan sebelumnya, dan 728 cek otomatis
 lulus, baik dengan `npm run dev` maupun `next start`.
 
+`next-env.d.ts` tidak disimpan di Git (masuk `.gitignore`), sesuai anjuran
+dokumentasi Next.js. File itu dikelola Next.js: dibuat atau ditulis ulang oleh
+`npm run dev`, `npm run build`, dan `npx next typegen`. Isinya berbeda antara
+dev (menunjuk ke `.next/dev/types/`) dan build atau typegen (`.next/types/`). Di
+clone baru file itu belum ada sampai salah satu perintah tadi dijalankan, dan
+`npx tsc --noEmit` tetap lolos tanpanya. Sampai 13 November 2026 file ini ikut
+disimpan di Git, sehingga setiap `npm run build` membuat `git status`
+menunjukkan `next-env.d.ts` berubah padahal tidak ada yang diedit. Perubahan itu
+akan ikut ter-commit bila memakai `git add -A`, dan di salinan repo lain yang
+sudah menjalankan build bisa membuat `git pull` ditolak.
+
 ### Environment
 
 File `.env.local` di root (tidak di-commit; salin dari `.env.example`):
