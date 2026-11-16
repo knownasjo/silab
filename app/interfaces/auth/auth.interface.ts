@@ -11,7 +11,7 @@ export interface ILoginResponseBody {
 export interface IMeResponseBody {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   nim: string;
   role: string;
 }

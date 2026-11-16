@@ -233,7 +233,9 @@ export default function Profile() {
             {[
               ["Nama lengkap", userData.name, "wrap-break-word"],
               [numberLabel, userData.nim, "break-all"],
-              ["Email", userData.email, "break-all"],
+              ...(userData.email
+                ? [["Email", userData.email, "break-all"]]
+                : []),
               [
                 "Peran",
                 ROLE_LABELS[userData.role] ?? userData.role,
@@ -249,7 +251,10 @@ export default function Profile() {
             ))}
           </dl>
           <p className="text-sm text-[#5E6278]">
-            {numberLabel} dan email tidak bisa diubah.
+            {numberLabel}
+            {userData.email
+              ? " dan email tidak bisa diubah."
+              : " tidak bisa diubah."}
           </p>
         </section>
 

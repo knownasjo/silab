@@ -96,6 +96,21 @@ await runWebTest("Profil", data, async (browser) => {
     evaluate(
       `[...(${formOf("Ubah Nama")}).querySelectorAll("p")].map((p) => p.innerText).find((t) => /^\\d+\\/100$/.test(t)) ?? null`,
     );
+  const accountData = () =>
+    evaluate(`(() => {
+      const box = [...document.querySelectorAll("main section")].find(
+        (s) => s.querySelector("h2")?.innerText === "Data Akun",
+      );
+      return {
+        terms: [...box.querySelectorAll("dt")].map((d) => d.innerText),
+        values: [...box.querySelectorAll("dd")].map((d) => d.innerText),
+        note: box.querySelector("p")?.innerText ?? null,
+      };
+    })()`);
+  const staffAccount = (account, numberLabel) =>
+    JSON.stringify(account.terms) ===
+      JSON.stringify(["Nama lengkap", numberLabel, "Peran"]) &&
+    account.note === `${numberLabel} tidak bisa diubah.`;
 
   await size(1366);
   check("login laboran", await browser.login(data.laboran, data.password));
@@ -151,6 +166,14 @@ await runWebTest("Profil", data, async (browser) => {
   check(
     "  Coba lagi memuat data akun dan form",
     await waitFor(`${bodyHas("Ganti Password")} && !${bodyHas(NOTICE)}`, 15000),
+  );
+
+  section("Data Akun laboran tanpa email");
+  const laboranAccount = await accountData();
+  check(
+    "laboran: Nama lengkap, NIY, dan Peran tanpa baris Email; catatan NIY tidak bisa diubah.",
+    staffAccount(laboranAccount, "NIY"),
+    JSON.stringify(laboranAccount),
   );
 
   section("Nama panjang di Data Akun");
@@ -361,6 +384,17 @@ await runWebTest("Profil", data, async (browser) => {
     `${relogin.code} ${stillHere}`,
   );
 
+  section("Dosen");
+  await send("Network.clearBrowserCookies");
+  check("login dosen", await browser.login(data.lecturer, data.password));
+  check("  halaman Profil dosen terbuka", await openProfile());
+  const lecturerAccount = await accountData();
+  check(
+    "  dosen: Nama lengkap, NIY, dan Peran tanpa baris Email; catatan NIY tidak bisa diubah.",
+    staffAccount(lecturerAccount, "NIY"),
+    JSON.stringify(lecturerAccount),
+  );
+
   section("Asisten");
   const subject = await data.subject("Uji Profil Asisten");
   const cls = await data.classOf(subject, "A", "MONDAY", 1);
@@ -381,5 +415,14 @@ await runWebTest("Profil", data, async (browser) => {
     "asisten: judul dan data akun tampil, tanpa form ubah",
     assistantView.title && assistantView.forms === 0 && assistantView.note,
     JSON.stringify(assistantView),
+  );
+  const assistantAccount = await accountData();
+  check(
+    "  asisten tetap melihat email miliknya; catatan NIM dan email tidak bisa diubah.",
+    JSON.stringify(assistantAccount.terms) ===
+      JSON.stringify(["Nama lengkap", "NIM", "Email", "Peran"]) &&
+      assistantAccount.values[2] === assistant.email &&
+      assistantAccount.note === "NIM dan email tidak bisa diubah.",
+    JSON.stringify(assistantAccount),
   );
 });
