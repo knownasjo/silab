@@ -142,6 +142,7 @@ await runWebTest(
         "/dashboard/pengumuman/list-pengumuman",
         "List Pengumuman",
       ],
+      ["Riwayat aktivitas", "/dashboard/riwayat-aktivitas", "Jenis Aksi"],
       [
         "Rekap presensi tanpa kelas",
         "/dashboard/praktikum/recap-attendances",

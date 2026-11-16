@@ -48,6 +48,7 @@ await runWebTest(
       "/dashboard/pengumuman/list-pengumuman",
       `/dashboard/pengumuman/${announcement.id}`,
       "/dashboard/pengumuman/add-pengumuman",
+      "/dashboard/riwayat-aktivitas",
       "/dashboard/profil",
     ];
     let mode = "normal";

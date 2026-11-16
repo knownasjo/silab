@@ -366,6 +366,7 @@ Mahasiswa, termasuk asisten, memakai Lupa password di aplikasi mobile.
 | `/dashboard/master-data/periode` | Periode akademik: periode aktif, Mulai Semester Baru, dan daftar periode (hanya LABORAN), lihat "Periode Akademik" |
 | `/dashboard/pengumuman/add-pengumuman` | Buat pengumuman untuk semua mahasiswa atau untuk mahasiswa mata kuliah tertentu (hanya LABORAN), lihat "Pengumuman untuk Mata Kuliah Tertentu" |
 | `.../list-pengumuman`, `.../[id]` | Daftar & detail pengumuman, masing-masing dengan keterangan "Untuk: ..." |
+| `/dashboard/riwayat-aktivitas` | Catatan aksi staf: siapa mengubah apa dan kapan, terbaru di atas, 50 per halaman, dengan saringan periode, jenis aksi, tanggal, dan kotak cari (hanya LABORAN), lihat "Riwayat Aktivitas" |
 | `/dashboard/profil` | LABORAN/DOSEN: data akun, ubah nama, ganti password. Asisten: data akun saja + arahan memakai aplikasi mobile |
 
 Alamat yang tidak dikenal menampilkan halaman 404 dari `app/not-found.tsx`.
@@ -1637,6 +1638,54 @@ backend). Web memakainya untuk membantu asisten mencegah titip akun:
   dicek." tampil dan daftar dimuat ulang. Halaman lain yang sedang terbuka
   ikut berubah lewat event `attendance`.
 
+### Riwayat Aktivitas
+
+Halaman Riwayat Aktivitas (`dashboard/riwayat-aktivitas`) dibuat pada
+16 November 2026. Isinya catatan aksi staf dari `GET /activity`: siapa
+mengubah apa dan kapan (lihat "Riwayat aktivitas staf" di README backend).
+Menunya hanya muncul untuk laboran, tepat di bawah Pengumuman, dengan ikon
+`public/history.svg`. Dosen dan asisten yang membuka alamatnya langsung hanya
+melihat "Hanya laboran yang dapat melihat riwayat aktivitas.". Komponennya
+ada di `app/components/riwayat-aktivitas/`, dan aturan tampilan serta
+saringannya di `app/utils/activity.ts`.
+
+**Tabel**
+- 50 catatan per halaman, terbaru di atas, dengan tombol Sebelumnya dan
+  Berikutnya. Pindah halaman menggulir daftar kembali ke atas.
+- Kolom Waktu, Pelaku, Aksi, Data, dan Perubahan. Waktu selalu WIB
+  (`Asia/Jakarta`), sama dengan saringan tanggal di backend, walaupun jam
+  laptop berbeda.
+- Pelaku ditulis dengan NIM/NIY dan perannya. Skrip terminal ditulis "Lewat
+  terminal" tanpa NIM.
+- Login gagal beruntun tampil satu baris dengan rentang waktu, misalnya
+  "13.02–13.09" dan "Gagal masuk 3 kali". Hanya aksi ini yang berwarna merah,
+  aksi lain abu-abu.
+
+**Filter**
+- Periode (awalnya Semua periode), Jenis Aksi (11 jenis, termasuk Login), dan
+  Tanggal dari–sampai. Semuanya bisa digabung.
+- Pelaku, mata kuliah, dan kelas dicari lewat satu kotak cari, bukan pilihan
+  terpisah. Server mencari di teks catatan, jadi nama mata kuliah, kelas, atau
+  akun yang sudah dihapus tetap ketemu. Permintaan baru dikirim 0,4 detik
+  setelah berhenti mengetik, dan kata kunci paling banyak 100 huruf.
+- Tanggal awal setelah tanggal akhir langsung ditolak dengan pesan, tanpa
+  bertanya ke server. Tahun yang belum selesai diketik di kotak tanggal
+  (misalnya 0202) tidak dikirim.
+- Tombol Hapus Filter hanya muncul bila ada filter.
+
+**Pembaruan**
+- Catatan baru muncul saat halaman dibuka, saat filter atau halaman diganti,
+  dan saat tombol Muat Ulang ditekan. Halaman ini sengaja tidak memakai event
+  real-time: login tidak mengirim event, jadi pembaruan otomatis hanya akan
+  menampilkan sebagian catatan.
+- Jawaban server yang terlambat untuk filter sebelumnya diabaikan, dan isi
+  `useActivityStore` dikosongkan saat halaman ditinggalkan. Saat halaman
+  dibuka lagi tertulis "Loading...", bukan baris lama.
+- Bila gagal dimuat, kotak merah "Riwayat aktivitas gagal dimuat. …" tampil
+  tanpa baris lama, dan Muat Ulang mencoba lagi.
+
+Tidak ada tombol ubah atau hapus catatan, sama dengan backend.
+
 ## Pekerjaan yang masih tersisa
 
 - [ ] Cookie `accessToken` diset tanpa `httpOnly`, `secure`, `sameSite`
@@ -1746,10 +1795,10 @@ node tests/login.mjs        # satu tes saja
 
 | Tes | Yang diperiksa | Cek |
 |---|---|---|
-| `halaman` | semua halaman laboran tampil tanpa error JavaScript; pilihan dosen, mata kuliah, hari, ruangan, dan jenis pengumuman terisi; alamat yang tidak dikenal menampilkan halaman 404 dengan satu judul tab | 35 |
+| `halaman` | semua halaman laboran tampil tanpa error JavaScript; pilihan dosen, mata kuliah, hari, ruangan, dan jenis pengumuman terisi; alamat yang tidak dikenal menampilkan halaman 404 dengan satu judul tab | 37 |
 | `login` | pesan saat server tidak terjangkau, balasan error tanpa pesan, password salah, dan login benar; `/` langsung ke Dashboard atau login; tombol tetap loading sampai Dashboard terbuka; pesan "Sesi Anda berakhir" saat token ditolak server dan saat password diganti dari perangkat lain, tetapi tidak setelah Sign Out biasa atau saat login dibuka langsung | 22 |
 | `sesi-pulih` | token kedaluwarsa diperbarui diam-diam, server mati memunculkan pemberitahuan tanpa melempar ke login, halaman pulih sendiri saat server hidup, tombol Coba lagi, token rusak kembali ke login dan cookie dihapus | 15 |
-| `server-mati` | 13 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 29 |
+| `server-mati` | 14 halaman dashboard saat server mati total dan saat server sibuk (503): tidak rusak, tidak macet di Loading, dan pesannya tampil | 31 |
 | `pembayaran` | form ubah aktivasi: pilihan kosongkan kelas, simpan tanpa perubahan tidak mengirim apa pun, konfirmasi tanpa kelas, batal bayar dengan peringatan, ditolak bila sudah ada presensi. Hapus pendaftaran: tombol hanya di mata kuliah Belum Bayar, tidak menimpa kotak status, dan Ubah sejajar di semua baris, Batal tidak menghapus, Ya, hapus mengirim satu DELETE, penolakan server tampil di konfirmasi, pendaftaran terakhir menutup pop-up dengan pesan di halaman | 67 |
 | `jam-sesi` | awalnya PSI dan Senin terpilih dengan satu kartu Senin · PSI; tombol Ruangan dan Hari berganti kartu (SBTI hanya berisi sesi SBTI, lalu Jumat · SBTI); 1366 px: tombol di dalam kartu, jam satu baris, Ubah sejajar di semua baris; 1024 px: tombol di baris kedua tepat di bawah jam, tidak keluar kartu, halaman tidak bergeser ke samping; sesi yang kelasnya sudah dihapus (0 kelas) benar-benar terhapus dengan pesan di bawah judul kartu; jam bertabrakan saat mengubah sesi paling atas: pesan merah di bawah form itu dan terlihat di layar, pesan berhasil di bawah barisnya; Ubah juga di hari lain hanya berisi hari di ruangan yang sama dengan nomor itu dan jamnya sekarang, centang Selasa mengubah Senin dan Selasa saja; Tambahkan juga ke berisi 4 hari lainnya tanpa teks menempel kotak centang, centang Rabu membuat sesi Senin dan Rabu lalu centangnya kosong lagi; jam baru yang membuat peserta bentrok tetap tersimpan dengan kotak kuning berisi nama dan kedua kelasnya; jam 7.00, 07:00, 0700, 730 dirapikan, Enter dari kotak jam mengirim 22.30–22.40 untuk Jumat PSI; isian Tambah Sesi (termasuk centang) dan form Ubah terkunci selama menyimpan; dengan jaringan lambat, pesan berhasil muncul bersamaan dengan baris yang sudah berganti nomor; Loading... saat memuat; saat `GET /session` gagal tanpa "Belum ada sesi" dan pesan gagal hilang sendiri setelah data termuat lagi | 24 |
 | `daftar-pembayaran` | daftar urut NIM, mata kuliah di pop-up urut semester lalu abjad; cari NIM dan sebagian nama tanpa peduli huruf besar dan spasi; kartu tetap total periode saat mencari; mengetik tidak mengirim permintaan ke server; pesan tidak ketemu menyebut kata dan pilihannya; kembali lewat sidebar mulai dari kotak cari kosong dan Show All; keterangan untuk periode tanpa pendaftar, semua lunas, dan belum ada yang lunas; Loading... saat memuat; di 1366 × 768 kartu paling tinggi 160 px, tombol pilihan sebaris dengan kotak cari, baris pertama paling jauh 360 px dari atas, jarak antarbaris paling banyak 56 px, judul kolom tetap di atas saat digulir; di 1024 px judul satu baris dan sejajar isinya, NIM di bawah nama, kolom nama minimal 180 px; tombol geser bernama Status pembayaran dan terkunci bersama pilihan kelas dan Kembali selama menyimpan | 23 |
@@ -1774,6 +1823,7 @@ node tests/login.mjs        # satu tes saja
 | `tambah-praktikum` | judul dan tombol Kembali; Loading... saat mata kuliah dimuat; mata kuliah urut abjad dengan semesternya; sorotan biru opsi menempel sampai tepi daftar; Mata Kuliah, Hari, dan Ruangan dipilih dengan keyboard; huruf baru di kolom Kelas mengganti huruf lama; Kelas yang sudah ada (n) urut A, B, C dengan tanda Penuh dan ruangan; nama mata kuliah panjang dipotong di tombol dan kartu; semua isian di dalam kotak dan tidak terpotong di layar 1440, 1280, 1024 px, juga dialog Ubah Kelas di 1024 px; Sesi Kelas menulis "Pilih ruangan dulu" sampai ruangan dipilih, hanya berisi sesi hari dan ruangan itu, dan kosong lagi saat ruangan diganti; isian terkunci selama menyimpan, lalu kosong dengan pesan berhasil; daftar mata kuliah ikut berubah saat laboran lain menambah, mengganti nama, dan menghapus; kartu membuka detail kelas; tanpa "Belum ada kelas" bila `GET /class` gagal; arahan ke Tambah Mata Kuliah bila belum ada mata kuliah | 34 |
 | `rekap-presensi` | layar 1024 px dengan 15 pertemuan: kolom Hadir terlihat tanpa menggeser, No, NIM, dan Nama tetap di kiri setelah digeser ke ujung (hanya kolom pertemuan yang bergeser), scrollbar 6 px hanya di bawah kolom pertemuan, hanya tampil saat digeser dan hilang lagi setelah diam (dicek dari piksel screenshot), kolom Nama minimal 200 px, tombol Unduh PDF satu baris; layar 1366 px: No, NIM, dan Nama tetap di kiri, baris Jumlah hadir, periode dan dosen pengampu; kelas 40 mahasiswa: keterangan dan Jumlah hadir terlihat tanpa menggulir, judul kolom tetap di atas setelah digulir; PDF: nama panjang utuh, judul kolom Responsi Akhir per kata, Jumlah hadir, periode dan dosen, semua tulisan rekap satu pertemuan berjudul panjang muat di kertas; data kelas gagal dimuat lalu pulih lewat event; kelas dihapus saat terbuka; Detail Kelas urut NIM dan keterangan ikon rekap | 29 |
 | `tambah-matkul` | judul; tulisan Pilih semester dan Pilih dosen pengampu; daftar Mata kuliah yang sudah ada awalnya tertutup per semester (urut, dengan jumlahnya), klik judul membuka isinya (urut abjad, kode dan dosen) dan menutupnya lagi; semester yang dipilih di form terbuka sendiri dan tertutup lagi saat pilihan diganti, semester yang dibuka sendiri tetap terbuka; Kosongkan menutup semua semester; satu-satunya semester langsung terbuka; daftar 22 dosen berhenti 16 px dari bawah layar dan dosen terakhir utuh; opsi tanpa tombol di dalamnya; nama dosen panjang satu baris dengan ... dan nama lengkap saat disorot di layar 1024 px; pilih semester dan dosen dengan keyboard; isian dan Kosongkan terkunci selama menyimpan; setelah Simpan semesternya tetap terbuka dan mata kuliah baru ada di sana; daftar ikut berubah saat laboran lain menambah dan mengganti nama, tanpa membuka semester sendiri; isian pop-up Ubah Mata Kuliah terkunci selama menyimpan; Pilih hari dan Pilih ruangan di Tambah Praktikum; daftar Pilih Pertemuan 20 pertemuan di layar 1024 px berhenti 16 px dari bawah layar tanpa menutupi tombolnya | 25 |
+| `riwayat-aktivitas` | menu hanya untuk laboran, tepat di bawah Pengumuman dan tersorot, juga di menu kecil; dosen dan asisten tanpa menu dan hanya melihat pesan bila membuka alamatnya; login laboran uji langsung paling atas; kolom Waktu (WIB), Pelaku, Aksi, Data, Perubahan; Lewat terminal tanpa NIM; login gagal merah dengan rentang waktu dan Gagal masuk 3 kali; 64 catatan uji: 50 per halaman, Sebelumnya dan Berikutnya, daftar kembali ke atas; Jenis Aksi Login, periode aktif (catatan tanpa periode tidak ikut), dan tanggal; tanggal terbalik ditolak tanpa mengirim permintaan dan tahun 0202 tidak dikirim; mengetik kata kunci hanya mengirim satu permintaan, berhenti di 100 huruf; keterangan tidak ada yang cocok; Hapus Filter mengosongkan semua; Muat Ulang menampilkan catatan baru; gagal dimuat tanpa baris lama lalu pulih; kembali lewat menu: Loading... tanpa sisa baris lama | 52 |
 
 | Variabel | Bawaan | Kegunaan |
 |---|---|---|

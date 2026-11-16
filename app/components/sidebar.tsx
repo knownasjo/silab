@@ -114,7 +114,7 @@ export default function SideBar({
         ))}
 
         {isRoleUnknown &&
-          [...Array(2)].map((_, index) => (
+          [...Array(3)].map((_, index) => (
             <div key={index} className="h-10 w-full">
               <Skeleton height={40} borderRadius={9999} />
             </div>
@@ -134,6 +134,12 @@ export default function SideBar({
               icon="/announcement.png"
               basePath="/dashboard/pengumuman/"
               links={pengumumanLinks}
+              collapsed={collapsed}
+            />
+            <SideBarItem
+              imageSrc="/history.svg"
+              route="/dashboard/riwayat-aktivitas"
+              title="Riwayat Aktivitas"
               collapsed={collapsed}
             />
           </>
